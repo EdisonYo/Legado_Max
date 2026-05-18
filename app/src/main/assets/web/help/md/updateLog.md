@@ -3,22 +3,19 @@
 * Kotlin版本: 2.3.10 | Rhino版本: 1.8.1 | Compose版本: 2025.04.01 | okhttp版本: 5.3.2
 
 ## 项目继承历史
-
 ### 原版
 * [Github仓库](https://github.com/gedoor/legado)
-
 ### Sigma版
 * [Github仓库](https://github.com/Luoyacheng/legado)
 * [Gitee镜像](https://gitee.com/lyc486/legado/releases)
 * [详细日志](https://gitee.com/lyc486/legado/commits/main)
-
 ### Max版
 * [Github仓库](https://github.com/youfengknight/Legado_Max)
 
 ## 更新日志
 
 **2026/05/16**
-* [功能]：新增存储管理
+* [功能]：新增存储管理和下载管理
 * [优化]：文件管理改用Compose界面
 * [❓]：增加订阅源性能分析日志
 
