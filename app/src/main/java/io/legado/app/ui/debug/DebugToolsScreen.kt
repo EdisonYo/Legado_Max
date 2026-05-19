@@ -86,8 +86,7 @@ fun DebugToolsScreen(
                         )
                         Text(
                             text = stringResource(R.string.debug_tools_desc),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            style = MaterialTheme.typography.labelMedium
                         )
                     }
                 },
