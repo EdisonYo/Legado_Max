@@ -1530,7 +1530,7 @@
     <string name="debug_regex_pattern_hint">请输入正则表达式</string>
     <string name="debug_regex_ignore_case">忽略大小写</string>
     <string name="debug_regex_multiline">多行模式</string>
-    <string name="debug_regex_dot_all">.匹配换行</string>
+    <string name="debug_regex_dot_all">匹配换行</string>
     <string name="debug_test">测试</string>
     <string name="debug_no_match">没有匹配结果</string>
     <string name="debug_highlight">高亮显示</string>
