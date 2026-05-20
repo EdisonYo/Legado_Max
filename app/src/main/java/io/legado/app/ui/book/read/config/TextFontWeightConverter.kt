@@ -19,7 +19,6 @@ import io.legado.app.lib.theme.accentColor
 import io.legado.app.lib.theme.bottomBackground
 import io.legado.app.lib.theme.getPrimaryTextColor
 import io.legado.app.ui.widget.text.StrokeTextView
-import io.legado.app.utils.ColorUtils
 import io.legado.app.utils.dpToPx
 
 /**
@@ -157,9 +156,6 @@ class TextFontWeightConverter(context: Context, attrs: AttributeSet?) :
         buttonText: String, 
         onButtonClick: (TextView) -> Unit
     ): LinearLayout {
-        val bg = context.bottomBackground
-        val isLight = ColorUtils.isColorLight(bg)
-        val textColor = context.getPrimaryTextColor(isLight)
         val accentColor = context.accentColor
         
         return LinearLayout(context).apply {
@@ -169,7 +165,7 @@ class TextFontWeightConverter(context: Context, attrs: AttributeSet?) :
             val titleTextView = TextView(context).apply {
                 text = title
                 textSize = 18f
-                setTextColor(textColor)
+                setTextColor(accentColor)
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
             }
             
