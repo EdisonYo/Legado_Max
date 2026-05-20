@@ -1,5 +1,6 @@
 package io.legado.app.ui.debuglog.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -62,6 +63,9 @@ import io.legado.app.model.debug.JsExecutionRecord
 import io.legado.app.model.debug.RuleType
 import io.legado.app.model.debug.VariableOperation
 import io.legado.app.model.debug.VariableOperationType
+import io.legado.app.model.debug.BookDataFlow
+import io.legado.app.model.debug.DataFlowStage
+import io.legado.app.model.debug.FieldFillRecord
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -268,6 +272,13 @@ fun FlowLogDetailDialog(
                         }
                     }
 
+                    log.dataFlow?.let { dataFlow ->
+                        Spacer(Modifier.height(12.dp))
+                        DetailSection(title = "数据流转", searchQuery = searchQuery) {
+                            DataFlowView(dataFlow, searchQuery)
+                        }
+                    }
+
                     if (!log.detail.isNullOrBlank()) {
                         Spacer(Modifier.height(12.dp))
                         DetailSection(title = "详细内容", searchQuery = searchQuery) {
@@ -405,28 +416,64 @@ private fun RuleExecutionNodeView(
             }
             
             if (node.ruleContent.isNotBlank()) {
+                var ruleExpanded by remember { mutableStateOf(false) }
+                val ruleNeedsExpand = remember(node.ruleContent) { node.ruleContent.length > 60 }
+                val ruleScrollState = rememberScrollState()
                 Text(
-                    text = "规则: ${node.ruleContent.take(100)}${if (node.ruleContent.length > 100) "..." else ""}",
+                    text = "规则: ${if (!ruleExpanded && ruleNeedsExpand) node.ruleContent.take(60) + "..." else node.ruleContent}",
                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                    modifier = Modifier.padding(top = 4.dp)
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .then(
+                            if (ruleNeedsExpand) Modifier.clickable { ruleExpanded = !ruleExpanded } else Modifier
+                        )
+                        .then(
+                            if (ruleExpanded) Modifier.horizontalScroll(ruleScrollState) else Modifier
+                        ),
+                    maxLines = if (ruleExpanded) Int.MAX_VALUE else 2,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
             
             node.input?.let { input ->
+                var inputExpanded by remember { mutableStateOf(false) }
+                val inputNeedsExpand = remember(input) { input.length > 50 }
+                val inputScrollState = rememberScrollState()
                 Text(
-                    text = "输入: ${input.take(50)}${if (input.length > 50) "..." else ""}",
+                    text = "输入: ${if (!inputExpanded && inputNeedsExpand) input.take(50) + "..." else input}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.outline,
-                    modifier = Modifier.padding(top = 2.dp)
+                    modifier = Modifier
+                        .padding(top = 2.dp)
+                        .then(
+                            if (inputNeedsExpand) Modifier.clickable { inputExpanded = !inputExpanded } else Modifier
+                        )
+                        .then(
+                            if (inputExpanded) Modifier.horizontalScroll(inputScrollState) else Modifier
+                        ),
+                    maxLines = if (inputExpanded) Int.MAX_VALUE else 2,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
             
             node.output?.let { output ->
+                var outputExpanded by remember { mutableStateOf(false) }
+                val outputNeedsExpand = remember(output) { output.length > 50 }
+                val outputScrollState = rememberScrollState()
                 Text(
-                    text = "输出: ${output.take(50)}${if (output.length > 50) "..." else ""}",
+                    text = "输出: ${if (!outputExpanded && outputNeedsExpand) output.take(50) + "..." else output}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.padding(top = 2.dp)
+                    modifier = Modifier
+                        .padding(top = 2.dp)
+                        .then(
+                            if (outputNeedsExpand) Modifier.clickable { outputExpanded = !outputExpanded } else Modifier
+                        )
+                        .then(
+                            if (outputExpanded) Modifier.horizontalScroll(outputScrollState) else Modifier
+                        ),
+                    maxLines = if (outputExpanded) Int.MAX_VALUE else 2,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
             
@@ -604,10 +651,22 @@ private fun EnvVarRow(name: String, value: String) {
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.width(100.dp)
         )
+        var envExpanded by remember { mutableStateOf(false) }
+        val envNeedsExpand = remember(value) { value.length > 60 }
+        val envScrollState = rememberScrollState()
         Text(
-            text = value.take(100) + if (value.length > 100) "..." else "",
+            text = if (!envExpanded && envNeedsExpand) value.take(60) + "..." else value,
             style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .then(
+                    if (envNeedsExpand) Modifier.clickable { envExpanded = !envExpanded } else Modifier
+                )
+                .then(
+                    if (envExpanded) Modifier.horizontalScroll(envScrollState) else Modifier
+                ),
+            maxLines = if (envExpanded) Int.MAX_VALUE else 2,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -644,9 +703,17 @@ private fun DetailRow(
     value: String,
     searchQuery: String
 ) {
+    var expanded by remember { mutableStateOf(false) }
+    val needsExpand = remember(value) { value.length > 80 || value.count { it == '\n' } > 2 }
+    val scrollState = rememberScrollState()
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .then(
+                if (needsExpand) Modifier.clickable { expanded = !expanded }
+                else Modifier
+            )
             .padding(vertical = 6.dp),
         verticalAlignment = Alignment.Top
     ) {
@@ -660,9 +727,14 @@ private fun DetailRow(
         Text(
             text = highlightText(value, searchQuery),
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(1f),
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 5
+            modifier = Modifier
+                .weight(1f)
+                .then(
+                    if (expanded) Modifier.horizontalScroll(scrollState)
+                    else Modifier
+                ),
+            overflow = if (expanded) TextOverflow.Clip else TextOverflow.Ellipsis,
+            maxLines = if (expanded) Int.MAX_VALUE else 5
         )
     }
 }
@@ -674,6 +746,7 @@ private fun getStageColor(stage: FlowStage) = when (stage) {
     FlowStage.EXTRACT -> MaterialTheme.colorScheme.secondary
     FlowStage.REPLACE -> MaterialTheme.colorScheme.error
     FlowStage.VARIABLE -> MaterialTheme.colorScheme.tertiary
+    FlowStage.DATA_FLOW -> MaterialTheme.colorScheme.primary
 }
 
 @Composable
@@ -683,6 +756,7 @@ private fun getStageIcon(stage: FlowStage) = when (stage) {
     FlowStage.EXTRACT -> Icons.Default.DataObject
     FlowStage.REPLACE -> Icons.Default.SwapHoriz
     FlowStage.VARIABLE -> Icons.Default.Inventory
+    FlowStage.DATA_FLOW -> Icons.Default.DataObject
 }
 
 @Composable
@@ -835,20 +909,196 @@ private fun VariableOperationItem(
             }
             
             operation.value?.let { value ->
+                var valExpanded by remember { mutableStateOf(false) }
+                val valNeedsExpand = remember(value) { value.length > 60 }
+                val valScrollState = rememberScrollState()
                 Text(
-                    text = "值: ${value.take(100)}${if (value.length > 100) "..." else ""}",
+                    text = "值: ${if (!valExpanded && valNeedsExpand) value.take(60) + "..." else value}",
                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                    modifier = Modifier.padding(top = 4.dp)
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .then(
+                            if (valNeedsExpand) Modifier.clickable { valExpanded = !valExpanded } else Modifier
+                        )
+                        .then(
+                            if (valExpanded) Modifier.horizontalScroll(valScrollState) else Modifier
+                        ),
+                    maxLines = if (valExpanded) Int.MAX_VALUE else 2,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
             
             operation.oldValue?.let { oldValue ->
+                var oldExpanded by remember { mutableStateOf(false) }
+                val oldNeedsExpand = remember(oldValue) { oldValue.length > 40 }
+                val oldScrollState = rememberScrollState()
                 Text(
-                    text = "原值: ${oldValue.take(50)}${if (oldValue.length > 50) "..." else ""}",
+                    text = "原值: ${if (!oldExpanded && oldNeedsExpand) oldValue.take(40) + "..." else oldValue}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.outline,
-                    modifier = Modifier.padding(top = 2.dp)
+                    modifier = Modifier
+                        .padding(top = 2.dp)
+                        .then(
+                            if (oldNeedsExpand) Modifier.clickable { oldExpanded = !oldExpanded } else Modifier
+                        )
+                        .then(
+                            if (oldExpanded) Modifier.horizontalScroll(oldScrollState) else Modifier
+                        ),
+                    maxLines = if (oldExpanded) Int.MAX_VALUE else 2,
+                    overflow = TextOverflow.Ellipsis
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DataFlowView(
+    dataFlow: BookDataFlow,
+    searchQuery: String
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        dataFlow.bookName?.let {
+            DetailRow("书名", it, searchQuery)
+        }
+        dataFlow.author?.let {
+            DetailRow("作者", it, searchQuery)
+        }
+        dataFlow.bookUrl?.let {
+            DetailRow("书籍URL", it, searchQuery)
+        }
+        dataFlow.sourceName?.let {
+            DetailRow("书源名称", it, searchQuery)
+        }
+        
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = "字段填充过程:",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.outline
+        )
+        Spacer(Modifier.height(4.dp))
+        
+        if (dataFlow.stages.isEmpty()) {
+            Text(
+                text = "暂无数据流转记录",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.outline
+            )
+        } else {
+            dataFlow.stages.sortedBy { it.stage.order }.forEach { stageFlow ->
+                StageDataFlowView(stageFlow, searchQuery)
+                Spacer(Modifier.height(8.dp))
+            }
+        }
+        
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = dataFlow.getSummary(),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.outline
+        )
+    }
+}
+
+@Composable
+private fun StageDataFlowView(
+    stageFlow: io.legado.app.model.debug.StageDataFlow,
+    searchQuery: String
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.small,
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+    ) {
+        Column(modifier = Modifier.padding(8.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "${stageFlow.stage.icon} ${stageFlow.stage.displayName}",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold
+                )
+                stageFlow.duration?.let {
+                    Text(
+                        text = "${it}ms",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                }
+            }
+            
+            if (stageFlow.fields.isEmpty()) {
+                Text(
+                    text = "无字段填充",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            } else {
+                stageFlow.fields.forEach { field ->
+                    FieldFillRecordView(field, searchQuery)
+                }
+            }
+            
+            if (stageFlow.hasAnyError()) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "⚠️ 有 ${stageFlow.getErrorFields().size} 个错误",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FieldFillRecordView(
+    field: FieldFillRecord,
+    searchQuery: String
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        val changeIndicator = if (field.hasChange()) "←" else "="
+        val errorIndicator = if (field.isError) "❌" else ""
+        
+        Text(
+            text = "${field.fieldName}:",
+            style = MaterialTheme.typography.labelSmall,
+            color = if (field.isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.width(80.dp)
+        )
+        
+        Column(modifier = Modifier.weight(1f)) {
+            if (field.isError) {
+                Text(
+                    text = "错误: ${field.errorMessage ?: "未知错误"}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            } else {
+                Text(
+                    text = "\"${field.getResultPreview(50) ?: "(空)"}\" $changeIndicator $errorIndicator",
+                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace)
+                )
+            }
+            
+            field.rule?.let { rule ->
+                if (rule.isNotBlank()) {
+                    Text(
+                        text = "rule: ${field.getRulePreview(30) ?: ""}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                }
             }
         }
     }
