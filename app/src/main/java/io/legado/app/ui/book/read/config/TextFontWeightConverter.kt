@@ -156,7 +156,7 @@ class TextFontWeightConverter(context: Context, attrs: AttributeSet?) :
         buttonText: String, 
         onButtonClick: (TextView) -> Unit
     ): LinearLayout {
-        val accentColor = context.accentColor
+        val bg = context.bottomBackground
         
         return LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -184,40 +184,49 @@ class TextFontWeightConverter(context: Context, attrs: AttributeSet?) :
         }
     }
 
-    private fun createCoarseModeView(
-        currentValue: Int,
-        onValueChanged: (Int) -> Unit
-    ): LinearLayout {
-        val accentColor = context.accentColor
-        
-        return LinearLayout(context).apply linearLayout@{
-            orientation = LinearLayout.VERTICAL
-            setPadding(16.dpToPx(), 8.dpToPx(), 16.dpToPx(), 8.dpToPx())
-            
-            val items = context.resources.getStringArray(R.array.text_font_weight)
-            items.forEachIndexed { index, text ->
-                val itemView = TextView(context).apply {
-                    this.text = text
-                    textSize = 16f
-                    setPadding(16.dpToPx(), 12.dpToPx(), 16.dpToPx(), 12.dpToPx())
-                    setTextColor(accentColor)
-                    setOnClickListener {
-                        onValueChanged(index)
-                        updateSelection(this@linearLayout, index, accentColor, accentColor)
-                    }
-                }
-                addView(itemView)
-            }
-        }
-    }
+	private fun createCoarseModeView(
+	    currentValue: Int,
+	    onValueChanged: (Int) -> Unit
+	): LinearLayout {
+	    val accentColor = context.accentColor
+	    val dimColor = (accentColor and 0x00FFFFFF) or 0x4D000000
+	    
+	    return LinearLayout(context).apply linearLayout@{
+	        orientation = LinearLayout.VERTICAL
+	        setPadding(16.dpToPx(), 8.dpToPx(), 16.dpToPx(), 8.dpToPx())
+	        
+	        val items = context.resources.getStringArray(R.array.text_font_weight)
+	        items.forEachIndexed { index, text ->
+	            val isSelected = index == currentValue
+	            val itemView = TextView(context).apply {
+	                this.text = text
+	                textSize = 16f
+	                setPadding(16.dpToPx(), 12.dpToPx(), 16.dpToPx(), 12.dpToPx())
+	                setTextColor(if (isSelected) accentColor else dimColor)
+	                paint.isFakeBoldText = isSelected
+	                setOnClickListener {
+	                    onValueChanged(index)
+	                    updateSelection(this@linearLayout, index, accentColor, dimColor)
+	                }
+	            }
+	            addView(itemView)
+	        }
+	    }
+	}
 
-    private fun updateSelection(container: LinearLayout, selectedIndex: Int, accentColor: Int, normalColor: Int) {
-        for (i in 0 until container.childCount) {
-            val child = container.getChildAt(i) as? TextView ?: continue
-            child.setTextColor(if (i == selectedIndex) accentColor else normalColor)
-            child.paint.isFakeBoldText = (i == selectedIndex)
-        }
-    }
+	private fun updateSelection(
+	    container: LinearLayout, 
+	    selectedIndex: Int, 
+	    selectedColor: Int, 
+	    normalColor: Int
+	) {
+	    for (i in 0 until container.childCount) {
+	        val child = container.getChildAt(i) as? TextView ?: continue
+	        val isSelected = i == selectedIndex
+	        child.setTextColor(if (isSelected) selectedColor else normalColor)
+	        child.paint.isFakeBoldText = isSelected
+	    }
+	}
 
     private fun createFineModeView(
         currentTextValue: Int,
