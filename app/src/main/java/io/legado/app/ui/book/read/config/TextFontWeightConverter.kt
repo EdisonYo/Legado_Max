@@ -156,7 +156,7 @@ class TextFontWeightConverter(context: Context, attrs: AttributeSet?) :
         buttonText: String, 
         onButtonClick: (TextView) -> Unit
     ): LinearLayout {
-        val bg = context.bottomBackground
+        val accentColor = context.accentColor
         
         return LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
