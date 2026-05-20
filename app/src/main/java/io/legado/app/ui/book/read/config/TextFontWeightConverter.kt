@@ -169,7 +169,7 @@ class TextFontWeightConverter(context: Context, attrs: AttributeSet?) :
             val titleTextView = TextView(context).apply {
                 text = title
                 textSize = 18f
-                setTextColor(accentColor)
+                setTextColor(textColor)
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
             }
             
@@ -192,9 +192,6 @@ class TextFontWeightConverter(context: Context, attrs: AttributeSet?) :
         currentValue: Int,
         onValueChanged: (Int) -> Unit
     ): LinearLayout {
-        val bg = context.bottomBackground
-        val isLight = ColorUtils.isColorLight(bg)
-        val textColor = context.getPrimaryTextColor(isLight)
         val accentColor = context.accentColor
         
         return LinearLayout(context).apply linearLayout@{
@@ -207,10 +204,10 @@ class TextFontWeightConverter(context: Context, attrs: AttributeSet?) :
                     this.text = text
                     textSize = 16f
                     setPadding(16.dpToPx(), 12.dpToPx(), 16.dpToPx(), 12.dpToPx())
-                    setTextColor(if (index == currentValue) accentColor else textColor)
+                    setTextColor(accentColor)
                     setOnClickListener {
                         onValueChanged(index)
-                        updateSelection(this@linearLayout, index, accentColor, textColor)
+                        updateSelection(this@linearLayout, index, accentColor, accentColor)
                     }
                 }
                 addView(itemView)
@@ -222,6 +219,7 @@ class TextFontWeightConverter(context: Context, attrs: AttributeSet?) :
         for (i in 0 until container.childCount) {
             val child = container.getChildAt(i) as? TextView ?: continue
             child.setTextColor(if (i == selectedIndex) accentColor else normalColor)
+            child.paint.isFakeBoldText = (i == selectedIndex)
         }
     }
 
@@ -230,9 +228,6 @@ class TextFontWeightConverter(context: Context, attrs: AttributeSet?) :
         currentTitleValue: Int,
         onValueChanged: (Int, Int) -> Unit
     ): LinearLayout {
-        val bg = context.bottomBackground
-        val isLight = ColorUtils.isColorLight(bg)
-        val textColor = context.getPrimaryTextColor(isLight)
         val accentColor = context.accentColor
         
         var textValue = currentTextValue
@@ -286,7 +281,7 @@ class TextFontWeightConverter(context: Context, attrs: AttributeSet?) :
             }
             
             // 正文标签容器
-            val textLabelsContainer = createLabelsContainer(textColor)
+            val textLabelsContainer = createLabelsContainer(accentColor)
             
             // 分隔空间
             val spacer = View(context).apply {
@@ -338,7 +333,7 @@ class TextFontWeightConverter(context: Context, attrs: AttributeSet?) :
             }
             
             // 标题标签容器
-            val titleLabelsContainer = createLabelsContainer(textColor)
+            val titleLabelsContainer = createLabelsContainer(accentColor)
             
             // 添加所有视图
             addView(contentLabel)
@@ -362,13 +357,13 @@ class TextFontWeightConverter(context: Context, attrs: AttributeSet?) :
             val thinLabel = TextView(context).apply {
                 text = context.getString(R.string.text_bold_thin)
                 textSize = 12f
-                setTextColor(accentColor)
+                setTextColor(textColor)
             }
             
             val boldLabel = TextView(context).apply {
                 text = context.getString(R.string.text_bold_bold)
                 textSize = 12f
-                setTextColor(accentColor)
+                setTextColor(textColor)
             }
             
             addView(thinLabel, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
