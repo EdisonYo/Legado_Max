@@ -75,7 +75,7 @@ fun DebugFloatingBall(
         modifier = modifier
             .offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }
             .size(ballSize)
-            .shadow(elevation = 12.dp, shape = CircleShape, ambientColor = startColor, spotColor = endColor)
+            //.shadow(elevation = 12.dp, shape = CircleShape, ambientColor = startColor, spotColor = endColor)
             .clip(CircleShape)
             .background(Brush.linearGradient(colors = listOf(startColor, endColor)))
             .border(1.5.dp, ringColor, CircleShape)
