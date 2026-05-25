@@ -30,10 +30,11 @@ class UnderlineWidthDialog : BaseDialogFragment(R.layout.dialog_underline_width)
     override fun onStart() {
         super.onStart()
         dialog?.window?.run {
+	        clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
             setBackgroundDrawableResource(R.color.background)
             decorView.setPadding(0, 0, 0, 0)
             val attr = attributes
-            attr.dimAmount = 0.5f
+            attr.dimAmount = 0.0f
             attr.gravity = Gravity.BOTTOM
             attributes = attr
             setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
