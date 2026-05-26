@@ -43,7 +43,7 @@ class HighlightRuleConfigDialog : BaseDialogFragment(R.layout.dialog_highlight_r
 
     private val binding by viewBinding(DialogHighlightRuleConfigBinding::bind)
     private val adapter by lazy { HighlightRuleAdapter(requireContext()) }
-    private val rules = ArrayList<HighlightRule>()
+    private val rules = ArrayList<<HighlightRule>()
     private var currentGroup: String? = null
     private var primaryTextColor = 0
     private var secondaryTextColor = 0
@@ -57,7 +57,6 @@ class HighlightRuleConfigDialog : BaseDialogFragment(R.layout.dialog_highlight_r
         super.onStart()
         setLayout(ViewGroup.LayoutParams.MATCH_PARENT, 0.85f)
         dialog?.window?.setGravity(Gravity.BOTTOM)
-        dialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
     }
 
     override fun onFragmentCreated(view: View, savedInstanceState: Bundle?) {
@@ -108,7 +107,6 @@ class HighlightRuleConfigDialog : BaseDialogFragment(R.layout.dialog_highlight_r
         previewBgColor = cardBgColor
         previewStrokeColor = cardStrokeColor
 
-        binding.sheetContainer.background?.mutate()?.setTint(bg)
         binding.ivClose.setColorFilter(primaryTextColor, PorterDuff.Mode.SRC_IN)
         binding.ivClose.background?.mutate()?.setTint(accentColor)
         binding.tvPageTitle.setTextColor(primaryTextColor)
@@ -194,7 +192,7 @@ class HighlightRuleConfigDialog : BaseDialogFragment(R.layout.dialog_highlight_r
         saveCurrentGroup()
     }
 
-    private fun getFilteredRules(): List<HighlightRule> {
+    private fun getFilteredRules(): List<<HighlightRule> {
         return if (currentGroup == null) {
             rules.toList()
         } else {
@@ -318,7 +316,7 @@ class HighlightRuleConfigDialog : BaseDialogFragment(R.layout.dialog_highlight_r
             context?.toastOnUi(R.string.highlight_rule_clipboard_empty)
             return
         }
-        val imported = GSON.fromJsonArray<HighlightRule>(clip).getOrNull()
+        val imported = GSON.fromJsonArray<<HighlightRule>(clip).getOrNull()
         if (imported.isNullOrEmpty()) {
             context?.toastOnUi(R.string.highlight_rule_import_invalid)
             return
@@ -335,7 +333,7 @@ class HighlightRuleConfigDialog : BaseDialogFragment(R.layout.dialog_highlight_r
         context?.toastOnUi(R.string.highlight_rule_import_success)
     }
 
-    private fun exportRulesToClipboard(targetRules: List<HighlightRule>) {
+    private fun exportRulesToClipboard(targetRules: List<<HighlightRule>) {
         if (targetRules.isEmpty()) {
             context?.toastOnUi("暂无规则可导出")
             return
@@ -344,7 +342,7 @@ class HighlightRuleConfigDialog : BaseDialogFragment(R.layout.dialog_highlight_r
         context?.toastOnUi("已复制 ${targetRules.size} 条规则")
     }
 
-    private fun shareRules(targetRules: List<HighlightRule>) {
+    private fun shareRules(targetRules: List<<HighlightRule>) {
         if (targetRules.isEmpty()) {
             context?.toastOnUi("没有可分享的规则")
             return
@@ -364,7 +362,7 @@ class HighlightRuleConfigDialog : BaseDialogFragment(R.layout.dialog_highlight_r
     }
 
     private inner class HighlightRuleAdapter(context: Context) :
-        RecyclerAdapter<HighlightRule, ItemHighlightPresetRuleBinding>(context) {
+        RecyclerAdapter<<HighlightRule, ItemHighlightPresetRuleBinding>(context) {
 
         override fun getViewBinding(parent: ViewGroup): ItemHighlightPresetRuleBinding {
             return ItemHighlightPresetRuleBinding.inflate(inflater, parent, false)
@@ -393,7 +391,7 @@ class HighlightRuleConfigDialog : BaseDialogFragment(R.layout.dialog_highlight_r
             holder: ItemViewHolder,
             binding: ItemHighlightPresetRuleBinding,
             item: HighlightRule,
-            payloads: MutableList<Any>
+            payloads: MutableList<<Any>
         ) {
             binding.tvTitle.text = item.name.ifBlank { getString(R.string.highlight_rule_unnamed) }
             binding.tvDesc.text = item.styleSummary()
@@ -403,14 +401,12 @@ class HighlightRuleConfigDialog : BaseDialogFragment(R.layout.dialog_highlight_r
             val density = binding.root.context.resources.displayMetrics.density
             binding.root.background = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
-                cornerRadius = 24f * density
                 setColor(cardBgColor)
                 setStroke((1f * density).toInt().coerceAtLeast(1), cardStrokeColor)
             }
             binding.tvPattern.background?.mutate()?.setTint(accentColor)
             binding.tvPreview.background = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
-                cornerRadius = 20f * density
                 setColor(previewBgColor)
                 setStroke((1f * density).toInt().coerceAtLeast(1), previewStrokeColor)
             }
