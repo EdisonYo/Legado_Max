@@ -392,9 +392,10 @@ fun RegexTestScreen(
                     if (useRegex) {
                         Spacer(modifier = Modifier.height(8.dp))
                         
-                        Row(
+                        FlowRow(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
                                 Checkbox(
