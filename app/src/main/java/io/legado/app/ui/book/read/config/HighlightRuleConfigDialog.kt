@@ -57,6 +57,7 @@ class HighlightRuleConfigDialog : BaseDialogFragment(R.layout.dialog_highlight_r
         super.onStart()
         setLayout(ViewGroup.LayoutParams.MATCH_PARENT, 0.85f)
         dialog?.window?.setGravity(Gravity.BOTTOM)
+        dialog?.window?.decorView.setPadding(0, 0, 0, 0)
     }
 
     override fun onFragmentCreated(view: View, savedInstanceState: Bundle?) {
@@ -106,7 +107,7 @@ class HighlightRuleConfigDialog : BaseDialogFragment(R.layout.dialog_highlight_r
         }
         previewBgColor = cardBgColor
         previewStrokeColor = cardStrokeColor
-
+        binding.sheetContainer.background?.mutate()?.setTint(bg)
         binding.ivClose.setColorFilter(primaryTextColor, PorterDuff.Mode.SRC_IN)
         binding.ivClose.background?.mutate()?.setTint(accentColor)
         binding.tvPageTitle.setTextColor(primaryTextColor)
