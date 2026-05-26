@@ -43,7 +43,7 @@ class HighlightRuleConfigDialog : BaseDialogFragment(R.layout.dialog_highlight_r
 
     private val binding by viewBinding(DialogHighlightRuleConfigBinding::bind)
     private val adapter by lazy { HighlightRuleAdapter(requireContext()) }
-    private val rules = ArrayList<<HighlightRule>()
+    private val rules = ArrayList<HighlightRule>()
     private var currentGroup: String? = null
     private var primaryTextColor = 0
     private var secondaryTextColor = 0
@@ -192,7 +192,7 @@ class HighlightRuleConfigDialog : BaseDialogFragment(R.layout.dialog_highlight_r
         saveCurrentGroup()
     }
 
-    private fun getFilteredRules(): List<<HighlightRule> {
+    private fun getFilteredRules(): List<HighlightRule> {
         return if (currentGroup == null) {
             rules.toList()
         } else {
@@ -316,7 +316,7 @@ class HighlightRuleConfigDialog : BaseDialogFragment(R.layout.dialog_highlight_r
             context?.toastOnUi(R.string.highlight_rule_clipboard_empty)
             return
         }
-        val imported = GSON.fromJsonArray<<HighlightRule>(clip).getOrNull()
+        val imported = GSON.fromJsonArray<HighlightRule>(clip).getOrNull()
         if (imported.isNullOrEmpty()) {
             context?.toastOnUi(R.string.highlight_rule_import_invalid)
             return
@@ -333,7 +333,7 @@ class HighlightRuleConfigDialog : BaseDialogFragment(R.layout.dialog_highlight_r
         context?.toastOnUi(R.string.highlight_rule_import_success)
     }
 
-    private fun exportRulesToClipboard(targetRules: List<<HighlightRule>) {
+    private fun exportRulesToClipboard(targetRules: List<HighlightRule>) {
         if (targetRules.isEmpty()) {
             context?.toastOnUi("暂无规则可导出")
             return
@@ -342,7 +342,7 @@ class HighlightRuleConfigDialog : BaseDialogFragment(R.layout.dialog_highlight_r
         context?.toastOnUi("已复制 ${targetRules.size} 条规则")
     }
 
-    private fun shareRules(targetRules: List<<HighlightRule>) {
+    private fun shareRules(targetRules: List<HighlightRule>) {
         if (targetRules.isEmpty()) {
             context?.toastOnUi("没有可分享的规则")
             return
@@ -362,7 +362,7 @@ class HighlightRuleConfigDialog : BaseDialogFragment(R.layout.dialog_highlight_r
     }
 
     private inner class HighlightRuleAdapter(context: Context) :
-        RecyclerAdapter<<HighlightRule, ItemHighlightPresetRuleBinding>(context) {
+        RecyclerAdapter<HighlightRule, ItemHighlightPresetRuleBinding>(context) {
 
         override fun getViewBinding(parent: ViewGroup): ItemHighlightPresetRuleBinding {
             return ItemHighlightPresetRuleBinding.inflate(inflater, parent, false)
@@ -391,7 +391,7 @@ class HighlightRuleConfigDialog : BaseDialogFragment(R.layout.dialog_highlight_r
             holder: ItemViewHolder,
             binding: ItemHighlightPresetRuleBinding,
             item: HighlightRule,
-            payloads: MutableList<<Any>
+            payloads: MutableList<Any>
         ) {
             binding.tvTitle.text = item.name.ifBlank { getString(R.string.highlight_rule_unnamed) }
             binding.tvDesc.text = item.styleSummary()
