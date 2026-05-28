@@ -12,8 +12,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,13 +29,6 @@ import io.legado.app.R
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.utils.toastOnUi
 
-/**
- * 文本菜单项配置对话框 - Compose实现
- * 
- * 功能说明：
- * 提供一个界面让用户选择要显示/隐藏的文本菜单项
- * 支持内置菜单项和其它应用文本处理菜单项（Android 6.0+）的集中管理
- */
 class TextMenuConfigDialog : DialogFragment() {
 
     override fun onCreateView(
@@ -57,12 +48,6 @@ class TextMenuConfigDialog : DialogFragment() {
     }
 }
 
-/**
- * 文本菜单配置对话框内容
- * 
- * 采用 Tab 切换内置菜单和其它应用菜单
- * 所有更改在点击"确定"后统一生效，勾选/取消勾选仅修改内存状态。
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextMenuConfigDialogContent(
@@ -71,7 +56,6 @@ fun TextMenuConfigDialogContent(
     val context = LocalContext.current
     val menuItems = remember { TextMenuConfig.getAllMenuItems() }
     
-    // 内存状态：仅用于界面展示，不实时持久化
     var hiddenIds by remember { mutableStateOf(TextMenuConfig.getHiddenMenuItemIds(context)) }
     var hiddenProcessItems by remember { mutableStateOf(TextMenuConfig.getHiddenProcessTextItems(context)) }
     var selectedTab by remember { mutableStateOf(0) }
@@ -84,7 +68,6 @@ fun TextMenuConfigDialogContent(
         }
     }
     
-    // 当系统支持且存在其它应用时才显示 Tab
     val showTabs = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && processTextApps.isNotEmpty()
 
     Dialog(
@@ -104,7 +87,6 @@ fun TextMenuConfigDialogContent(
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // 顶部工具栏
                 TopAppBar(
                     title = {
                         Text(
@@ -115,23 +97,13 @@ fun TextMenuConfigDialogContent(
                             )
                         )
                     },
-                    navigationIcon = {
-                        IconButton(onClick = onDismiss) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "返回"
-                            )
-                        }
-                    },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.secondary,
                         titleContentColor = MaterialTheme.colorScheme.onSecondary,
-                        navigationIconContentColor = MaterialTheme.colorScheme.onSecondary,
                         actionIconContentColor = MaterialTheme.colorScheme.onSecondary
                     )
                 )
 
-                // Tab 切换栏（内置菜单 / 其它应用）
                 if (showTabs) {
                     TabRow(
                         selectedTabIndex = selectedTab,
@@ -150,7 +122,6 @@ fun TextMenuConfigDialogContent(
                     }
                 }
 
-                // 描述文字根据当前 Tab 切换
                 Text(
                     text = if (selectedTab == 0) {
                         stringResource(R.string.text_menu_config_desc)
@@ -162,7 +133,6 @@ fun TextMenuConfigDialogContent(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
 
-                // 菜单项列表
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -195,14 +165,12 @@ fun TextMenuConfigDialogContent(
                     }
                 }
 
-                // 底部操作栏
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    // 恢复默认：仅重置内存状态，不立即持久化
                     TextButton(
                         onClick = {
                             hiddenIds = emptySet()
@@ -212,7 +180,6 @@ fun TextMenuConfigDialogContent(
                         Text(text = stringResource(R.string.reset_to_default))
                     }
 
-                    // 确定：统一持久化所有更改并关闭对话框
                     TextButton(
                         onClick = {
                             TextMenuConfig.setHiddenMenuItemIds(context, hiddenIds)
@@ -229,9 +196,6 @@ fun TextMenuConfigDialogContent(
     }
 }
 
-/**
- * 其它应用信息
- */
 data class ProcessTextAppInfo(
     val key: String,
     val label: String,
@@ -239,9 +203,6 @@ data class ProcessTextAppInfo(
     val className: String
 )
 
-/**
- * 获取能处理 ACTION_PROCESS_TEXT 的应用列表
- */
 @Suppress("DEPRECATION")
 private fun getProcessTextApps(context: Context): List<ProcessTextAppInfo> {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
@@ -269,9 +230,6 @@ private fun getProcessTextApps(context: Context): List<ProcessTextAppInfo> {
     }
 }
 
-/**
- * 菜单项
- */
 @Composable
 fun MenuItemRow(
     item: TextMenuConfig.MenuItemInfo,
@@ -309,9 +267,6 @@ fun MenuItemRow(
     }
 }
 
-/**
- * 其他应用菜单项
- */
 @Composable
 fun ProcessTextAppRow(
     appInfo: ProcessTextAppInfo,
