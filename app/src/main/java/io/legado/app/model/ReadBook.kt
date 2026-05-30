@@ -339,7 +339,7 @@ object ReadBook : CoroutineScope by MainScope() {
             readStartTime = now
             readRecord.lastRead = now
             readRecord.durChapterTitle = book?.durChapterTitle.orEmpty()
-            
+
             val session = ReadRecordSession(
                 deviceId = readRecord.deviceId,
                 bookName = readRecord.bookName,
@@ -349,7 +349,7 @@ object ReadBook : CoroutineScope by MainScope() {
                 words = 0,
                 durChapterTitle = readRecord.durChapterTitle
             )
-            
+
             val repository = ReadRecordRepository(appDb.readRecordDao)
             try {
                 kotlinx.coroutines.runBlocking {
@@ -360,7 +360,7 @@ object ReadBook : CoroutineScope by MainScope() {
                     appDb.readRecordDao.insert(readRecord)
                 }
             }
-            
+
             sessionStartTime = now
         }
     }
@@ -724,6 +724,13 @@ object ReadBook : CoroutineScope by MainScope() {
                         }
                     }
                 }
+                override fun onAllPagesLoaded() {
+                    AppLog.put("懒加载回调: 章节${chapter.index} 全部完成，归档尾页")
+                    curTextChapter?.finalizeLazyLayout()
+                    kotlinx.coroutines.GlobalScope.launch(Main) {
+                        callBack?.upContent(0, false)
+                    }
+                }
             }
             val (content, lazyContent) = WebBook.getContentLazyAwait(
                 scope = this,
@@ -774,6 +781,13 @@ object ReadBook : CoroutineScope by MainScope() {
                                 kotlinx.coroutines.GlobalScope.launch(Main) {
                                     callBack?.upContent(0, false)
                                 }
+                            }
+                        }
+                        override fun onAllPagesLoaded() {
+                            AppLog.put("懒加载回调: 章节${chapter.index} 全部完成，归档尾页")
+                            curTextChapter?.finalizeLazyLayout()
+                            kotlinx.coroutines.GlobalScope.launch(Main) {
+                                callBack?.upContent(0, false)
                             }
                         }
                     }
