@@ -1,5 +1,6 @@
 package io.legado.app.ui.debuglog
 
+import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -14,7 +15,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
@@ -30,6 +32,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -54,6 +57,7 @@ import io.legado.app.model.debug.DebugCategory
 import io.legado.app.model.debug.DebugEvent
 import io.legado.app.model.debug.FlowStage
 import io.legado.app.model.debug.SourceSubCategory
+import io.legado.app.ui.debug.DebugToolsActivity
 import io.legado.app.ui.debuglog.DebugFloatingBallManager
 import io.legado.app.ui.debuglog.components.DebugCategoryTabs
 import io.legado.app.ui.debuglog.components.DebugLogItem
@@ -122,6 +126,10 @@ fun DebugLogScreen(
     val cardColor = pageCardElevatedContainerColor()
     val secondaryTextColor = pageSecondaryTextColor()
     val mutedIconTint = pageMutedIconTint()
+    val menuItemColors = MenuDefaults.itemColors(
+        textColor = MaterialTheme.colorScheme.onSurface,
+        leadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+    )
 
     // 搜索框显示状态
     var showSearch by remember { mutableStateOf(false) }
@@ -137,124 +145,172 @@ fun DebugLogScreen(
     }
 
     Scaffold(
-		topBar = {
-		    Column {
-		        TopAppBar(
-		            colors = TopAppBarDefaults.topAppBarColors(
-		                containerColor = topBarColor,
-		                scrolledContainerColor = topBarColor,
-		                navigationIconContentColor = MaterialTheme.colorScheme.onSecondary,
-		                titleContentColor = MaterialTheme.colorScheme.onSecondary,
-		                actionIconContentColor = MaterialTheme.colorScheme.onSecondary
-		            ),
-		            title = { },
-		            navigationIcon = { },
-		            actions = {
-		                // 刷新
-		                IconButton(onClick = {
-		                    viewModel.refreshLogs()
-		                    viewModel.refreshFlowLogs()
-		                    viewModel.refreshRssExecutionRecords()
-		                }) {
-		                    Icon(Icons.Default.Refresh, contentDescription = "刷新")
-		                }
-		                // 搜索
-		                IconButton(onClick = { showSearch = !showSearch }) {
-		                    Icon(Icons.Default.Search, contentDescription = "搜索")
-		                }
-		                // 暂停/继续
-		                IconButton(onClick = { viewModel.togglePause() }) {
-		                    Icon(
-		                        imageVector = if (isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
-		                        contentDescription = if (isPaused) "继续" else "暂停"
-		                    )
-		                }
-		                // 清空
-		                IconButton(onClick = { viewModel.clearLogs() }) {
-		                    Icon(Icons.Default.Delete, contentDescription = "清空")
-		                }
-		                // 关闭调试球
-		                IconButton(onClick = {
-		                    context.putPrefBoolean(PreferKey.debugLogFloatingBall, false)
-		                    DebugFloatingBallManager.updateFloatingBallState(false)
-		                    onDismiss()
-		                }) {
-		                    Icon(
-		                        imageVector = Icons.Default.Close,
-		                        contentDescription = "关闭调试球",
-		                        tint = MaterialTheme.colorScheme.error
-		                    )
-		                }
-		                // 溢出菜单
-		                var showOverflowMenu by remember { mutableStateOf(false) }
-		                Box {
-		                    IconButton(onClick = { showOverflowMenu = true }) {
-		                        Icon(Icons.Default.MoreVert, contentDescription = "更多")
-		                    }
-		                    DropdownMenu(
-		                        expanded = showOverflowMenu,
-		                        onDismissRequest = { showOverflowMenu = false },
-		                        containerColor = pageCardElevatedContainerColor()
-		                    ) {
-		                        DropdownMenuItem(
-		                            text = { Text("导出日志") },
-		                            onClick = {
-		                                showOverflowMenu = false
-		                                val exportedText = viewModel.exportFilteredLogs()
-		                                context.share(exportedText, "导出调试日志")
-		                            },
-		                            leadingIcon = {
-		                                Icon(Icons.Default.Save, contentDescription = null)
-		                            }
-		                        )
-		                    }
-		                }
-		            }
-		        )
-		
-		        // 搜索框
-		        AnimatedVisibility(
-		            visible = showSearch,
-		            enter = fadeIn(),
-		            exit = fadeOut()
-		        ) {
-		            OutlinedTextField(
-		                value = searchQuery ?: "",
-		                onValueChange = { viewModel.setSearchQuery(it.ifBlank { null }) },
-		                modifier = Modifier
-		                    .fillMaxWidth()
-		                    .padding(horizontal = 16.dp, vertical = 8.dp),
-		                placeholder = { Text("搜索日志内容...") },
-		                leadingIcon = {
-		                    Icon(Icons.Default.Search, contentDescription = null)
-		                },
-		                trailingIcon = {
-		                    if (!searchQuery.isNullOrBlank()) {
-		                        IconButton(onClick = { viewModel.setSearchQuery(null) }) {
-		                            Icon(Icons.Default.Clear, contentDescription = "清除")
-		                        }
-		                    }
-		                },
-		                singleLine = true,
-		                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-		                keyboardActions = KeyboardActions(onSearch = { viewModel.setSearchQuery(searchQuery) }),
-		                colors = TextFieldDefaults.colors(
-		                    focusedContainerColor = cardColor,
-		                    unfocusedContainerColor = cardColor,
-		                    disabledContainerColor = cardColor,
-		                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-		                    unfocusedIndicatorColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-		                    focusedPlaceholderColor = secondaryTextColor,
-		                    unfocusedPlaceholderColor = secondaryTextColor,
-		                    focusedLeadingIconColor = mutedIconTint,
-		                    unfocusedLeadingIconColor = mutedIconTint,
-		                    focusedTrailingIconColor = mutedIconTint,
-		                    unfocusedTrailingIconColor = mutedIconTint
-		                )
-		            )
-		        }
-		    }
-		}
+        topBar = {
+            Column {
+                // 顶部工具栏
+                TopAppBar(
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = topBarColor,
+                        scrolledContainerColor = topBarColor,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onSecondary,
+                        titleContentColor = MaterialTheme.colorScheme.onSecondary,
+                        actionIconContentColor = MaterialTheme.colorScheme.onSecondary
+                    ),
+                    title = { Text("调试日志") },
+                    navigationIcon = {
+                        IconButton(onClick = onDismiss) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "关闭"
+                            )
+                        }
+                    },
+                    actions = {
+                        // 刷新按钮：手动刷新日志列表
+                        IconButton(onClick = {
+                            viewModel.refreshLogs()
+                            viewModel.refreshFlowLogs()
+                            viewModel.refreshRssExecutionRecords()
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "刷新"
+                            )
+                        }
+                        // 搜索按钮：切换搜索框显示
+                        IconButton(onClick = { showSearch = !showSearch }) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "搜索"
+                            )
+                        }
+                        // 暂停/继续按钮：控制日志采集
+                        IconButton(onClick = { viewModel.togglePause() }) {
+                            Icon(
+                                imageVector = if (isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
+                                contentDescription = if (isPaused) "继续" else "暂停"
+                            )
+                        }
+
+                        // 清空按钮：清除所有日志
+                        IconButton(onClick = { viewModel.clearLogs() }) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "清空",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+
+                        // 溢出菜单：包含导出操作
+                        var showOverflowMenu by remember { mutableStateOf(false) }
+                        Box {
+                            IconButton(onClick = { showOverflowMenu = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.MoreVert,
+                                    contentDescription = "更多"
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = showOverflowMenu,
+                                onDismissRequest = { showOverflowMenu = false },
+                                containerColor = cardColor
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("导出日志") },
+                                    onClick = {
+                                        showOverflowMenu = false
+                                        val exportedText = viewModel.exportFilteredLogs()
+                                        context.share(exportedText, "导出调试日志")
+                                    },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.Save, contentDescription = null)
+                                    },
+                                    colors = menuItemColors
+                                )
+
+                                DropdownMenuItem(
+                                    text = { Text("调试工具") },
+                                    onClick = {
+                                        showOverflowMenu = false
+                                        context.startActivity(
+                                            Intent(context, DebugToolsActivity::class.java)
+                                        )
+                                    },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.BugReport, contentDescription = null)
+                                    },
+                                    colors = menuItemColors
+                                )
+
+                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+                                DropdownMenuItem(
+                                    text = { Text("关闭调试球") },
+                                    onClick = {
+                                        showOverflowMenu = false
+                                        context.putPrefBoolean(PreferKey.debugLogFloatingBall, false)
+                                        DebugFloatingBallManager.updateFloatingBallState(false)
+                                        onDismiss()
+                                    },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.Cancel, contentDescription = null)
+                                    },
+                                    colors = menuItemColors
+                                )
+                            }
+                        }
+                    }
+                )
+
+                // 搜索框（可展开/收起）
+                AnimatedVisibility(
+                    visible = showSearch,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    OutlinedTextField(
+                        value = searchQuery ?: "",
+                        onValueChange = { viewModel.setSearchQuery(it.ifBlank { null }) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        placeholder = { Text("搜索日志内容...") },
+                        leadingIcon = {
+                            Icon(Icons.Default.Search, contentDescription = null)
+                        },
+                        trailingIcon = {
+                            if (!searchQuery.isNullOrBlank()) {
+                                IconButton(onClick = { viewModel.setSearchQuery(null) }) {
+                                    Icon(Icons.Default.Close, contentDescription = "清除")
+                                }
+                            }
+                        },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Search
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onSearch = {
+                                viewModel.setSearchQuery(searchQuery)
+                            }
+                        ),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = cardColor,
+                            unfocusedContainerColor = cardColor,
+                            disabledContainerColor = cardColor,
+                            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                            unfocusedIndicatorColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                            focusedPlaceholderColor = secondaryTextColor,
+                            unfocusedPlaceholderColor = secondaryTextColor,
+                            focusedLeadingIconColor = mutedIconTint,
+                            unfocusedLeadingIconColor = mutedIconTint,
+                            focusedTrailingIconColor = mutedIconTint,
+                            unfocusedTrailingIconColor = mutedIconTint
+                        )
+                    )
+                }
+            }
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
