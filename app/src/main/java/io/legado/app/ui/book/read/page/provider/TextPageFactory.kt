@@ -25,7 +25,8 @@ class TextPageFactory(dataSource: DataSource) : PageFactory<TextPage>(dataSource
         if (pageIndex >= 0 && pageIndex < chapter.pageSize - 1) {
             return@with true
         }
-        chapter.isFullyLoaded() && hasNextChapter()
+        // 即使当前章节懒加载未完成，也允许跳转到下一章
+        hasNextChapter()
     }
 
     override fun hasNextPlus(): Boolean = with(dataSource) {
@@ -33,7 +34,7 @@ class TextPageFactory(dataSource: DataSource) : PageFactory<TextPage>(dataSource
         if (pageIndex >= 0 && pageIndex < chapter.pageSize - 2) {
             return@with true
         }
-        chapter.isFullyLoaded() && hasNextChapter()
+        hasNextChapter()
     }
 
     override fun moveToFirst() {
@@ -55,9 +56,6 @@ class TextPageFactory(dataSource: DataSource) : PageFactory<TextPage>(dataSource
             val chapter = currentChapter
             val pageIndex = pageIndex
             if (chapter == null || pageIndex >= chapter.pageSize - 1) {
-                if (chapter != null && !chapter.isFullyLoaded()) {
-                    return@with false
-                }
                 if (chapter == null && nextChapter == null) {
                     return@with false
                 }
