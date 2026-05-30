@@ -51,15 +51,16 @@ data class TextChapter(
     }
 
     fun maybePrefetchNextPage(currentPageIndex: Int, currentPageProgress: Float = 0f) {
-        if (!useLazyLoading || currentPageIndex < 0 || pageSize <= 0) return
+        // 修复：用 pages.size，避免开放尾页干扰预取判断
+        if (!useLazyLoading || currentPageIndex < 0 || pages.isEmpty()) return
         val manager = lazyContent ?: return
         if (manager.isCompleted.get()) return
         val readProgress = (
-            min(currentPageIndex, lastIndex).coerceAtLeast(0) +
+            min(currentPageIndex, pages.lastIndex).coerceAtLeast(0) +
                 currentPageProgress.coerceIn(0f, 1f)
-            ) / pageSize.toFloat()
+            ) / pages.size.toFloat()
         if (readProgress >= 0.5f) {
-            val readPosition = min(currentPageIndex, lastIndex).coerceAtLeast(0) +
+            val readPosition = min(currentPageIndex, pages.lastIndex).coerceAtLeast(0) +
                 currentPageProgress.coerceIn(0f, 1f)
             if (readPosition <= lastLazyPrefetchReadPosition) return
             if (manager.prefetchNextPage()) {
@@ -71,9 +72,9 @@ data class TextChapter(
     fun getPage(index: Int): TextPage? {
         return if (index in pages.indices) {
             pages[index]
-        } else if (index == pages.size) {
-            // 懒加载未完成时，开放尾页可供实时读取
-            layout?.tailPage?.takeIf { it.lines.isNotEmpty() }
+        } else if (index == pages.size && pages.isNotEmpty() && layout?.tailPage?.lines?.isNotEmpty() == true) {
+            // pages 为空时不暴露 tailPage
+            layout?.tailPage
         } else {
             null
         }
@@ -83,14 +84,16 @@ data class TextChapter(
         return getPage(getPageIndexByCharIndex(readPos))
     }
 
-    val lastPage: TextPage? get() = pages.lastOrNull() ?: layout?.tailPage?.takeIf { it.lines.isNotEmpty() }
+    val lastPage: TextPage? get() = pages.lastOrNull() ?: layout?.tailPage?.takeIf { pages.isNotEmpty() && it.lines.isNotEmpty() }
 
-    val lastIndex: Int get() = pages.lastIndex + if (layout?.tailPage?.lines?.isNotEmpty() == true) 1 else 0
+    // pages 为空时不计入 tailPage，避免 pageSize > 0 但 pages 为空的矛盾
+    val lastIndex: Int
+        get() = pages.lastIndex + if (pages.isNotEmpty() && layout?.tailPage?.lines?.isNotEmpty() == true) 1 else 0
 
     val lastReadLength: Int get() = getReadLength(lastIndex)
 
     val pageSize: Int
-        get() = pages.size + if (layout?.tailPage?.lines?.isNotEmpty() == true) 1 else 0
+        get() = pages.size + if (pages.isNotEmpty() && layout?.tailPage?.lines?.isNotEmpty() == true) 1 else 0
 
     var listener: LayoutProgressListener? = null
 
@@ -263,6 +266,10 @@ data class TextChapter(
      * @return 根据索引位置获取所在页
      */
     fun getPageIndexByCharIndex(charIndex: Int): Int {
+        // pages 为空时直接返回 -1
+        if (pages.isEmpty()) {
+            return -1
+        }
         val pageSize = pageSize
         if (pageSize == 0) {
             return -1
