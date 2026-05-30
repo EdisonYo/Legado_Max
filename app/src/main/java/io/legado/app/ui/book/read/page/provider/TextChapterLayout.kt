@@ -206,7 +206,37 @@ class TextChapterLayout(
         val imageStyle = book.getImageStyle()
         val isTextImageStyle = imageStyle.equals(Book.imgStyleText, true)
         
-        // 移除强制完成 pendingTextPage 的逻辑，让新内容续排当前未排满的页面
+        // 续排逻辑：如果最后一页没排满，摘回来继续排
+        if (textPages.isNotEmpty()) {
+            val lastPage = textPages.last()
+            val lastLine = lastPage.lines.lastOrNull()
+            if (lastLine != null && !lastLine.isParagraphEnd) {
+                // 最后一行不是段落结尾，说明页面没排满，摘回来续排
+                AppLog.put("懒加载排版: 最后一页未排满，摘回续排，当前页行数=${lastPage.lines.size}")
+                pendingTextPage = lastPage
+                pendingTextPage.isResumed = true
+                textPages.removeAt(textPages.lastIndex)
+                // 恢复排版状态
+                durY = lastLine.lineBottom
+                stringBuilder.clear()
+                // 重建 stringBuilder 内容（从该页第一行开始）
+                for (line in lastPage.lines) {
+                    stringBuilder.append(line.text)
+                    if (line.isParagraphEnd) stringBuilder.append("\n")
+                }
+            } else if (lastLine != null && lastLine.isParagraphEnd && lastPage.height < visibleHeight) {
+                // 段落结束了但页面还有空间，也摘回来续排
+                AppLog.put("懒加载排版: 最后一页有剩余空间，摘回续排，当前高度=${lastPage.height}, 可视高度=${visibleHeight}")
+                pendingTextPage = lastPage
+                textPages.removeAt(textPages.lastIndex)
+                durY = lastPage.height
+                stringBuilder.clear()
+                for (line in lastPage.lines) {
+                    stringBuilder.append(line.text)
+                    if (line.isParagraphEnd) stringBuilder.append("\n")
+                }
+            }
+        }
         
         val sb = StringBuffer()
         var isSetTypedImage = false
@@ -411,7 +441,9 @@ class TextChapterLayout(
         textPage.upLinesPosition()
         textPage.upRenderHeight()
         textPages.add(textPage)
-        channel.trySend(textPage)
+        if (!textPage.isResumed) {
+            channel.trySend(textPage)
+        }
         try {
             listener?.onLayoutPageCompleted(textPages.lastIndex, textPage)
         } catch (e: Exception) {
@@ -429,6 +461,7 @@ class TextChapterLayout(
             AppLog.put("调用布局进度监听回调出错\n${e.localizedMessage}", e)
         } finally {
             listener = null
+        }
         
         // 初始排版完成后，处理排队等待的懒加载内容
         if (pendingLazyContents.isNotEmpty()) {
@@ -445,7 +478,6 @@ class TextChapterLayout(
                     AppLog.put("处理排队懒加载内容失败: ${e.localizedMessage}", e)
                 }
             }
-        }
         }
     }
 
