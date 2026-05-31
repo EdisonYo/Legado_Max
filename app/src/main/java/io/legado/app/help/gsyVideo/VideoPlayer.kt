@@ -43,6 +43,8 @@ class VideoPlayer: StandardGSYVideoPlayer {
     private var tipView: TextView? = null
     private var isChanging = false
     private var isLongPressSpeed = false
+    private var mChangePlayerVolume = false
+    private var mStartPlayerVolume = 0f
 
     private var mParser: BaseDanmakuParser? = null //解析器对象
     private var mDanmakuView: DanmakuView? = null //弹幕view
@@ -129,7 +131,35 @@ class VideoPlayer: StandardGSYVideoPlayer {
             val time = getCurrentPositionWhenPlaying()
             resolveDanmakuStart(time)
         }
+        mChangePlayerVolume = false
         super.touchSurfaceUp()
+    }
+
+    override fun touchSurfaceMoveFullLogic(absDeltaX: Float, absDeltaY: Float) {
+        if (absDeltaX > absDeltaY) {
+            mChangePosition = true
+        } else {
+            if (mDownX < mScreenWidth * 0.5f) {
+                mBrightness = true
+            } else {
+                // 不走 GSY 默认的系统音量调节，改用独立音量
+                mChangePlayerVolume = true
+                mStartPlayerVolume = VideoPlay.videoVolume
+            }
+        }
+    }
+
+    override fun touchSurfaceMove(deltaX: Float, deltaY: Float, y: Float) {
+        if (mChangePlayerVolume) {
+            val deltaY = -deltaY
+            val deltaV = deltaY * 2 / mScreenHeight
+            val newVolume = (mStartPlayerVolume + deltaV).coerceIn(0f, 1f)
+            VideoPlay.videoVolume = newVolume
+            gsyVideoManager.setVolume(newVolume, newVolume)
+            showVolumeTip(newVolume)
+        } else {
+            super.touchSurfaceMove(deltaX, deltaY, y)
+        }
     }
 
     private fun setVideoSpeed(speed: Float) {
@@ -225,6 +255,11 @@ class VideoPlayer: StandardGSYVideoPlayer {
                 alpha = 0f
             }
         }
+    }
+
+    private fun showVolumeTip(volume: Float) {
+        val percent = (volume * 100).toInt()
+        showOverlayTip("音量 $percent%", 800)
     }
 
     private fun initView() {
