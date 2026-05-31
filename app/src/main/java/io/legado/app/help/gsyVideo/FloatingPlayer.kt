@@ -191,7 +191,7 @@ class FloatingPlayer : StandardGSYVideoPlayer {
             val deltaV = deltaY * 2 / mScreenHeight
             val newVolume = (mStartPlayerVolume + deltaV).coerceIn(0f, 1f)
             VideoPlay.videoVolume = newVolume
-            gsyVideoManager.getMediaPlayer()?.setVolume(newVolume, newVolume)
+            gsyVideoManager.setVolume(newVolume, newVolume)
         } else {
             super.touchSurfaceMove(deltaX, deltaY, y)
         }
