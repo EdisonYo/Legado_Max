@@ -157,7 +157,6 @@ class FloatingPlayer : StandardGSYVideoPlayer {
         checkoutState()
     }
 
-    private var mChangePlayerVolume = false
     private var mStartPlayerVolume = 0f
 
     var needDestroy: Boolean = true
@@ -172,21 +171,8 @@ class FloatingPlayer : StandardGSYVideoPlayer {
         }
     }
 
-    override fun touchSurfaceMoveFullLogic(absDeltaX: Float, absDeltaY: Float) {
-        if (absDeltaX > absDeltaY) {
-            mChangePosition = true
-        } else {
-            if (mDownX < mScreenWidth * 0.5f) {
-                mBrightness = true
-            } else {
-                mChangePlayerVolume = true
-                mStartPlayerVolume = VideoPlay.videoVolume
-            }
-        }
-    }
-
-    override fun touchSurfaceMove(deltaX: Float, deltaY: Float, y: Float) {
-        if (mChangePlayerVolume) {
+override fun touchSurfaceMove(deltaX: Float, deltaY: Float, y: Float) {
+        if (mChangeVolume) {
             val deltaY = -deltaY
             val deltaV = deltaY * 2 / mScreenHeight
             val newVolume = (mStartPlayerVolume + deltaV).coerceIn(0f, 1f)
@@ -197,8 +183,12 @@ class FloatingPlayer : StandardGSYVideoPlayer {
         }
     }
 
+    override fun touchSurfaceDown(x: Float, y: Float) {
+        super.touchSurfaceDown(x, y)
+        mStartPlayerVolume = VideoPlay.videoVolume
+    }
+
     override fun touchSurfaceUp() {
-        mChangePlayerVolume = false
         super.touchSurfaceUp()
     }
 
