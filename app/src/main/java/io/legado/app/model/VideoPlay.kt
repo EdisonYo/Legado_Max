@@ -92,12 +92,6 @@ object VideoPlay : CoroutineScope by MainScope(){
         set(value) {
             videoPrefs.edit { putBoolean("mutePlay", value) }
         }
-    /**  播放器独立音量 0.0~1.0，与系统音量隔离  **/
-    var videoVolume
-        get() = videoPrefs.getFloat("videoVolume", 1.0f)
-        set(value) {
-            videoPrefs.edit { putFloat("videoVolume", value.coerceIn(0f, 1f)) }
-        }
     /**  弹幕滚动速度  **/
     var danmakuSpeed = 1.2f
     /**  锁屏  **/
