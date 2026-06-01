@@ -157,8 +157,6 @@ class FloatingPlayer : StandardGSYVideoPlayer {
         checkoutState()
     }
 
-    private var mStartPlayerVolume = 0f
-
     var needDestroy: Boolean = true
 
     override fun onSurfaceDestroyed(surface: Surface?): Boolean {
@@ -169,27 +167,6 @@ class FloatingPlayer : StandardGSYVideoPlayer {
             needDestroy = true
             return true
         }
-    }
-
-override fun touchSurfaceMove(deltaX: Float, deltaY: Float, y: Float) {
-        if (mChangeVolume) {
-            val deltaY = -deltaY
-            val deltaV = deltaY * 2 / mScreenHeight
-            val newVolume = (mStartPlayerVolume + deltaV).coerceIn(0f, 1f)
-            VideoPlay.videoVolume = newVolume
-            gsyVideoManager.setVolume(newVolume, newVolume)
-        } else {
-            super.touchSurfaceMove(deltaX, deltaY, y)
-        }
-    }
-
-    override fun touchSurfaceDown(x: Float, y: Float) {
-        super.touchSurfaceDown(x, y)
-        mStartPlayerVolume = VideoPlay.videoVolume
-    }
-
-    override fun touchSurfaceUp() {
-        super.touchSurfaceUp()
     }
 
     fun saveState(): FloatingPlayer {
