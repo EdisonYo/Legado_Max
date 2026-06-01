@@ -46,7 +46,7 @@ class FloatingPlayer : StandardGSYVideoPlayer {
 
     override fun setUp(url: String?, cacheWithPlay: Boolean, cachePath: File?, title: String?): Boolean {
         val result = super.setUp(url, cacheWithPlay, cachePath, title)
-        // 应用静音播放设置
+        // 应用静音播放设置，悬浮窗播放器也需要支持静音功能
         gsyVideoManager.setNeedMute(VideoPlay.mutePlay)
         return result
     }
@@ -168,9 +168,8 @@ class FloatingPlayer : StandardGSYVideoPlayer {
             return true
         }
     }
-    }
 
-fun saveState(): FloatingPlayer {
+    fun saveState(): FloatingPlayer {
         return this
     }
 
