@@ -626,7 +626,10 @@ class VideoPlayService : BaseService() {
                 override fun onReceive(context: Context, intent: Intent) {
                     if (intent.action == "android.media.VOLUME_CHANGED_ACTION") {
                         val currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
-                        VideoPlay.videoVolume = (currentVolume.toFloat() / maxVolume).coerceIn(0f, 1f)
+                        val newVolume = (currentVolume.toFloat() / maxVolume).coerceIn(0f, 1f)
+                        VideoPlay.videoVolume = newVolume
+                        // 直接同步到 ExoPlayerManager，否则悬浮窗内播放器音量不会变
+                        playerView.gsyVideoManager.setVolume(newVolume, newVolume)
                     }
                 }
             }
