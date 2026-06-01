@@ -85,6 +85,8 @@ class VideoPlayService : BaseService() {
         BitmapFactory.decodeResource(appCtx.resources, R.drawable.icon_read_book)
     private var upPlayProgressJob: Job? = null
     private var broadcastReceiver: BroadcastReceiver? = null
+    private val audioManager by lazy { getSystemService(Context.AUDIO_SERVICE) as AudioManager }
+    private var volumeObserver: android.database.ContentObserver? = null
     private val activityLifecycleCallbacks = object : Application.ActivityLifecycleCallbacks {
         override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
             if (activity is VideoPlayerActivity) {
@@ -419,6 +421,9 @@ class VideoPlayService : BaseService() {
     @OptIn(UnstableApi::class)
     @SuppressLint("ClickableViewAccessibility", "InflateParams")
     private fun createFloatingWindow() {
+        // 同步播放器独立音量到系统音量，使音量键在悬浮窗期间有效
+        syncVideoVolumeToSystem()
+        initVolumeObserver()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         val screenWidth = resources.displayMetrics.widthPixels
         val videoWidth = playerView.currentVideoWidth
@@ -578,6 +583,7 @@ class VideoPlayService : BaseService() {
 
     override fun onDestroy() {
         super.onDestroy()
+        volumeObserver?.let { contentResolver.unregisterContentObserver(it) }
         VideoPlay.saveRead()
         try {
             if (::windowManager.isInitialized && floatingView.parent != null) {
@@ -593,6 +599,41 @@ class VideoPlayService : BaseService() {
             playerView.release()
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    /**
+     * 将播放器独立音量同步到系统音量，使悬浮窗期间音量键有效
+     */
+    private fun syncVideoVolumeToSystem() {
+        try {
+            val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+            val targetVolume = (VideoPlay.videoVolume * maxVolume).toInt().coerceIn(0, maxVolume)
+            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, targetVolume, 0)
+        } catch (e: Exception) {
+            e.printOnDebug()
+        }
+    }
+
+    /**
+     * 监听系统音量变化，实时写回播放器独立音量，保持全屏/悬浮窗音量一致
+     */
+    private fun initVolumeObserver() {
+        try {
+            val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+            volumeObserver = object : android.database.ContentObserver(null) {
+                override fun onChange(selfChange: Boolean) {
+                    val currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+                    VideoPlay.videoVolume = (currentVolume.toFloat() / maxVolume).coerceIn(0f, 1f)
+                }
+            }
+            contentResolver.registerContentObserver(
+                android.provider.Settings.System.CONTENT_URI,
+                true,
+                volumeObserver!!
+            )
+        } catch (e: Exception) {
+            e.printOnDebug()
         }
     }
 
