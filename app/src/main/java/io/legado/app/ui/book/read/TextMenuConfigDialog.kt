@@ -85,10 +85,10 @@ fun TextMenuConfigDialogContent(
 
     // 编辑对话框状态
     var editingMenuItem by remember { mutableStateOf<TextMenuConfig.MenuItemInfo?>(null) }
-    var editingProcessApp by remember { mutableStateOf<<ProcessTextAppInfo?>(null) }
+    var editingProcessApp by remember { mutableStateOf<ProcessTextAppInfo?>(null) }
 
     // 异步加载其它应用列表
-    var processTextApps by remember { mutableStateOf<List<<ProcessTextAppInfo>>(emptyList()) }
+    var processTextApps by remember { mutableStateOf<List<ProcessTextAppInfo>>(emptyList()) }
     var isLoadingProcessApps by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -474,7 +474,7 @@ data class ProcessTextAppInfo(
  * 获取能处理 ACTION_PROCESS_TEXT 的应用列表
  */
 @Suppress("DEPRECATION")
-private fun getProcessTextApps(context: Context): List<<ProcessTextAppInfo> {
+private fun getProcessTextApps(context: Context): List<ProcessTextAppInfo> {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
         return emptyList()
     }
