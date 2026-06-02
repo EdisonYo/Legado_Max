@@ -508,7 +508,7 @@ class RssSourceActivity : VMBaseActivity<ActivityRssSourceBinding, RssSourceView
                     adapter.setItems(it, adapter.diffItemCallback)
                 }
                 itemTouchCallback.isCanDrag =
-
+                    sort == RssSourceSort.Default
                 tryLocateSource(it)
                 delay(100)
             }
