@@ -134,6 +134,9 @@ object PreferKey {
     const val brightness = "brightness"
     const val nightBrightness = "nightBrightness"
     const val expandTextMenu = "expandTextMenu"
+    const val textMenuVisibleCount = "textMenuVisibleCount"
+    const val textMenuCustomTitles = "textMenuCustomTitles"
+    const val processTextCustomTitles = "processTextCustomTitles"
     const val hiddenTextMenuItems = "hiddenTextMenuItems"  // 隐藏的文本菜单项ID列表，用逗号分隔
     const val hiddenProcessTextItems = "hiddenProcessTextItems"  // 隐藏的其他应用菜单项列表，格式：包名/类名,用逗号分隔
     const val doublePageHorizontal = "doubleHorizontalPage"
@@ -207,6 +210,7 @@ object PreferKey {
 
     const val rssSourceSort = "rssSourceSort"
     const val rssSourceSortAscending = "rssSourceSortAscending"
+    const val rssSourceGroupByDomain = "rssSourceGroupByDomain"
 
     const val dThemeName = "durThemeName"
     const val dNThemeName = "durThemeNameNight"
