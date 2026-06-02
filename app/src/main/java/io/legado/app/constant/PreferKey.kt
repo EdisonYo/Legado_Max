@@ -210,7 +210,7 @@ object PreferKey {
 
     const val rssSourceSort = "rssSourceSort"
     const val rssSourceSortAscending = "rssSourceSortAscending"
-    const val rssSourceGroupByDomain = "rssSourceGroupByDomain"
+
 
     const val dThemeName = "durThemeName"
     const val dNThemeName = "durThemeNameNight"
