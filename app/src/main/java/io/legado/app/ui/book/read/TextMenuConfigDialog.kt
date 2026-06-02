@@ -12,21 +12,29 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.fragment.app.DialogFragment
 import io.legado.app.R
 import io.legado.app.ui.theme.LegadoTheme
+import io.legado.app.ui.theme.pageCardContainerColor
+import io.legado.app.ui.theme.pageTopBarContainerColor
 import io.legado.app.utils.toastOnUi
 
 /**
@@ -34,7 +42,6 @@ import io.legado.app.utils.toastOnUi
  * 
  * 功能说明：
  * 提供一个界面让用户选择要显示/隐藏的文本菜单项
- * 支持内置菜单项和其它应用文本处理菜单项（Android 6.0+）的集中管理
  */
 class TextMenuConfigDialog : DialogFragment() {
 
@@ -57,9 +64,6 @@ class TextMenuConfigDialog : DialogFragment() {
 
 /**
  * 文本菜单配置对话框内容
- * 
- * 采用 Tab 切换内置菜单和其它应用菜单
- * 所有更改在点击"确定"后统一生效，勾选/取消勾选仅修改内存状态。
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,11 +72,289 @@ fun TextMenuConfigDialogContent(
 ) {
     val context = LocalContext.current
     val menuItems = remember { TextMenuConfig.getAllMenuItems() }
+    var hiddenIds by remember { 
+        mutableStateOf(TextMenuConfig.getHiddenMenuItemIds(context))
+    }
+    var customTitles by remember {
+        mutableStateOf(TextMenuConfig.getCustomMenuTitles(context))
+    }
+    var visibleCount by remember {
+        mutableIntStateOf(TextMenuConfig.getTextMenuVisibleCount(context))
+    }
+    var editingItem by remember { mutableStateOf<TextMenuConfig.MenuItemInfo?>(null) }
+    var showProcessTextConfig by remember { mutableStateOf(false) }
     
-    // 内存状态：仅用于界面展示，不实时持久化
-    var hiddenIds by remember { mutableStateOf(TextMenuConfig.getHiddenMenuItemIds(context)) }
-    var hiddenProcessItems by remember { mutableStateOf(TextMenuConfig.getHiddenProcessTextItems(context)) }
-    var selectedTab by remember { mutableStateOf(0) }
+    val topBarColor = pageTopBarContainerColor()
+    val cardColor = pageCardContainerColor()
+
+    if (showProcessTextConfig) {
+        ProcessTextConfigContent(
+            onDismiss = { showProcessTextConfig = false }
+        )
+    } else {
+        editingItem?.let { item ->
+            EditMenuTitleDialog(
+                title = customTitles[item.id] ?: TextMenuConfig.getDefaultMenuTitle(context, item),
+                defaultTitle = TextMenuConfig.getDefaultMenuTitle(context, item),
+                onDismiss = { editingItem = null },
+                onConfirm = { newTitle ->
+                    TextMenuConfig.setCustomMenuTitle(context, item.id, newTitle)
+                    customTitles = TextMenuConfig.getCustomMenuTitles(context)
+                    editingItem = null
+                }
+            )
+        }
+
+        Dialog(
+            onDismissRequest = onDismiss,
+            properties = DialogProperties(
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true
+            )
+        ) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                shape = MaterialTheme.shapes.large,
+                color = cardColor
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    TopAppBar(
+                        title = {
+                            Text(
+                                text = stringResource(R.string.text_menu_config),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = onDismiss) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "关闭"
+                                )
+                            }
+                        },
+                        actions = {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                IconButton(onClick = { showProcessTextConfig = true }) {
+                                    Icon(
+                                        imageVector = Icons.Filled.MoreVert,
+                                        contentDescription = "更多选项"
+                                    )
+                                }
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = topBarColor,
+                            titleContentColor = MaterialTheme.colorScheme.onSurface
+                        )
+                    )
+
+                    Text(
+                        text = stringResource(R.string.text_menu_config_desc),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+
+                    TextMenuVisibleCountRow(
+                        count = visibleCount,
+                        onCountChange = { count ->
+                            TextMenuConfig.setTextMenuVisibleCount(context, count)
+                            visibleCount = TextMenuConfig.getTextMenuVisibleCount(context)
+                        }
+                    )
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f, fill = false)
+                    ) {
+                        items(menuItems) { item ->
+                            MenuItemRow(
+                                item = item,
+                                title = customTitles[item.id]
+                                    ?: TextMenuConfig.getDefaultMenuTitle(context, item),
+                                isChecked = item.id !in hiddenIds,
+                                onEditClick = { editingItem = item },
+                                onCheckedChange = { checked ->
+                                    val newHiddenIds = hiddenIds.toMutableSet()
+                                    if (checked) {
+                                        newHiddenIds.remove(item.id)
+                                    } else {
+                                        newHiddenIds.add(item.id)
+                                    }
+                                    TextMenuConfig.setHiddenMenuItemIds(context, newHiddenIds)
+                                    hiddenIds = newHiddenIds
+                                }
+                            )
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        TextButton(
+                            onClick = {
+                                TextMenuConfig.resetToDefault(context)
+                                hiddenIds = emptySet()
+                                customTitles = emptyMap()
+                                visibleCount = TextMenuConfig.DEFAULT_VISIBLE_COUNT
+                                context.toastOnUi("已重置为默认配置")
+                            }
+                        ) {
+                            Text(text = stringResource(R.string.reset_to_default))
+                        }
+
+                        TextButton(onClick = onDismiss) {
+                            Text(text = stringResource(R.string.close))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * 其他应用菜单配置界面
+ */
+@Composable
+fun TextMenuVisibleCountRow(
+    count: Int,
+    onCountChange: (Int) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 16.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.text_menu_visible_count),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = stringResource(R.string.text_menu_visible_count_desc, count),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = { onCountChange(count - 1) },
+                enabled = count > TextMenuConfig.MIN_VISIBLE_COUNT
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Remove,
+                    contentDescription = stringResource(R.string.reduce)
+                )
+            }
+
+            Box(
+                modifier = Modifier.widthIn(min = 32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = count.toString(),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            IconButton(
+                onClick = { onCountChange(count + 1) },
+                enabled = count < TextMenuConfig.MAX_VISIBLE_COUNT
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = stringResource(R.string.plus)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun EditMenuTitleDialog(
+    title: String,
+    defaultTitle: String,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var value by remember(title) { mutableStateOf(title) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        shape = RectangleShape,
+        title = {
+            Text(text = stringResource(R.string.text_menu_edit_title))
+        },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = value,
+                    onValueChange = { value = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    shape = RectangleShape,
+                    label = {
+                        Text(text = stringResource(R.string.text_menu_edit_name))
+                    },
+                    placeholder = {
+                        Text(text = defaultTitle)
+                    }
+                )
+                Text(
+                    text = stringResource(R.string.text_menu_edit_name_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(value) }) {
+                Text(text = stringResource(android.R.string.ok))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(android.R.string.cancel))
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProcessTextConfigContent(
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+    var hiddenItems by remember { 
+        mutableStateOf(TextMenuConfig.getHiddenProcessTextItems(context))
+    }
+    var customTitles by remember {
+        mutableStateOf(TextMenuConfig.getCustomProcessTextTitles(context))
+    }
+    var editingAppInfo by remember { mutableStateOf<ProcessTextAppInfo?>(null) }
     
     val processTextApps = remember {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -82,8 +364,21 @@ fun TextMenuConfigDialogContent(
         }
     }
     
-    // 当系统支持且存在其它应用时才显示 Tab
-    val showTabs = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && processTextApps.isNotEmpty()
+    val topBarColor = pageTopBarContainerColor()
+    val cardColor = pageCardContainerColor()
+
+    editingAppInfo?.let { appInfo ->
+        EditMenuTitleDialog(
+            title = customTitles[appInfo.key] ?: appInfo.label,
+            defaultTitle = appInfo.label,
+            onDismiss = { editingAppInfo = null },
+            onConfirm = { newTitle ->
+                TextMenuConfig.setCustomProcessTextTitle(context, appInfo.key, newTitle)
+                customTitles = TextMenuConfig.getCustomProcessTextTitles(context)
+                editingAppInfo = null
+            }
+        )
+    }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -97,120 +392,99 @@ fun TextMenuConfigDialogContent(
                 .fillMaxWidth()
                 .wrapContentHeight(),
             shape = MaterialTheme.shapes.large,
-            color = MaterialTheme.colorScheme.surface
+            color = cardColor
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // 顶部工具栏
                 TopAppBar(
                     title = {
                         Text(
-                            text = stringResource(R.string.text_menu_config),
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Medium
-                            )
+                            text = stringResource(R.string.process_text_menu_config),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
                         )
                     },
+                    navigationIcon = {
+                        IconButton(onClick = onDismiss) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "返回"
+                            )
+                        }
+                    },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        titleContentColor = MaterialTheme.colorScheme.onSecondary,
-                        actionIconContentColor = MaterialTheme.colorScheme.onSecondary
+                        containerColor = topBarColor,
+                        titleContentColor = MaterialTheme.colorScheme.onSurface
                     )
                 )
 
-                // Tab 切换栏（内置菜单 / 其它应用）
-                if (showTabs) {
-                    TabRow(
-                        selectedTabIndex = selectedTab,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Tab(
-                            selected = selectedTab == 0,
-                            onClick = { selectedTab = 0 },
-                            text = { Text(stringResource(R.string.text_menu_config)) }
-                        )
-                        Tab(
-                            selected = selectedTab == 1,
-                            onClick = { selectedTab = 1 },
-                            text = { Text(stringResource(R.string.process_text_menu_config)) }
-                        )
-                    }
-                }
-
-                // 描述文字根据当前 Tab 切换
                 Text(
-                    text = if (selectedTab == 0) {
-                        stringResource(R.string.text_menu_config_desc)
-                    } else {
-                        stringResource(R.string.process_text_menu_config_desc)
-                    },
+                    text = stringResource(R.string.process_text_menu_config_desc),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
 
-                // 菜单项列表
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f, fill = false)
-                ) {
-                    if (selectedTab == 0) {
-                        items(menuItems) { item ->
-                            MenuItemRow(
-                                item = item,
-                                isChecked = item.id !in hiddenIds,
-                                onCheckedChange = { checked ->
-                                    hiddenIds = hiddenIds.toMutableSet().apply {
-                                        if (checked) remove(item.id) else add(item.id)
-                                    }
-                                }
-                            )
-                        }
-                    } else {
+                if (processTextApps.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.no_process_text_apps),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f, fill = false)
+                    ) {
                         items(processTextApps) { appInfo ->
                             ProcessTextAppRow(
                                 appInfo = appInfo,
-                                isChecked = appInfo.key !in hiddenProcessItems,
+                                title = customTitles[appInfo.key] ?: appInfo.label,
+                                isChecked = appInfo.key !in hiddenItems,
+                                onEditClick = { editingAppInfo = appInfo },
                                 onCheckedChange = { checked ->
-                                    hiddenProcessItems = hiddenProcessItems.toMutableSet().apply {
-                                        if (checked) remove(appInfo.key) else add(appInfo.key)
+                                    val newHiddenItems = hiddenItems.toMutableSet()
+                                    if (checked) {
+                                        newHiddenItems.remove(appInfo.key)
+                                    } else {
+                                        newHiddenItems.add(appInfo.key)
                                     }
+                                    TextMenuConfig.setHiddenProcessTextItems(context, newHiddenItems)
+                                    hiddenItems = newHiddenItems
                                 }
                             )
                         }
                     }
                 }
 
-                // 底部操作栏
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    // 恢复默认：仅重置内存状态，不立即持久化
                     TextButton(
                         onClick = {
-                            hiddenIds = emptySet()
-                            hiddenProcessItems = emptySet()
+                            TextMenuConfig.resetProcessTextConfig(context)
+                            hiddenItems = emptySet()
+                            customTitles = emptyMap()
+                            context.toastOnUi("已重置为默认配置")
                         }
                     ) {
                         Text(text = stringResource(R.string.reset_to_default))
                     }
 
-                    // 确定：统一持久化所有更改并关闭对话框
-                    TextButton(
-                        onClick = {
-                            TextMenuConfig.setHiddenMenuItemIds(context, hiddenIds)
-                            TextMenuConfig.setHiddenProcessTextItems(context, hiddenProcessItems)
-                            context.toastOnUi("已保存")
-                            onDismiss()
-                        }
-                    ) {
-                        Text(text = stringResource(R.string.dialog_confirm))
+                    TextButton(onClick = onDismiss) {
+                        Text(text = stringResource(R.string.close))
                     }
                 }
             }
@@ -219,7 +493,7 @@ fun TextMenuConfigDialogContent(
 }
 
 /**
- * 其它应用信息
+ * 其他应用信息
  */
 data class ProcessTextAppInfo(
     val key: String,
@@ -259,12 +533,14 @@ private fun getProcessTextApps(context: Context): List<ProcessTextAppInfo> {
 }
 
 /**
- * 菜单项
+ * 菜单项行
  */
 @Composable
 fun MenuItemRow(
     item: TextMenuConfig.MenuItemInfo,
+    title: String,
     isChecked: Boolean,
+    onEditClick: () -> Unit,
     onCheckedChange: (Boolean) -> Unit
 ) {
     Row(
@@ -280,7 +556,7 @@ fun MenuItemRow(
                 .padding(end = 16.dp)
         ) {
             Text(
-                text = stringResource(item.nameResId),
+                text = title,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -288,6 +564,13 @@ fun MenuItemRow(
                 text = "ID: ${item.id}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        IconButton(onClick = onEditClick) {
+            Icon(
+                imageVector = Icons.Filled.Edit,
+                contentDescription = stringResource(R.string.text_menu_edit_title)
             )
         }
 
@@ -299,12 +582,14 @@ fun MenuItemRow(
 }
 
 /**
- * 其他应用菜单项
+ * 其他应用菜单项行
  */
 @Composable
 fun ProcessTextAppRow(
     appInfo: ProcessTextAppInfo,
+    title: String,
     isChecked: Boolean,
+    onEditClick: () -> Unit,
     onCheckedChange: (Boolean) -> Unit
 ) {
     Row(
@@ -320,7 +605,7 @@ fun ProcessTextAppRow(
                 .padding(end = 16.dp)
         ) {
             Text(
-                text = appInfo.label,
+                text = title,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -328,6 +613,13 @@ fun ProcessTextAppRow(
                 text = appInfo.packageName,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        IconButton(onClick = onEditClick) {
+            Icon(
+                imageVector = Icons.Filled.Edit,
+                contentDescription = stringResource(R.string.text_menu_edit_title)
             )
         }
 
