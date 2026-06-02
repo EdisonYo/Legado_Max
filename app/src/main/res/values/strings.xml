@@ -704,10 +704,10 @@
     <string name="enhanced_features">Enhanced Features</string>
     <string name="selectText">Long Tap to select text</string>
     <string name="header">Header</string>
-    <string name="header_font_size">Header Font</string>
+    <string name="header_font_size">Font Size</string>
     <string name="main_body">Content</string>
     <string name="footer">Footer</string>
-    <string name="footer_font_size">Footer Font Size</string>
+    <string name="footer_font_size">Font Size</string>
     <string name="select_end">Select end</string>
     <string name="select_start">Select start</string>
     <string name="share_layout">Shared layout</string>
@@ -760,7 +760,12 @@
     <string name="preview">Preview</string>
     <string name="text_menu_config">Expand Text Menu Config</string>
     <string name="menu_config">Menu Config</string>
-    <string name="text_menu_config_desc">Select the menu items you want to display. Items beyond 7 will be shown in the overflow menu</string>
+    <string name="text_menu_config_desc">Select the menu items you want to display. In collapsed mode, items beyond the direct display count will be shown in the overflow menu</string>
+    <string name="text_menu_visible_count">Direct display count</string>
+    <string name="text_menu_visible_count_desc">Collapsed mode shows %1$d items directly before using the overflow menu</string>
+    <string name="text_menu_edit_title">Edit menu name</string>
+    <string name="text_menu_edit_name">Menu name</string>
+    <string name="text_menu_edit_name_desc">Leave blank to restore the default name</string>
     <string name="process_text_menu_config">Other Apps Menu Config</string>
     <string name="process_text_menu_config_desc">Select the other apps menu items you want to display</string>
     <string name="no_process_text_apps">No apps found that support text processing</string>
@@ -1307,8 +1312,12 @@
     <string name="view_backup_info_t">View Backup Info</string>
     <string name="view_backup_info_s">View backup file contents and sizes</string>
     <string name="view_backup_info">Backup Info</string>
+    <string name="view_restore_info_t">View Restore Info</string>
+    <string name="view_restore_info_s">View current restore scope and ignored items</string>
+    <string name="view_restore_info">Restore Info</string>
     <string name="no_backup_file">No backup file found</string>
     <string name="no_backup_data">No backup data</string>
+    <string name="no_restore_data">No restore data</string>
     <string name="parse_backup_failed">Failed to parse backup file</string>
     <string name="webdav_application_authorization_error">Fail to authorize WebDav application</string>
     <string name="respondTime">respondTime: %1$d ms</string>
@@ -1501,13 +1510,13 @@
     <string name="no_read_record">暂无阅读记录</string>
     <string name="total_read_time_s">累计阅读 %1$s</string>
     <string name="last_read_s">最近阅读 %1$s</string>
-    <string name="show_read_record_in_book_info">显示书籍阅读记录</string>
+    <string name="show_read_record_in_book_info">显示阅读记录</string>
     <string name="words">字</string>
     <string name="app_name_sigma">阅读Max</string>
     <string name="about_description_sigma">\u3000\u3000阅读Max继承自阅读Sigma，旨在原版基础上完善和增加功能，欢迎您的加入。</string>
-    <string name="contributors_summary_sigma">gedoor、Luoyacheng、Horis、Xwite、GEd520和youfengknight 等，详情请在 GitHub 中查看</string>
+    <string name="contributors_summary_sigma">gedoor、Luoyacheng、Horis、Xwite、GEd520、youfengknight 等，详情请在 GitHub 中查看</string>
     <string name="app_share_description_sigma">
-        阅读 Max 下载地址：\nhttps://github.com/GEd520/legados/releases
+        阅读 Max 下载地址：\nhttps://github.com/
     </string>
     <string name="sure_cache_book">是否确认开始缓存？</string>
     <string name="non_printable_set">不可视字符设定</string>

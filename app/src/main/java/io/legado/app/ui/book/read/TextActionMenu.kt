@@ -141,6 +141,11 @@ class TextActionMenu(private val context: Context, private val callBack: CallBac
         val myMenu = MenuBuilder(context)      // 自定义菜单
         val otherMenu = MenuBuilder(context)    // 系统菜单（Android 6.0+）
         SupportMenuInflater(context).inflate(R.menu.content_select_action, myMenu)
+        myMenu.visibleItems.forEach { menuItem ->
+            TextMenuConfig.getCustomMenuTitle(context, menuItem.itemId)?.let { customTitle ->
+                menuItem.title = customTitle
+            }
+        }
         
         // Android 6.0+ 支持系统文本处理菜单
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -158,9 +163,10 @@ class TextActionMenu(private val context: Context, private val callBack: CallBac
         moreMenuItems.clear()
         
         // 将菜单项分为可见项（前7项）和更多项（第7项之后）
-        if (menuItems.size > 7) {
-            visibleMenuItems.addAll(menuItems.subList(0, 7))
-            moreMenuItems.addAll(menuItems.subList(7, menuItems.size))
+        val visibleCount = TextMenuConfig.getTextMenuVisibleCount(context)
+        if (menuItems.size > visibleCount) {
+            visibleMenuItems.addAll(menuItems.subList(0, visibleCount))
+            moreMenuItems.addAll(menuItems.subList(visibleCount, menuItems.size))
         } else {
             // 如果菜单项少于7个，全部显示在主菜单
             visibleMenuItems.addAll(menuItems)
@@ -416,9 +422,11 @@ class TextActionMenu(private val context: Context, private val callBack: CallBac
                 val className = resolveInfo.activityInfo.name
                 val itemKey = TextMenuConfig.getProcessTextItemKey(packageName, className)
                 if (itemKey !in hiddenItems) {
+                    val title = TextMenuConfig.getCustomProcessTextTitle(context, itemKey)
+                        ?: resolveInfo.loadLabel(context.packageManager)
                     menu.add(
                         Menu.NONE, Menu.NONE,
-                        menuItemOrder++, resolveInfo.loadLabel(context.packageManager)
+                        menuItemOrder++, title
                     ).intent = createProcessTextIntentForResolveInfo(resolveInfo)
                 }
             }

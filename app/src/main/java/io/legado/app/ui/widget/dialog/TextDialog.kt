@@ -131,6 +131,7 @@ class TextDialog() : BaseDialogFragment(R.layout.dialog_text_view) {
     // 追踪当前显示的内容，切换帮助文档时同步更新，确保打开编辑器时获取的是最新内容
     private var currentContent: String? = null
     private var markwon: Markwon? = null // Markdown渲染器
+    private var isUpdatingHelpSelector: Boolean = false
 
     companion object {
         private const val TAG = "TextDialog"
@@ -322,9 +323,13 @@ class TextDialog() : BaseDialogFragment(R.layout.dialog_text_view) {
             binding.toolBar.title = docName
             
             // 同步更新文档选择器的选中项（下拉列表）
-            val docIndex = HelpDocManager.getDocIndex(fileName)
-            if (docIndex >= 0) {
-                binding.helpSpinner.setSelection(docIndex, false)
+            val groupIndex = HelpDocManager.getDocGroupIndex(fileName)
+            val docIndex = HelpDocManager.getDocIndexInGroup(fileName)
+            if (groupIndex >= 0 && docIndex >= 0) {
+                isUpdatingHelpSelector = true
+                binding.helpGroupSpinner.setSelection(groupIndex, false)
+                updateHelpDocSpinner(groupIndex, fileName)
+                isUpdatingHelpSelector = false
             }
             
             // 更新内容显示并滚动到搜索结果所在行
@@ -497,27 +502,55 @@ class TextDialog() : BaseDialogFragment(R.layout.dialog_text_view) {
         
         binding.helpSelectorLayout.visibility = View.VISIBLE
         
-        // 创建帮助文档列表适配器
-        val adapter = ArrayAdapter(
+        // 创建帮助文档分组适配器
+        val groupAdapter = ArrayAdapter(
             requireContext(),
             R.layout.item_spinner_dropdown,
-            HelpDocManager.allHelpDocs.map { it.displayName }
+            HelpDocManager.helpDocGroups.map { it.displayName }
         )
-        adapter.setDropDownViewResource(R.layout.item_spinner_dropdown)
-        binding.helpSpinner.adapter = adapter
+        groupAdapter.setDropDownViewResource(R.layout.item_spinner_dropdown)
+        binding.helpGroupSpinner.adapter = groupAdapter
         
         // 设置当前选中的文档
         currentHelpDoc?.let { docName ->
-            val index = HelpDocManager.getDocIndex(docName)
-            if (index >= 0) {
-                binding.helpSpinner.setSelection(index, false)
+            val groupIndex = HelpDocManager.getDocGroupIndex(docName)
+            if (groupIndex >= 0) {
+                isUpdatingHelpSelector = true
+                binding.helpGroupSpinner.setSelection(groupIndex, false)
+                updateHelpDocSpinner(groupIndex, docName)
+                isUpdatingHelpSelector = false
             }
         }
         
-        // 设置下拉选择监听器
+        // 设置分组选择监听器
+        binding.helpGroupSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                if (isUpdatingHelpSelector) return
+                val group = HelpDocManager.helpDocGroups.getOrNull(position) ?: return
+                val selectedDoc = group.docs.firstOrNull() ?: return
+                isUpdatingHelpSelector = true
+                updateHelpDocSpinner(position, selectedDoc.fileName)
+                isUpdatingHelpSelector = false
+                if (selectedDoc.fileName != currentHelpDoc) {
+                    currentHelpDoc = selectedDoc.fileName
+                    loadHelpDoc(selectedDoc.fileName)
+                    updateSearchButtonVisibility()
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
+
+        // 设置文档选择监听器
         binding.helpSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val selectedDoc = HelpDocManager.allHelpDocs[position]
+                if (isUpdatingHelpSelector) return
+                val groupIndex = binding.helpGroupSpinner.selectedItemPosition
+                val selectedDoc = HelpDocManager.helpDocGroups
+                    .getOrNull(groupIndex)
+                    ?.docs
+                    ?.getOrNull(position)
+                    ?: return
                 if (selectedDoc.fileName != currentHelpDoc) {
                     currentHelpDoc = selectedDoc.fileName
                     loadHelpDoc(selectedDoc.fileName)
@@ -527,6 +560,25 @@ class TextDialog() : BaseDialogFragment(R.layout.dialog_text_view) {
             }
             
             override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
+    }
+
+    private fun updateHelpDocSpinner(groupIndex: Int, selectedFileName: String? = null) {
+        val docs = HelpDocManager.helpDocGroups.getOrNull(groupIndex)?.docs ?: emptyList()
+        val docAdapter = ArrayAdapter(
+            requireContext(),
+            R.layout.item_spinner_dropdown,
+            docs.map { it.displayName }
+        )
+        docAdapter.setDropDownViewResource(R.layout.item_spinner_dropdown)
+        binding.helpSpinner.adapter = docAdapter
+
+        val selectedIndex = selectedFileName
+            ?.let { fileName -> docs.indexOfFirst { it.fileName == fileName } }
+            ?.takeIf { it >= 0 }
+            ?: 0
+        if (docs.isNotEmpty()) {
+            binding.helpSpinner.setSelection(selectedIndex, false)
         }
     }
     
