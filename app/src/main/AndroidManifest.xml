@@ -376,6 +376,11 @@
             android:name=".ui.urlRecord.UrlRecordActivity"
             android:configChanges="orientation|screenSize"
             android:hardwareAccelerated="true" />
+        <!-- 源回收站 -->
+        <activity
+            android:name=".ui.source.recycle.SourceRecycleBinActivity"
+            android:configChanges="orientation|screenSize"
+            android:hardwareAccelerated="true" />
         <!-- HTML封面模板配置 -->
         <activity
             android:name=".ui.config.CoverHtmlActivity"
