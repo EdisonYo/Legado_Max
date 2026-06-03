@@ -160,15 +160,8 @@ fun DebugLogScreen(
                         titleContentColor = MaterialTheme.colorScheme.onSecondary,
                         actionIconContentColor = MaterialTheme.colorScheme.onSecondary
                     ),
-                    title = { Text("调试日志") },
-                    navigationIcon = {
-                        IconButton(onClick = onDismiss) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "关闭"
-                            )
-                        }
-                    },
+                    title = { Text("") },
+                    navigationIcon = { },
                     actions = {
                         // 刷新按钮：手动刷新日志列表
                         IconButton(onClick = {

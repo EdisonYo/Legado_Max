@@ -43,6 +43,7 @@ class VideoPlayer: StandardGSYVideoPlayer {
     private var tipView: TextView? = null
     private var isChanging = false
     private var isLongPressSpeed = false
+    private var mStartPlayerVolume = 0f
 
     private var mParser: BaseDanmakuParser? = null //解析器对象
     private var mDanmakuView: DanmakuView? = null //弹幕view
@@ -121,6 +122,11 @@ class VideoPlayer: StandardGSYVideoPlayer {
             }
         }
     }
+    override fun touchSurfaceDown(x: Float, y: Float) {
+        super.touchSurfaceDown(x, y)
+        mStartPlayerVolume = VideoPlay.videoVolume
+    }
+
     override fun touchSurfaceUp(){
         if (isLongPressSpeed) {
             isLongPressSpeed = false
@@ -130,6 +136,19 @@ class VideoPlayer: StandardGSYVideoPlayer {
             resolveDanmakuStart(time)
         }
         super.touchSurfaceUp()
+    }
+
+override fun touchSurfaceMove(deltaX: Float, deltaY: Float, y: Float) {
+        if (mChangeVolume) {
+            val deltaY = -deltaY
+            val deltaV = deltaY * 2 / mScreenHeight
+            val newVolume = (mStartPlayerVolume + deltaV).coerceIn(0f, 1f)
+            VideoPlay.videoVolume = newVolume
+            gsyVideoManager.setVolume(newVolume, newVolume)
+            showVolumeTip(newVolume)
+        } else {
+            super.touchSurfaceMove(deltaX, deltaY, y)
+        }
     }
 
     private fun setVideoSpeed(speed: Float) {
@@ -225,6 +244,11 @@ class VideoPlayer: StandardGSYVideoPlayer {
                 alpha = 0f
             }
         }
+    }
+
+    private fun showVolumeTip(volume: Float) {
+        val percent = (volume * 100).toInt()
+        showOverlayTip("音量 $percent%", 800)
     }
 
     private fun initView() {

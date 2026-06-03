@@ -109,8 +109,8 @@ class BookSourceActivity : VMBaseActivity<ActivityBookSourceBinding, BookSourceV
     override var isSortAscending = true
         private set
     private var snackBar: Snackbar? = null
-    private var isGroupSourcesByDomain = false
-    private val hostMap = hashMapOf<String, String>()
+
+
     private var locateSourceUrl: String? = null
     private var locateSourceName: String? = null
     private val qrResult = registerForActivityResult(QrCodeResult()) {
@@ -269,12 +269,12 @@ class BookSourceActivity : VMBaseActivity<ActivityBookSourceBinding, BookSourceV
                 searchView.setQuery(getString(R.string.disabled_explore), true)
             }
 
-            R.id.menu_group_sources_by_domain -> {
-                item.isChecked = !item.isChecked
-                isGroupSourcesByDomain = item.isChecked
-                adapter.showSourceHost = item.isChecked
-                upBookSource(searchView.query?.toString())
-            }
+
+
+
+
+
+
 
             R.id.menu_help -> showHelp("SourceMBookHelp")
 
@@ -353,13 +353,13 @@ class BookSourceActivity : VMBaseActivity<ActivityBookSourceBinding, BookSourceV
                     appDb.bookSourceDao.flowSearch(searchKey)
                 }
             }.map { data ->
-                hostMap.clear()
-                if (isGroupSourcesByDomain) {
-                    data.sortedWith(
-                        compareBy<BookSourcePart> { getSourceHost(it.bookSourceUrl) == "#" }
-                            .thenBy { getSourceHost(it.bookSourceUrl) }
-                            .thenByDescending { it.lastUpdateTime })
-                } else if (isSortAscending) {
+
+
+
+
+
+
+                if (isSortAscending) {
                     when (sort) {
                         BookSourceSort.Weight -> data.sortedBy { it.weight }
                         BookSourceSort.Name -> data.sortedWith { o1, o2 ->
@@ -412,7 +412,7 @@ class BookSourceActivity : VMBaseActivity<ActivityBookSourceBinding, BookSourceV
                     adapter.setItems(data, adapter.diffItemCallback, !Debug.isChecking)
                 }
                 itemTouchCallback.isCanDrag =
-                    sort == BookSourceSort.Default && !isGroupSourcesByDomain
+                    sort == BookSourceSort.Default
                 tryLocateSource(data)
                 delay(500)
             }
@@ -533,7 +533,7 @@ class BookSourceActivity : VMBaseActivity<ActivityBookSourceBinding, BookSourceV
             R.id.menu_enable_explore -> viewModel.enableSelectExplore(adapter.selection)
             R.id.menu_disable_explore -> viewModel.disableSelectExplore(adapter.selection)
             R.id.menu_check_source -> checkSource()
-            R.id.menu_check_source_compose -> checkSourceCompose()
+
             R.id.menu_top_sel -> viewModel.topSource(*adapter.selection.toTypedArray())
             R.id.menu_bottom_sel -> viewModel.bottomSource(*adapter.selection.toTypedArray())
             R.id.menu_add_group -> selectionAddToGroups()
@@ -600,9 +600,9 @@ class BookSourceActivity : VMBaseActivity<ActivityBookSourceBinding, BookSourceV
         }
     }
 
-    private fun checkSourceCompose() {
-        startActivity<io.legado.app.ui.book.source.check.CheckSourceActivity>()
-    }
+
+
+
 
     private fun resumeCheckSource() {
         if (!Debug.isChecking) {
@@ -778,11 +778,11 @@ class BookSourceActivity : VMBaseActivity<ActivityBookSourceBinding, BookSourceV
             .upCountView(adapter.selection.size, adapter.itemCount)
     }
 
-    override fun getSourceHost(origin: String): String {
-        return hostMap.getOrPut(origin) {
-            NetworkUtils.getSubDomainOrNull(origin) ?: "#"
-        }
-    }
+
+
+
+
+
 
     override fun onQueryTextChange(newText: String?): Boolean {
         newText?.let {

@@ -26,7 +26,7 @@ class UrlOptionDialog(context: Context, private val success: (String) -> Unit) :
         setContentView(binding.root)
         binding.root.setOnClickListener { dismiss() }
         binding.vwBg.setOnClickListener(null)
-        binding.editMethod.setFilterValues("POST", "GET")
+        binding.editMethod.setFilterValues("POST", "GET", "HEAD")
         binding.editCharset.setFilterValues(AppConst.charsets)
         binding.tvOk.setOnClickListener {
             success.invoke(GSON.toJson(getUrlOption()))

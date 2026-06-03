@@ -72,4 +72,11 @@ class ExoVideoManager: GSYVideoBaseManager() {
         (playerManager as ExoPlayerManager).next()
     }
 
+    /**
+     * 设置播放器独立音量
+     */
+    fun setVolume(left: Float, right: Float) {
+        playerManager?.setVolume(left, right)
+    }
+
 }

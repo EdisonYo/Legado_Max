@@ -274,9 +274,6 @@ class OtherConfigFragment : PreferenceFragment(),
                 val enabled = sharedPreferences?.getBoolean(key, false) ?: false
                 DebugFloatingBallManager.updateFloatingBallState(enabled)
             }
-            PreferKey.language -> listView.postDelayed(1000) {
-                appCtx.restart()
-            }
 
             PreferKey.userAgent -> listView.post {
                 upPreferenceSummary(PreferKey.userAgent, AppConfig.userAgent)
