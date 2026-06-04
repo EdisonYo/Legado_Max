@@ -84,6 +84,10 @@
 # legado
 -keep class * extends io.legado.app.help.JsExtensions { *; }
 -keep class io.legado.app.api.ReturnData { *; }
+-keep class io.legado.app.help.storage.BookCacheIndex{*;}
+-keep class io.legado.app.help.storage.ChapterCacheInfo{*;}
+-keep class io.legado.app.ui.book.cacheSelector.BookCacheIndex{*;}
+-keep class io.legado.app.ui.book.cacheSelector.ChapterCacheInfo{*;}
 -keep class **.data.entities.** { *; }
 -keep class **.help.http.CookieStore { *; }
 -keep class **.help.CacheManager { *; }
