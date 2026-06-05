@@ -1869,8 +1869,11 @@
     <string name="fvd_webdav_restore_error">WebDav restore error\n%s</string>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     <string name="group_name">分组名称</string>
 =======
+=======
+>>>>>>> 87ecbb98 (cleanup：删除废弃的自定义帮助文档弹窗)
     <!-- Explore Show Column Layout -->
     <string name="switch_layout">Switch Layout</string>
     <string name="select_column">Select Column(%d)</string>
@@ -1887,7 +1890,10 @@
     <!-- Custom Help Documents -->
     <string name="add_custom_group">添加自定义分组</string>
     <string name="add_custom_doc">添加自定义文档</string>
+=======
+>>>>>>> 05464d7d (cleanup：删除废弃的自定义帮助文档弹窗)
     <string name="group_name">分组名称</string>
+<<<<<<< HEAD
     <string name="doc_name">文档名称</string>
     <string name="file_format">文件格式</string>
     <string name="add_method">添加方式</string>
@@ -1907,4 +1913,6 @@
     <string name="confirm_delete_doc">确定要删除此文档吗?</string>
     <string name="confirm_delete_group">确定要删除此分组及内部所有文档吗?</string>
 >>>>>>> 1387cf90 (feat：增加自定义文档字符串资源)
+=======
+>>>>>>> 87ecbb98 (cleanup：删除废弃的自定义帮助文档弹窗)
 </resources>
