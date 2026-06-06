@@ -25,6 +25,7 @@ class ExploreShowAdapter(context: Context, val callBack: CallBack) :
         private const val VIEW_TYPE_LIST = 0
         private const val VIEW_TYPE_GRID = 1
         private const val VIEW_TYPE_WATERFALL = 2
+        private const val SPACING_RATIO = 0.05f
     }
 
     private val primaryTextColor by lazy { context.getColor(R.color.primaryText) }
@@ -102,11 +103,22 @@ class ExploreShowAdapter(context: Context, val callBack: CallBack) :
         val isInShelf = callBack.isInBookshelf(item)
         binding.tvNameGrid.setTextColor(if (isInShelf) shelfTextColor else primaryTextColor)
         binding.tvNameGrid.setTypeface(null, if (isInShelf) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
+        val tagKey = "${item.bookUrl}_$columnCount"
         val lastItemTag = holder.itemView.tag as? String
-        if (lastItemTag == item.bookUrl) return
-        holder.itemView.tag = item.bookUrl
-        binding.ivCoverGrid.load(item, AppConfig.loadCoverOnlyWifi)
+        if (lastItemTag == tagKey) return
+        holder.itemView.tag = tagKey
+        val spacing = calcColumnSpacing()
+        val halfSpacing = spacing / 2
+        holder.itemView.setPadding(halfSpacing, halfSpacing, halfSpacing, halfSpacing)
+        val contentWidth = context.resources.displayMetrics.widthPixels / columnCount - spacing
+        binding.ivCoverGrid.load(item, AppConfig.loadCoverOnlyWifi, overrideWidth = contentWidth, overrideHeight = contentWidth * 4 / 3)
         binding.tvNameGrid.text = item.name
+    }
+
+    private fun calcColumnSpacing(): Int {
+        val screenWidth = context.resources.displayMetrics.widthPixels
+        val itemWidth = screenWidth / columnCount.coerceAtLeast(1)
+        return (itemWidth * SPACING_RATIO).toInt().coerceIn(2, 80)
     }
 
     private fun bindWaterfall(
@@ -139,9 +151,10 @@ class ExploreShowAdapter(context: Context, val callBack: CallBack) :
 
         val coverUrl = item.coverUrl
         val imageView = binding.ivCoverWaterfall
+        val tagKey = "${coverUrl}_$columnCount"
         val lastTag = imageView.tag as? String
-        if (lastTag == coverUrl) return
-        imageView.tag = coverUrl
+        if (lastTag == tagKey) return
+        imageView.tag = tagKey
         imageView.adjustViewBounds = true
         val lp = imageView.layoutParams
         lp.width = ViewGroup.LayoutParams.MATCH_PARENT
@@ -153,7 +166,14 @@ class ExploreShowAdapter(context: Context, val callBack: CallBack) :
             return
         }
 
-        val options = RequestOptions()
+        val spacing = calcColumnSpacing()
+        val halfSpacing = spacing / 2
+        (binding.root.layoutParams as? ViewGroup.MarginLayoutParams)?.let {
+            it.setMargins(halfSpacing, halfSpacing, halfSpacing, halfSpacing)
+            binding.root.layoutParams = it
+        }
+        val contentWidth = context.resources.displayMetrics.widthPixels / columnCount - spacing
+        val options = RequestOptions().override(contentWidth, contentWidth * 4 / 3)
         if (item.origin.isNotEmpty()) {
             options.set(OkHttpModelLoader.sourceOriginOption, item.origin)
         }
