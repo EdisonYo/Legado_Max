@@ -27,6 +27,9 @@ class ExploreShowAdapter(context: Context, val callBack: CallBack) :
         private const val VIEW_TYPE_WATERFALL = 2
     }
 
+    private val primaryTextColor by lazy { context.getColor(R.color.primaryText) }
+    private val shelfTextColor by lazy { context.getColor(R.color.md_green_600) }
+
     var layoutMode: Int = 0
         set(value) {
             if (field != value) {
@@ -96,7 +99,9 @@ class ExploreShowAdapter(context: Context, val callBack: CallBack) :
         binding: ItemExploreShowGridBinding,
         item: SearchBook
     ) {
-        binding.ivInBookshelfGrid.isVisible = callBack.isInBookshelf(item)
+        val isInShelf = callBack.isInBookshelf(item)
+        binding.tvNameGrid.setTextColor(if (isInShelf) shelfTextColor else primaryTextColor)
+        binding.tvNameGrid.setTypeface(null, if (isInShelf) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
         val lastItemTag = holder.itemView.tag as? String
         if (lastItemTag == item.bookUrl) return
         holder.itemView.tag = item.bookUrl
@@ -108,7 +113,9 @@ class ExploreShowAdapter(context: Context, val callBack: CallBack) :
         binding: ItemExploreShowWaterfallBinding,
         item: SearchBook
     ) {
-        binding.ivInBookshelfWaterfall.isVisible = callBack.isInBookshelf(item)
+        val isInShelf = callBack.isInBookshelf(item)
+        binding.tvNameWaterfall.setTextColor(if (isInShelf) shelfTextColor else primaryTextColor)
+        binding.tvNameWaterfall.setTypeface(null, if (isInShelf) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
         binding.tvNameWaterfall.text = item.name
         binding.tvAuthorWaterfall.text = context.getString(R.string.author_show, item.author)
 
@@ -173,10 +180,12 @@ class ExploreShowAdapter(context: Context, val callBack: CallBack) :
     }
 
     private fun bind(binding: ItemSearchBinding, item: SearchBook) {
+        val isInShelf = callBack.isInBookshelf(item)
         binding.run {
             tvName.text = item.name
+            tvName.setTextColor(if (isInShelf) shelfTextColor else primaryTextColor)
+            tvName.setTypeface(null, if (isInShelf) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
             tvAuthor.text = context.getString(R.string.author_show, item.author)
-            ivInBookshelf.isVisible = callBack.isInBookshelf(item)
             if (item.latestChapterTitle.isNullOrEmpty()) {
                 tvLasted.gone()
             } else {
@@ -202,8 +211,11 @@ class ExploreShowAdapter(context: Context, val callBack: CallBack) :
         binding.run {
             bundle.keySet().forEach {
                 when (it) {
-                    "isInBookshelf" -> ivInBookshelf.isVisible =
-                        callBack.isInBookshelf(item)
+                    "isInBookshelf" -> {
+                        val isInShelf = callBack.isInBookshelf(item)
+                        tvName.setTextColor(if (isInShelf) shelfTextColor else primaryTextColor)
+                        tvName.setTypeface(null, if (isInShelf) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
+                    }
                 }
             }
         }
