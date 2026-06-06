@@ -20,6 +20,9 @@ class SearchAdapter(context: Context, val callBack: CallBack) :
 
     override val keepScrollPosition = true
 
+    private val primaryTextColor by lazy { context.getColor(R.color.primaryText) }
+    private val shelfTextColor by lazy { context.getColor(R.color.md_green_600) }
+
     override val diffItemCallback: DiffUtil.ItemCallback<SearchBook>
         get() = object : DiffUtil.ItemCallback<SearchBook>() {
 
@@ -80,10 +83,12 @@ class SearchAdapter(context: Context, val callBack: CallBack) :
     }
 
     private fun bind(binding: ItemSearchBinding, searchBook: SearchBook) {
+        val isInShelf = callBack.isInBookshelf(searchBook)
         binding.run {
             tvName.text = searchBook.name
+            tvName.setTextColor(if (isInShelf) shelfTextColor else primaryTextColor)
+            tvName.setTypeface(null, if (isInShelf) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
             tvAuthor.text = context.getString(R.string.author_show, searchBook.author)
-            ivInBookshelf.isVisible = callBack.isInBookshelf(searchBook)
             bvOriginCount.setBadgeCount(searchBook.origins.size)
             upLasted(binding, searchBook.latestChapterTitle)
             tvIntroduce.text = searchBook.trimIntro(context)
@@ -103,7 +108,11 @@ class SearchAdapter(context: Context, val callBack: CallBack) :
                     "last" -> upLasted(binding, searchBook.latestChapterTitle)
                     "intro" -> tvIntroduce.text = searchBook.trimIntro(context)
                     "kind" -> upKind(binding, searchBook.getKindList())
-                    "isInBookshelf" -> ivInBookshelf.isVisible = callBack.isInBookshelf(searchBook)
+                    "isInBookshelf" -> {
+                        val isInShelf = callBack.isInBookshelf(searchBook)
+                        tvName.setTextColor(if (isInShelf) shelfTextColor else primaryTextColor)
+                        tvName.setTypeface(null, if (isInShelf) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
+                    }
                     "cover" -> ivCover.load(
                         searchBook,
                         false

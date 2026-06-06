@@ -31,6 +31,12 @@ class ExoPlayerManager : BasePlayerManager() {
     private var surfaceControl: SurfaceControl? = null
     private var videoSurface: Surface? = null
     private var mediaPlayer: Exo2MediaPlayer? = null
+    // 内部独立音量，与系统音量完全隔离
+    var internalVolume: Float = 1.0f
+        set(value) {
+            field = value.coerceIn(0f, 1f)
+            mediaPlayer?.setVolume(field, field)
+        }
     override fun getMediaPlayer(): IMediaPlayer? {
         return mediaPlayer
     }
@@ -119,19 +125,11 @@ class ExoPlayerManager : BasePlayerManager() {
     }
 
     override fun setNeedMute(needMute: Boolean) {
-        if (mediaPlayer != null) {
-            if (needMute) {
-                mediaPlayer!!.setVolume(0f, 0f)
-            } else {
-                mediaPlayer!!.setVolume(1f, 1f)
-            }
-        }
+        internalVolume = if (needMute) 0f else io.legado.app.model.VideoPlay.videoVolume
     }
 
     override fun setVolume(left: Float, right: Float) {
-        if (mediaPlayer != null) {
-            mediaPlayer!!.setVolume(left, right)
-        }
+        internalVolume = left.coerceIn(0f, 1f)
     }
 
     override fun releaseSurface() {

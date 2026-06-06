@@ -98,11 +98,6 @@ fun DebugToolsScreen(
                             text = stringResource(R.string.debug_tools),
                             style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp, fontWeight = FontWeight.Medium)
                         )
-                        Text(
-                            text = stringResource(R.string.debug_tools_desc),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
                     }
                 },
                 navigationIcon = {
