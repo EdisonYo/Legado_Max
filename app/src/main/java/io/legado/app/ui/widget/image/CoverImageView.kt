@@ -30,6 +30,7 @@ import io.legado.app.constant.PreferKey
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.SearchBook
 import io.legado.app.help.config.AppConfig
+import io.legado.app.help.glide.AdaptiveCoverTransformation
 import io.legado.app.help.glide.ImageLoader
 import io.legado.app.help.glide.OkHttpModelLoader
 import io.legado.app.lib.theme.accentColor
@@ -396,8 +397,8 @@ class CoverImageView @JvmOverloads constructor(
                     }
                 })
             }
+            builder.centerCrop()
             builder
-                .centerCrop()
                 .into(this)
         }
     }

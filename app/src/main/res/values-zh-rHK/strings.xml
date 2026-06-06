@@ -1375,4 +1375,12 @@
     <string name="cover_gallery">封面圖集</string>
     <string name="cover_gallery_summary">管理分組封面圖集，可設為全域預設封面來源</string>
     <string name="cronet">Cronet</string>
+
+    <!-- Explore Show Column Layout -->
+    <string name="switch_layout">切換佈局</string>
+    <string name="select_column">選擇分列(%d)</string>
+    <string name="select_column_count">選擇列數</string>
+    <string name="switch_layout_list">列表</string>
+    <string name="switch_layout_grid">網格</string>
+    <string name="switch_layout_waterfall">瀑布流</string>
 </resources>

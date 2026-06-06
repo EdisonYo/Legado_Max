@@ -160,24 +160,34 @@ class BgTextConfigDialog : BaseDialogFragment(R.layout.dialog_read_bg_text) {
         }
         tvBgAlpha.setTextColor(primaryTextColor)
         tvBgImage.setTextColor(primaryTextColor)
+        binding.tvTextUnderline.setTextColor(primaryTextColor)
+        spUnderline.background.setColorFilter(primaryTextColor, PorterDuff.Mode.SRC_ATOP)
         if (ReadBook.book?.isImage == true) {
             spUnderline.isGone = true
         } else {
             val textStyles = arrayOf("关闭", "实线", "虚线", "波浪", "点线")
-            val adapter = object : ArrayAdapter<String>(requireContext(), R.layout.item_text_common, textStyles) {
-                override fun getDropDownView(
-                    position: Int,
-                    convertView: View?,
-                    parent: ViewGroup
-                ): View {
-                    val view = super.getDropDownView(position, convertView, parent)
-                    if (view is android.widget.TextView) {
-                        view.setBackgroundColor(bg) // 设置下拉列表项的背景色
-                        view.setTextColor(primaryTextColor) // 设置下拉列表项的文本颜色
-                    }
-                    return view
-                }
-            }
+			val adapter = object : ArrayAdapter<String>(
+			    requireContext(), 
+			    R.layout.item_text_common, 
+			    textStyles
+			) {
+			    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+			        val view = super.getView(position, convertView, parent)
+			        if (view is android.widget.TextView) {
+			            view.setTextColor(primaryTextColor)
+			        }
+			        return view
+			    }
+			
+			    override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+			        val view = super.getDropDownView(position, convertView, parent)
+			        if (view is android.widget.TextView) {
+			            view.setBackgroundColor(bg)
+			            view.setTextColor(primaryTextColor)
+			        }
+			        return view
+			    }
+			}
             adapter.setDropDownViewResource(R.layout.item_spinner_dropdown)
             spUnderline.adapter = adapter
             spUnderline.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {

@@ -150,8 +150,7 @@ fun UrlRecordScreen(
                         if (recordCount > 0) {
                             Text(
                                 text = "共 $recordCount 条记录",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                style = MaterialTheme.typography.labelMedium
                             )
                         }
                     }
