@@ -144,6 +144,7 @@ class VideoPlayerActivity : VMBaseActivity<ActivityVideoPlayerBinding, VideoPlay
     private var isFullScreen = false
     private var orientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     private var menuCustomBtn: MenuItem? = null
+    private var isStartingFloatingWindow = false
     private val bookSourceEditResult =
         registerForActivityResult(StartActivityContract(BookSourceEditActivity::class.java)) {
             if (it.resultCode == RESULT_OK) {
@@ -737,6 +738,7 @@ class VideoPlayerActivity : VMBaseActivity<ActivityVideoPlayerBinding, VideoPlay
     }
 
     private fun startFloatingWindow() {
+        isStartingFloatingWindow = true
         VideoPlay.savePlayState(playerView)
         // 启动悬浮窗服务
         val intent = Intent(this, VideoPlayService::class.java).apply {
@@ -764,6 +766,12 @@ class VideoPlayerActivity : VMBaseActivity<ActivityVideoPlayerBinding, VideoPlay
     }
 
     override fun finish() {
+        // 切悬浮窗时直接结束，不弹确认框
+        if (isStartingFloatingWindow) {
+            isStartingFloatingWindow = false
+            callBackBookEnd()
+            return super.finish()
+        }
         val book = VideoPlay.book ?: return super.finish()
         if (VideoPlay.inBookshelf) {
             callBackBookEnd()
