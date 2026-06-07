@@ -202,6 +202,10 @@ class VideoPlayerActivity : VMBaseActivity<ActivityVideoPlayerBinding, VideoPlay
                 finish()
                 return
             }
+            // 首次进入时应用静音设置，切换时不重置
+            if (VideoPlay.mutePlay) {
+                VideoPlay.videoVolume = 0f
+            }
             VideoPlay.startPlay(playerView)
             VideoPlay.saveRead()
         } else {

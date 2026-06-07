@@ -138,7 +138,7 @@ class VideoPlayer: StandardGSYVideoPlayer {
         super.touchSurfaceUp()
     }
 
-override fun touchSurfaceMove(deltaX: Float, deltaY: Float, y: Float) {
+    override fun touchSurfaceMove(deltaX: Float, deltaY: Float, y: Float) {
         if (mChangeVolume) {
             val deltaY = -deltaY
             val deltaV = deltaY * 2 / mScreenHeight
@@ -285,8 +285,8 @@ override fun touchSurfaceMove(deltaX: Float, deltaY: Float, y: Float) {
     override fun setUp(url: String?, cacheWithPlay: Boolean, cachePath: File?, title: String?): Boolean {
         initDanmaku()
         val result = super.setUp(url, cacheWithPlay, cachePath, title)
-        // 应用静音播放设置，根据用户配置决定是否静音
-        gsyVideoManager.setNeedMute(VideoPlay.mutePlay)
+        // 从悬浮窗切回时，显式同步持久化音量到播放器
+        gsyVideoManager.setVolume(VideoPlay.videoVolume, VideoPlay.videoVolume)
         return result
     }
 

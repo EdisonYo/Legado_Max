@@ -86,8 +86,6 @@ class VideoPlayService : BaseService() {
         BitmapFactory.decodeResource(appCtx.resources, R.drawable.icon_read_book)
     private var upPlayProgressJob: Job? = null
     private var broadcastReceiver: BroadcastReceiver? = null
-    private val audioManager by lazy { getSystemService(Context.AUDIO_SERVICE) as AudioManager }
-    private var volumeReceiver: BroadcastReceiver? = null
     private val activityLifecycleCallbacks = object : Application.ActivityLifecycleCallbacks {
         override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
             if (activity is VideoPlayerActivity) {
@@ -230,7 +228,8 @@ class VideoPlayService : BaseService() {
             playerView.setSurfaceToPlay()
             playerView.startAfterPrepared()
         }
-        syncVideoVolumeToSystem()
+        // 从全屏切到悬浮窗：同步播放器独立音量
+        playerView.gsyVideoManager.setVolume(VideoPlay.videoVolume, VideoPlay.videoVolume)
         setupPlayerView()
         if (floatingView.parent == null) {
             createFloatingWindow()
@@ -423,9 +422,6 @@ class VideoPlayService : BaseService() {
     @OptIn(UnstableApi::class)
     @SuppressLint("ClickableViewAccessibility", "InflateParams")
     private fun createFloatingWindow() {
-        // 同步播放器独立音量到系统音量，使音量键在悬浮窗期间有效
-        syncVideoVolumeToSystem()
-        initVolumeReceiver()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         val screenWidth = resources.displayMetrics.widthPixels
         val videoWidth = playerView.currentVideoWidth
@@ -585,7 +581,6 @@ class VideoPlayService : BaseService() {
 
     override fun onDestroy() {
         super.onDestroy()
-        try { volumeReceiver?.let { unregisterReceiver(it) } } catch (e: Exception) { e.printOnDebug() }
         VideoPlay.saveRead()
         try {
             if (::windowManager.isInitialized && floatingView.parent != null) {
@@ -604,40 +599,4 @@ class VideoPlayService : BaseService() {
         }
     }
 
-    /**
-     * 将播放器独立音量同步到系统音量，使悬浮窗期间音量键有效
-     */
-    private fun syncVideoVolumeToSystem() {
-        try {
-            val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-            val targetVolume = (VideoPlay.videoVolume * maxVolume).toInt().coerceIn(0, maxVolume)
-            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, targetVolume, 0)
-        } catch (e: Exception) {
-            e.printOnDebug()
-        }
-    }
-
-    /**
-     * 监听系统音量变化广播，实时写回播放器独立音量，保持全屏/悬浮窗音量一致
-     */
-    private fun initVolumeReceiver() {
-        try {
-            val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-            volumeReceiver = object : BroadcastReceiver() {
-                override fun onReceive(context: Context, intent: Intent) {
-                    if (intent.action == "android.media.VOLUME_CHANGED_ACTION") {
-                        val currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
-                        val newVolume = (currentVolume.toFloat() / maxVolume).coerceIn(0f, 1f)
-                        VideoPlay.videoVolume = newVolume
-                        // 直接同步到 ExoPlayerManager，否则悬浮窗内播放器音量不会变
-                        playerView.gsyVideoManager.setVolume(newVolume, newVolume)
-                    }
-                }
-            }
-            val filter = IntentFilter("android.media.VOLUME_CHANGED_ACTION")
-            registerReceiver(volumeReceiver, filter)
-        } catch (e: Exception) {
-            e.printOnDebug()
-        }
-    }
 }
