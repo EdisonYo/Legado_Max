@@ -765,6 +765,12 @@ class VideoPlayerActivity : VMBaseActivity<ActivityVideoPlayerBinding, VideoPlay
     }
 
     override fun finish() {
+        // 切悬浮窗时直接结束，不弹确认框
+        if (VideoPlay.isSwitchingToFloating) {
+            VideoPlay.isSwitchingToFloating = false
+            callBackBookEnd()
+            return super.finish()
+        }
         val book = VideoPlay.book ?: return super.finish()
         if (VideoPlay.inBookshelf) {
             callBackBookEnd()
