@@ -99,8 +99,6 @@ object VideoPlay : CoroutineScope by MainScope(){
         set(value) {
             videoPrefs.edit { putBoolean("mutePlay", value) }
         }
-    /**  是否正在切换到悬浮窗，避免 onPause 暂停播放器  **/
-    var isSwitchingToFloating = false
     /**  播放器独立音量 0.0~1.0，与系统音量隔离  **/
     var videoVolume
         get() = videoPrefs.getFloat("videoVolume", 1.0f)
@@ -422,10 +420,9 @@ object VideoPlay : CoroutineScope by MainScope(){
      */
     fun onPause() {
         upReadTime()
-        if (!isSwitchingToFloating && videoManager.listener() != null) {
+        if (videoManager.listener() != null) {
             videoManager.listener().onVideoPause()
         }
-        isSwitchingToFloating = false
     }
 
     /**

@@ -737,7 +737,6 @@ class VideoPlayerActivity : VMBaseActivity<ActivityVideoPlayerBinding, VideoPlay
     }
 
     private fun startFloatingWindow() {
-        VideoPlay.isSwitchingToFloating = true
         VideoPlay.savePlayState(playerView)
         // 启动悬浮窗服务
         val intent = Intent(this, VideoPlayService::class.java).apply {
@@ -765,12 +764,6 @@ class VideoPlayerActivity : VMBaseActivity<ActivityVideoPlayerBinding, VideoPlay
     }
 
     override fun finish() {
-        // 切悬浮窗时直接结束，不弹确认框
-        if (VideoPlay.isSwitchingToFloating) {
-            VideoPlay.isSwitchingToFloating = false
-            callBackBookEnd()
-            return super.finish()
-        }
         val book = VideoPlay.book ?: return super.finish()
         if (VideoPlay.inBookshelf) {
             callBackBookEnd()
@@ -827,7 +820,10 @@ class VideoPlayerActivity : VMBaseActivity<ActivityVideoPlayerBinding, VideoPlay
      */
     override fun onPause() {
         super.onPause()
-        VideoPlay.onPause()
+        // 切悬浮窗时 isFinishing=true，不暂停播放器
+        if (!isFinishing) {
+            VideoPlay.onPause()
+        }
     }
 
     /**
