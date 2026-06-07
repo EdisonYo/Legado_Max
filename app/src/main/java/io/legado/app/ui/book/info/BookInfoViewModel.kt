@@ -81,13 +81,19 @@ class BookInfoViewModel(application: Application) : BaseViewModel(application) {
                     upBook(it)
                     return@execute
                 }
-                appDb.searchBookDao.getSearchBook(bookUrl)?.toBook()?.let {
-                    upBook(it)
+                appDb.searchBookDao.getSearchBook(bookUrl)?.toBook()?.let { book ->
+                    appDb.bookDao.getBook(book.name, book.author)?.let {
+                        inBookshelf = !it.isNotShelf
+                    }
+                    upBook(book)
                     return@execute
                 }
             }
-            appDb.searchBookDao.getFirstByNameAuthor(name, author)?.toBook()?.let {
-                upBook(it)
+            appDb.searchBookDao.getFirstByNameAuthor(name, author)?.toBook()?.let { book ->
+                appDb.bookDao.getBook(book.name, book.author)?.let {
+                    inBookshelf = !it.isNotShelf
+                }
+                upBook(book)
                 return@execute
             }
             throw NoStackTraceException("未找到书籍")
@@ -102,6 +108,7 @@ class BookInfoViewModel(application: Application) : BaseViewModel(application) {
             val name = intent.getStringExtra("name") ?: ""
             val author = intent.getStringExtra("author") ?: ""
             appDb.bookDao.getBook(name, author)?.let { book ->
+                inBookshelf = !book.isNotShelf
                 upBook(book)
             }
         }
@@ -578,8 +585,12 @@ class BookInfoViewModel(application: Application) : BaseViewModel(application) {
                 }
                 if (ReadBook.book?.isSameNameAuthor(book) == true) {
                     ReadBook.book = book
+                    ReadBook.inBookshelf = true
                 } else if (AudioPlay.book?.isSameNameAuthor(book) == true) {
                     AudioPlay.book = book
+                    AudioPlay.inBookshelf = true
+                } else if (ReadManga.book?.isSameNameAuthor(book) == true) {
+                    ReadManga.inBookshelf = true
                 }
                 book.save()
                 SourceCallBack.callBackBook(SourceCallBack.ADD_BOOK_SHELF, bookSource, book)
