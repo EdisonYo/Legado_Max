@@ -217,9 +217,9 @@ class VideoPlayerActivity : VMBaseActivity<ActivityVideoPlayerBinding, VideoPlay
         setupPlayerView()
         initView()
         // 静音播放视频toast提示
-        if (VideoPlay.mutePlay) {
-            toastOnUi(R.string.mute_play_enabled)
-        }
+		if (isNew && VideoPlay.mutePlay) {
+		    toastOnUi(R.string.mute_play_enabled)
+		}
         upView()
         onBackPressedDispatcher.addCallback(this) {
             if (isFullScreen) {
@@ -737,6 +737,7 @@ class VideoPlayerActivity : VMBaseActivity<ActivityVideoPlayerBinding, VideoPlay
     }
 
     private fun startFloatingWindow() {
+        VideoPlay.isSwitchingToFloating = true
         VideoPlay.savePlayState(playerView)
         // 启动悬浮窗服务
         val intent = Intent(this, VideoPlayService::class.java).apply {
