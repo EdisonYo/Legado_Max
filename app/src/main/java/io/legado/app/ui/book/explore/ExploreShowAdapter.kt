@@ -169,7 +169,6 @@ class ExploreShowAdapter(context: Context, val callBack: CallBack) :
         lp.width = ViewGroup.LayoutParams.MATCH_PARENT
         lp.height = ViewGroup.LayoutParams.WRAP_CONTENT
         imageView.layoutParams = lp
-
         val spacing = calcColumnSpacing()
         val halfSpacing = spacing / 2
         (binding.root.layoutParams as? ViewGroup.MarginLayoutParams)?.let {
@@ -177,7 +176,6 @@ class ExploreShowAdapter(context: Context, val callBack: CallBack) :
             binding.root.layoutParams = it
         }
         val contentWidth = context.resources.displayMetrics.widthPixels / columnCount - spacing
-
         // 使用 CoverLoader 加载封面，支持封面设置，保持自由图片比例
         CoverLoader.load(
             imageView,
