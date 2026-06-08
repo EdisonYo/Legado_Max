@@ -132,46 +132,57 @@ class TextActionMenu(private val context: Context, private val callBack: CallBac
         }
     }
     
-    /**
-     * 重新加载菜单项
-     * 从配置中读取隐藏的菜单项，重新构建菜单列表
-     */
-    private fun reloadMenuItems() {
-        // 构建菜单项
-        val myMenu = MenuBuilder(context)      // 自定义菜单
-        val otherMenu = MenuBuilder(context)    // 系统菜单（Android 6.0+）
-        SupportMenuInflater(context).inflate(R.menu.content_select_action, myMenu)
-        myMenu.visibleItems.forEach { menuItem ->
-            TextMenuConfig.getCustomMenuTitle(context, menuItem.itemId)?.let { customTitle ->
-                menuItem.title = customTitle
-            }
-        }
-        
-        // Android 6.0+ 支持系统文本处理菜单
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            onInitializeMenu(otherMenu)
-        }
-        
-        // 合并自定义菜单和系统菜单
-        val allMenuItems = myMenu.visibleItems + otherMenu.visibleItems
-        
-        // 过滤掉被隐藏的菜单项
-        menuItems = allMenuItems.filter { it.itemId !in hiddenMenuItemIds }
-        
-        // 清空旧数据
-        visibleMenuItems.clear()
-        moreMenuItems.clear()
-        
-        // 将菜单项分为可见项（前7项）和更多项（第7项之后）
-        val visibleCount = TextMenuConfig.getTextMenuVisibleCount(context)
-        if (menuItems.size > visibleCount) {
-            visibleMenuItems.addAll(menuItems.subList(0, visibleCount))
-            moreMenuItems.addAll(menuItems.subList(visibleCount, menuItems.size))
-        } else {
-            // 如果菜单项少于7个，全部显示在主菜单
-            visibleMenuItems.addAll(menuItems)
-        }
-    }
+	/**
+	 * 重新加载菜单项
+	 * 从配置中读取隐藏的菜单项，重新构建菜单列表
+	 * menu_config 始终放在溢出菜单最后一项，不参与可见数分配
+	 */
+	private fun reloadMenuItems() {
+	    // 构建菜单项
+	    val myMenu = MenuBuilder(context)      // 自定义菜单
+	    val otherMenu = MenuBuilder(context)    // 系统菜单（Android 6.0+）
+	    SupportMenuInflater(context).inflate(R.menu.content_select_action, myMenu)
+	    myMenu.visibleItems.forEach { menuItem ->
+	        TextMenuConfig.getCustomMenuTitle(context, menuItem.itemId)?.let { customTitle ->
+	            menuItem.title = customTitle
+	        }
+	    }
+	    
+	    // Android 6.0+ 支持系统文本处理菜单
+	    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+	        onInitializeMenu(otherMenu)
+	    }
+	    
+	    // 合并自定义菜单和系统菜单
+	    val allMenuItems = myMenu.visibleItems + otherMenu.visibleItems
+	    
+	    // 分离 menu_config，它始终放在溢出菜单最后一项
+	    val configItem = allMenuItems.find { it.itemId == R.id.menu_text_menu_config }
+	    val normalItems = allMenuItems.filter { it.itemId != R.id.menu_text_menu_config }
+	    
+	    // 过滤掉被隐藏的普通菜单项
+	    val filteredNormalItems = normalItems.filter { it.itemId !in hiddenMenuItemIds }
+	    
+	    // 清空旧数据
+	    visibleMenuItems.clear()
+	    moreMenuItems.clear()
+	    
+	    // 将普通菜单项分为可见项和溢出项
+	    val visibleCount = TextMenuConfig.getTextMenuVisibleCount(context)
+	    if (filteredNormalItems.size > visibleCount) {
+	        visibleMenuItems.addAll(filteredNormalItems.subList(0, visibleCount))
+	        moreMenuItems.addAll(filteredNormalItems.subList(visibleCount, filteredNormalItems.size))
+	    } else {
+	        visibleMenuItems.addAll(filteredNormalItems)
+	    }
+	    
+	    // menu_config 始终放在溢出菜单最后一项（如果没被隐藏）
+	    configItem?.let {
+	        if (it.itemId !in hiddenMenuItemIds) {
+	            moreMenuItems.add(it)
+	        }
+	    }
+	}
 
     /**
      * 更新菜单显示状态
