@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Bundle
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import com.bumptech.glide.request.RequestOptions
 import io.legado.app.R
 import io.legado.app.base.adapter.ItemViewHolder
 import io.legado.app.base.adapter.RecyclerAdapter
@@ -13,8 +12,7 @@ import io.legado.app.databinding.ItemExploreShowGridBinding
 import io.legado.app.databinding.ItemExploreShowWaterfallBinding
 import io.legado.app.databinding.ItemSearchBinding
 import io.legado.app.help.config.AppConfig
-import io.legado.app.help.glide.ImageLoader
-import io.legado.app.help.glide.OkHttpModelLoader
+import io.legado.app.help.glide.CoverLoader
 import io.legado.app.utils.gone
 import io.legado.app.utils.visible
 
@@ -147,11 +145,22 @@ class ExploreShowAdapter(context: Context, val callBack: CallBack) :
         }
 
         binding.tvIntroduceWaterfall.text = item.trimIntro(context)
-        binding.tvIntroduceWaterfall.maxLines = if (columnCount <= 3) 10 else 1
+        // 根据卡片实际宽度动态计算简介最大行数（基于密度比例）
+        binding.tvIntroduceWaterfall.maxLines = if (columnCount <= 3) {
+            10
+        } else {
+            // 以360dp宽度为基准，计算相对比例
+            val density = context.resources.displayMetrics.density
+            val screenWidthPx = context.resources.displayMetrics.widthPixels
+            val spacing = calcColumnSpacing()
+            val itemWidthDp = (screenWidthPx / columnCount - spacing) / density
+            // 基准宽度360dp时显示4行，按比例调整
+            val baseWidthDp = 360f
+            maxOf(1, (itemWidthDp / baseWidthDp * 4).toInt().coerceIn(1, 6))
+        }
 
-        val coverUrl = item.coverUrl
         val imageView = binding.ivCoverWaterfall
-        val tagKey = "${coverUrl}_$columnCount"
+        val tagKey = "${item.bookUrl}_${item.origin}_$columnCount"
         val lastTag = imageView.tag as? String
         if (lastTag == tagKey) return
         imageView.tag = tagKey
@@ -160,12 +169,6 @@ class ExploreShowAdapter(context: Context, val callBack: CallBack) :
         lp.width = ViewGroup.LayoutParams.MATCH_PARENT
         lp.height = ViewGroup.LayoutParams.WRAP_CONTENT
         imageView.layoutParams = lp
-
-        if (coverUrl.isNullOrEmpty()) {
-            imageView.setImageResource(R.drawable.image_cover_default)
-            return
-        }
-
         val spacing = calcColumnSpacing()
         val halfSpacing = spacing / 2
         (binding.root.layoutParams as? ViewGroup.MarginLayoutParams)?.let {
@@ -173,14 +176,15 @@ class ExploreShowAdapter(context: Context, val callBack: CallBack) :
             binding.root.layoutParams = it
         }
         val contentWidth = context.resources.displayMetrics.widthPixels / columnCount - spacing
-        val options = RequestOptions().override(contentWidth, contentWidth * 4 / 3)
-        if (item.origin.isNotEmpty()) {
-            options.set(OkHttpModelLoader.sourceOriginOption, item.origin)
-        }
-        ImageLoader.load(context, coverUrl)
-            .apply(options)
-            .placeholder(R.drawable.image_cover_default)
-            .into(imageView)
+        // 使用 CoverLoader 加载封面，支持封面设置，保持自由图片比例
+        CoverLoader.load(
+            imageView,
+            item,
+            AppConfig.loadCoverOnlyWifi,
+            overrideWidth = contentWidth,
+            overrideHeight = contentWidth * 4 / 3,
+            fixedRatio = false
+        )
     }
 
     override fun convert(
