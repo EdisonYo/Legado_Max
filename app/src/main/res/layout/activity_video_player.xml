@@ -17,6 +17,13 @@
         android:layout_height="wrap_content"
         tools:layout_height="300dp" />
 
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/quick_jump_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp" />
+
     <LinearLayout
         android:id="@+id/data"
         android:layout_width="match_parent"

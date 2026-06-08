@@ -1,7 +1,9 @@
 package io.legado.app.help.gsyVideo
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
+import android.media.AudioManager
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -11,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import com.shuyu.gsyvideoplayer.listener.LockClickListener
 import com.shuyu.gsyvideoplayer.utils.CommonUtil
@@ -51,6 +54,9 @@ class VideoPlayer: StandardGSYVideoPlayer {
     var mToggleDanmaku: TextView? = null //弹幕开关
     private var mDanmakuStartSeekPosition: Long = -1
 
+    // 音量调节相关
+    private val mAudioManager: AudioManager by lazy { context.getSystemService(Context.AUDIO_SERVICE) as AudioManager }
+
 
     override fun getLayoutId(): Int {
         return if (mIfCurrentIsFullscreen)
@@ -86,6 +92,17 @@ class VideoPlayer: StandardGSYVideoPlayer {
 
     public override fun lockTouchLogic() = super.lockTouchLogic()
 
+    /**
+     * 设置静音状态
+     * 同时更新小屏和全屏播放器，确保静音立即生效
+     */
+    fun setMute(needMute: Boolean) {
+        // 更新当前播放器
+        gsyVideoManager.setNeedMute(needMute)
+        // 同时更新全屏播放器（如果存在）
+        getFullWindowPlayer()?.gsyVideoManager?.setNeedMute(needMute)
+    }
+
     override fun init(context: Context) {
         super.init(context)
         initView()
@@ -94,7 +111,27 @@ class VideoPlayer: StandardGSYVideoPlayer {
                 getContext().applicationContext,
                 object : GestureDetector.SimpleOnGestureListener() {
                     override fun onDoubleTap(e: MotionEvent): Boolean {
-                        touchDoubleUp(e)
+                        // 双击快退/快进功能
+                        if (VideoPlay.doubleTapSeekEnabled && mHadPlay && mCurrentState == CURRENT_STATE_PLAYING) {
+                            val screenWidth = width.toFloat()
+                            val currentPosition = getCurrentPositionWhenPlaying()
+                            val seekSeconds = VideoPlay.doubleTapSeekSeconds
+                            
+                            if (e.x < screenWidth / 2) {
+                                // 左侧双击，快退
+                                val newPosition = (currentPosition - seekSeconds * 1000).coerceAtLeast(0)
+                                seekTo(newPosition)
+                                showOverlayTip("快退${seekSeconds}秒", 1000)
+                            } else {
+                                // 右侧双击，快进
+                                val duration = getDuration()
+                                val newPosition = (currentPosition + seekSeconds * 1000).coerceAtMost(duration)
+                                seekTo(newPosition)
+                                showOverlayTip("快进${seekSeconds}秒", 1000)
+                            }
+                        } else {
+                            touchDoubleUp(e)
+                        }
                         return super.onDoubleTap(e)
                     }
 
@@ -135,20 +172,101 @@ class VideoPlayer: StandardGSYVideoPlayer {
             val time = getCurrentPositionWhenPlaying()
             resolveDanmakuStart(time)
         }
+        // 滑动结束后隐藏亮度/音量提示
+        if (mBrightness || mChangeVolume) {
+            showOverlayTip()
+        }
         super.touchSurfaceUp()
     }
 
-    override fun touchSurfaceMove(deltaX: Float, deltaY: Float, y: Float) {
-        if (mChangeVolume) {
-            val deltaY = -deltaY
-            val deltaV = deltaY * 2 / mScreenHeight
-            val newVolume = (mStartPlayerVolume + deltaV).coerceIn(0f, 1f)
-            VideoPlay.videoVolume = newVolume
-            gsyVideoManager.setVolume(newVolume, newVolume)
-            showVolumeTip(newVolume)
+    /**
+     * 重写全屏滑动逻辑，根据配置控制亮度/音量调节
+     * 左侧滑动调节亮度（需leftSlideBrightnessEnabled为true）
+     * 右侧滑动调节音量（需rightSlideVolumeEnabled为true）
+     */
+    override fun touchSurfaceMoveFullLogic(absDeltaX: Float, absDeltaY: Float) {
+        val curWidth = if (CommonUtil.getCurrentScreenLand(getActivityContext() as Activity)) {
+            mScreenHeight
         } else {
-            super.touchSurfaceMove(deltaX, deltaY, y)
+            mScreenWidth
         }
+
+        if (absDeltaX > mThreshold || absDeltaY > mThreshold) {
+            cancelProgressTimer()
+            if (absDeltaX >= mThreshold) {
+                // 横向滑动：调节进度
+                val screenWidth = CommonUtil.getScreenWidth(context)
+                if (Math.abs(screenWidth - mDownX) > mSeekEndOffset) {
+                    mChangePosition = true
+                    mDownPosition = getCurrentPositionWhenPlaying()
+                } else {
+                    mShowVKey = true
+                }
+            } else {
+                // 纵向滑动：调节亮度或音量
+                val screenHeight = CommonUtil.getScreenHeight(context)
+                val noEnd = Math.abs(screenHeight - mDownY) > mSeekEndOffset
+
+                if (mFirstTouch) {
+                    val isLeftSide = mDownX < curWidth * 0.5f
+                    
+                    if (isLeftSide) {
+                        // 左侧滑动：仅当leftSlideBrightnessEnabled=true时调节亮度
+                        if (VideoPlay.leftSlideBrightnessEnabled && noEnd) {
+                            mBrightness = true
+                        }
+                    } else {
+                        // 右侧滑动：仅当rightSlideVolumeEnabled=true时调节音量
+                        if (VideoPlay.rightSlideVolumeEnabled && noEnd) {
+                            mChangeVolume = true
+                            mGestureDownVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+                        }
+                    }
+                    mFirstTouch = false
+                }
+                mShowVKey = !noEnd
+            }
+        }
+    }
+
+    /**
+     * 重写滑动进度显示，添加亮度/音量提示
+     */
+    override fun touchSurfaceMove(deltaX: Float, deltaY: Float, y: Float) {
+        super.touchSurfaceMove(deltaX, deltaY, y)
+
+        // 显示亮度/音量调节提示
+        if (mBrightness) {
+            val brightnessPercent = getBrightnessPercent(deltaY)
+            showOverlayTip("亮度 ${brightnessPercent}%")
+        } else if (mChangeVolume) {
+            val volumePercent = getVolumePercent(deltaY)
+            showOverlayTip("音量 ${volumePercent}%")
+        }
+    }
+
+    /**
+     * 计算亮度百分比
+     */
+    private fun getBrightnessPercent(deltaY: Float): Int {
+        val screenHeight = CommonUtil.getScreenHeight(context)
+        val slideRatio = -deltaY / screenHeight
+        val brightness = (mBrightnessData + slideRatio * 0.5f).coerceIn(0f, 1f)
+        mBrightnessData = brightness
+        return (brightness * 100).toInt()
+    }
+
+    /**
+     * 计算音量百分比
+     */
+    private fun getVolumePercent(deltaY: Float): Int {
+        val maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+        val screenHeight = CommonUtil.getScreenHeight(context)
+        val slideRatio = -deltaY / screenHeight
+        val volumeDelta = (slideRatio * maxVolume * 0.5f).toInt()
+        val newVolume = (mGestureDownVolume + volumeDelta).coerceIn(0, maxVolume)
+        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newVolume, 0)
+        return (newVolume * 100 / maxVolume)
     }
 
     private fun setVideoSpeed(speed: Float) {
@@ -263,6 +381,8 @@ class VideoPlayer: StandardGSYVideoPlayer {
         if (mIfCurrentIsFullscreen && !VideoPlay.fullBottomProgressBar) {
             mBottomProgressBar = null
         }
+        //初始化全屏快捷跳转按钮
+        initQuickJumpButtons()
         //切换选集
         episodeList = findViewById(R.id.episode_list)
         btnNext = findViewById(R.id.next)
@@ -279,6 +399,58 @@ class VideoPlayer: StandardGSYVideoPlayer {
         btnNext?.setOnClickListener {
             VideoPlay.upDurIndex(1,this)
         }
+    }
+
+    /**
+     * 初始化全屏快捷跳转按钮
+     */
+    private fun initQuickJumpButtons() {
+        if (!mIfCurrentIsFullscreen) return
+        
+        val quickJumpContainer = findViewById<LinearLayout>(R.id.quick_jump_container)
+        val quickJumpBackA = findViewById<TextView>(R.id.quick_jump_back_a)
+        val quickJumpBackB = findViewById<TextView>(R.id.quick_jump_back_b)
+        val quickJumpForwardB = findViewById<TextView>(R.id.quick_jump_forward_b)
+        val quickJumpForwardA = findViewById<TextView>(R.id.quick_jump_forward_a)
+        
+        if (!VideoPlay.quickJumpButtonsEnabled) {
+            quickJumpContainer?.visibility = GONE
+            return
+        }
+        
+        val minutesA = VideoPlay.quickJumpMinutesA
+        val minutesB = VideoPlay.quickJumpMinutesB
+        
+        quickJumpContainer?.visibility = VISIBLE
+        quickJumpBackA?.apply {
+            text = "-${minutesA}分"
+            setOnClickListener { performQuickJump(-minutesA) }
+        }
+        quickJumpBackB?.apply {
+            text = "-${minutesB}分"
+            setOnClickListener { performQuickJump(-minutesB) }
+        }
+        quickJumpForwardB?.apply {
+            text = "+${minutesB}分"
+            setOnClickListener { performQuickJump(minutesB) }
+        }
+        quickJumpForwardA?.apply {
+            text = "+${minutesA}分"
+            setOnClickListener { performQuickJump(minutesA) }
+        }
+    }
+
+    /**
+     * 执行快捷跳转（分钟）
+     */
+    private fun performQuickJump(minutes: Int) {
+        if (!mHadPlay) return
+        val currentPosition = getCurrentPositionWhenPlaying()
+        val duration = getDuration()
+        val jumpMs = minutes * 60 * 1000L
+        val newPosition = (currentPosition + jumpMs).coerceIn(0, duration)
+        seekTo(newPosition)
+        showOverlayTip("${if (minutes > 0) "+" else ""}${minutes}分", 1000)
     }
 
 
@@ -492,6 +664,8 @@ class VideoPlayer: StandardGSYVideoPlayer {
 //            gsyVideoPlayer.mDanmakuView = this.mDanmakuView
             gsyVideoPlayer.mDanmakuStartSeekPosition = this.getCurrentPositionWhenPlaying()
             onPrepareDanmaku(gsyVideoPlayer)
+            // 同步静音状态到全屏播放器
+            gsyVideoPlayer.gsyVideoManager.setNeedMute(VideoPlay.mutePlay)
         }
         return gsyBaseVideoPlayer
     }
