@@ -334,7 +334,7 @@ class SearchActivity : VMBaseActivity<ActivityBookSearchBinding, SearchViewModel
             if (progress.isNullOrEmpty() || !getPrefBoolean(PreferKey.showSearchProgress)) {
                 binding.tvSearchProgress.gone()
             } else {
-                binding.tvSearchProgress.setTextColor(primaryTextColor)
+                binding.tvSearchProgress.setTextColor(accentColor)
                 binding.tvSearchProgress.text = progress
                 binding.tvSearchProgress.visible()
             }
