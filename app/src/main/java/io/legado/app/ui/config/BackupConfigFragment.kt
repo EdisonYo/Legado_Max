@@ -74,6 +74,21 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import splitties.init.appCtx
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import kotlinx.coroutines.delay
 
 
 class BackupConfigFragment : PreferenceFragment(),
@@ -296,31 +311,167 @@ class BackupConfigFragment : PreferenceFragment(),
 
     /**
      * 显示备份选择器
+     * 布局：Checkbox 列表 + 底部 [切换全选/全不选][反选]        [确认]
+     * 弹窗内只维护临时状态，确认后统一写入，取消/返回则丢弃
      */
     private fun showBackupSelector() {
         val items = BackupSelectorConfig.allItems
-        val titles = items.map { "[${it.group}] ${it.title}" }.toTypedArray()
-        val checkedItems = BooleanArray(items.size) { index ->
-            BackupSelectorConfig.isSelected(items[index].key)
+        val activity = requireActivity()
+        val rootView = activity.window.decorView as? ViewGroup ?: return
+
+        var showDialog by mutableStateOf(true)
+        val tempSelected = mutableStateMapOf<String, Boolean>().apply {
+            items.forEach { put(it.key, BackupSelectorConfig.isSelected(it.key)) }
         }
-        
-        alert(R.string.backup_selector) {
-            multiChoiceItems(titles, checkedItems) { _, which, isChecked ->
-                BackupSelectorConfig.setSelected(items[which].key, isChecked)
+
+        val composeView = ComposeView(activity).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                LegadoTheme {
+                    if (showDialog) {
+                        BackupSelectorDialogContent(
+                            items = items,
+                            tempSelected = tempSelected,
+                            onConfirm = {
+                                items.forEach { item ->
+                                    BackupSelectorConfig.setSelected(
+                                        item.key,
+                                        tempSelected[item.key] ?: true
+                                    )
+                                }
+                                BackupSelectorConfig.save()
+                                showDialog = false
+                            },
+                            onDismiss = { showDialog = false }
+                        )
+                    }
+                }
             }
-            positiveButton(R.string.select_all) {
-                BackupSelectorConfig.selectAll()
-                showBackupSelector()
+        }
+
+        val layoutParams = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        )
+        rootView.addView(composeView, layoutParams)
+
+        lifecycleScope.launch {
+            while (showDialog) {
+                delay(100)
             }
-            negativeButton(R.string.un_select_all) {
-                BackupSelectorConfig.deselectAll()
-                showBackupSelector()
-            }
-            neutralButton(R.string.ok) {
-                BackupSelectorConfig.save()
-            }
-            onDismiss {
-                BackupSelectorConfig.save()
+            val parent = composeView.parent as? ViewGroup
+            parent?.removeView(composeView)
+        }
+    }
+
+    @Composable
+    private fun BackupSelectorDialogContent(
+        items: List<BackupSelectorConfig.BackupItem>,
+        tempSelected: androidx.compose.runtime.snapshots.SnapshotStateMap<String, Boolean>,
+        onConfirm: () -> Unit,
+        onDismiss: () -> Unit
+    ) {
+        Dialog(
+            onDismissRequest = onDismiss,
+            properties = DialogProperties(
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true
+            )
+        ) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                color = MaterialTheme.colorScheme.surface
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = stringResource(R.string.backup_selector),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp)
+                    )
+                    Divider(
+                        modifier = Modifier.fillMaxWidth(),
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f, fill = false)
+                    ) {
+                        items(items) { item ->
+                            val isChecked = tempSelected[item.key] ?: true
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(40.dp)
+                                    .clickable {
+                                        tempSelected[item.key] = !isChecked
+                                    }
+                                    .padding(horizontal = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Checkbox(
+                                    checked = isChecked,
+                                    onCheckedChange = { checked ->
+                                        tempSelected[item.key] = checked
+                                    }
+                                )
+                                Text(
+                                    text = "[${item.group}] ${item.title}",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier.padding(start = 8.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        val isAllSelected = items.all { tempSelected[it.key] ?: true }
+
+                        TextButton(
+                            onClick = {
+                                val newState = !isAllSelected
+                                items.forEach { tempSelected[it.key] = newState }
+                            }
+                        ) {
+                            Text(
+                                text = if (isAllSelected) {
+                                    stringResource(R.string.un_select_all)
+                                } else {
+                                    stringResource(R.string.select_all)
+                                }
+                            )
+                        }
+
+                        TextButton(
+                            onClick = {
+                                items.forEach {
+                                    val current = tempSelected[it.key] ?: true
+                                    tempSelected[it.key] = !current
+                                }
+                            }
+                        ) {
+                            Text(text = stringResource(R.string.revert_selection))
+                        }
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        TextButton(onClick = onConfirm) {
+                            Text(text = stringResource(R.string.ok))
+                        }
+                    }
+                }
             }
         }
     }
