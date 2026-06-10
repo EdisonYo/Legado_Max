@@ -12,7 +12,6 @@ import io.legado.app.base.adapter.ItemViewHolder
 import io.legado.app.data.entities.Book
 import io.legado.app.databinding.ItemDownloadBinding
 import io.legado.app.help.book.isLocal
-import io.legado.app.lib.theme.primaryTextColor
 import io.legado.app.model.CacheBook
 import io.legado.app.utils.gone
 import io.legado.app.utils.visible
@@ -47,7 +46,6 @@ class CacheAdapter(context: Context, private val callBack: CallBack) :
             if (payloads.isEmpty()) {
                 ivCover.load(item, false)
                 tvName.text = item.name
-                tvName.setTextColor(context.primaryTextColor)
                 tvAuthor.text = context.getString(R.string.author_show, item.getRealAuthor())
                 if (item.isLocal) {
                     tvDownload.setText(R.string.local_book)

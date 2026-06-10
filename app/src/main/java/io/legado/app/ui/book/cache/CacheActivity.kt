@@ -119,18 +119,19 @@ class CacheActivity : VMBaseActivity<ActivityCacheBookBinding, CacheViewModel>()
         }
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        groupId = intent.getLongExtra("groupId", -1)
-        lifecycleScope.launch {
-            binding.titleBar.subtitle = withContext(IO) {
-                appDb.bookGroupDao.getByID(groupId)?.groupName
-                    ?: getString(R.string.no_group)
-            }
-        }
-        initRecyclerView()
-        initGroupData()
-        initBookData()
-    }
+	override fun onActivityCreated(savedInstanceState: Bundle?) {
+	    groupId = intent.getLongExtra("groupId", -1)
+	    binding.titleBar.title = ""
+	    lifecycleScope.launch {
+	        binding.titleBar.subtitle = withContext(IO) {
+	            appDb.bookGroupDao.getByID(groupId)?.groupName
+	                ?: getString(R.string.no_group)
+	        }
+	    }
+	    initRecyclerView()
+	    initGroupData()
+	    initBookData()
+	}
 
     override fun onCompatCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.book_cache, menu)
