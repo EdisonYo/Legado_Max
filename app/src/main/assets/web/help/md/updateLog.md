@@ -2,31 +2,10 @@
 * 阅读只是一个转码工具，不提供内容
 * Kotlin版本：2.3.10｜Rhino版本：1.8.1｜Compose版本：2025.04.01｜Compose UI 版本：1.7.x｜Material3 版本：1.3.x｜okhttp版本：5.3.2
 
-## 项目继承历史
-### 原版
-* [Github](https://github.com/gedoor/legado)
-### Sigma版
-* [Github](https://github.com/Luoyacheng/legado)
-* [Gitee](https://gitee.com/lyc486/legado/releases)
-* [详细日志](https://gitee.com/lyc486/legado/commits/main)
-### Max版
-* [Github](https://github.com/youfengknight/Legado_Max)
-* [Github分支](https://github.com/GEd520/legados)
-
 ## 更新日志
 
-**与上游不同的偏好**
-* 禁止Gradle资源压缩
-* 禁止ProGuard混淆，保留行号
-* 禁止引入GMS和Firebase
-* 仅编译简中语言，同时删除应用内切换语言功能
-* 封面规则增加官方渠道和兜底html封面
-* 完善视频播放器
-* 文本菜单管理界面改用tab，异步加载其它应用
-* 回退原字重切换界面
-* 回退原关于界面
-* 删除新版书源检测
-* 删除按域名分组显示
+**2026/06/12**
+* [优化]：搜索范围支持临时调用未开启的书源/分组，不需要改变其日常的启用状态
 
 **2026/06/11**
 * [优化]：修正源管理内容查询的异常逻辑，并适配主题
@@ -49,6 +28,18 @@
   * [优化]：瀑布流布局样式优化，并改由CoverLoader接管封面加载
 * [优化]：缓存并发率设定运作过程中被覆盖的问题
 
+**偏好**
+* 禁止Gradle资源压缩
+* 禁止ProGuard混淆，保留行号
+* 禁止引入GMS和Firebase
+* 仅编译简中语言，同时删除应用内切换语言功能
+* 封面规则增加官方渠道和兜底html封面
+* 文本菜单管理界面改用tab，异步加载其它应用
+* 回退原字重切换界面
+* 回退原关于界面
+* 删除新版书源检测
+* 删除按域名分组显示
+
 **2026/06/06**
 * [优化]：悬浮球位置仅在退出应用后重置
 * [发现页布局]
@@ -68,9 +59,9 @@
 
 **2026/06/03**
 * [重大]：数据库版本升级为99，增加规则回收站功能
-- 上传历史长按显示全名
 * [功能]：缓存时支持设置全局并发率
 * [优化]：搜索进度支持开关（默认关闭）
+* [优化]：上传历史长按显示全名
 
 **2026/06/02**
 * [功能]：长按文本菜单支持改名，支持增加和修改显示数量
@@ -736,3 +727,14 @@
 * [2023年日志](https://github.com/gedoor/legado/blob/record2023/app/src/main/assets/updateLog.md)
 * [2022年日志](https://github.com/gedoor/legado/blob/record2022/app/src/main/assets/updateLog.md)
 * [2021年日志](https://github.com/gedoor/legado/blob/record2021/app/src/main/assets/updateLog.md)
+
+## 项目继承历史
+### 原版
+* [Github](https://github.com/gedoor/legado)
+### Sigma版
+* [Github](https://github.com/Luoyacheng/legado)
+* [Gitee](https://gitee.com/lyc486/legado/releases)
+* [详细日志](https://gitee.com/lyc486/legado/commits/main)
+### Max版
+* [Github](https://github.com/youfengknight/Legado_Max)
+* [Github_GEd520](https://github.com/GEd520/legados)
