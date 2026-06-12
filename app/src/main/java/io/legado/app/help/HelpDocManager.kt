@@ -54,7 +54,6 @@ object HelpDocManager {
             "其他文档",
             listOf(
                 HelpDoc("部分功能需要安卓特定版本", "安卓特定版本功能"),
-                HelpDoc("导出编码说明", "导出编码说明"),
                 HelpDoc("ExtensionContentType", "扩展内容类型")
             )
         )
@@ -72,6 +71,7 @@ object HelpDocManager {
         HelpDoc("readMenuHelp", "阅读界面帮助文档"),
         HelpDoc("webDavBookHelp", "WebDav书籍简明使用教程"),
         HelpDoc("webDavHelp", "WebDav备份教程"),
+        HelpDoc("导出编码说明", "导出编码说明"),
         HelpDoc("updateLog", "更新日志")
     )
     

@@ -94,11 +94,6 @@
         android:title="@string/export_charset"
         app:showAsAction="never" />
 
-    <!-- 新增帮助菜单项 -->
-    <item
-        android:id="@+id/menu_export_charset_help"
-        android:title="@string/help"
-        app:showAsAction="never" />
 
     <item
         android:id="@+id/menu_cache_rate"
@@ -110,4 +105,10 @@
         android:title="@string/log"
         app:showAsAction="never" />
 
+    <!-- 新增帮助菜单项 -->
+    <item
+        android:id="@+id/menu_export_charset_help"
+        android:title="@string/help"
+        app:showAsAction="never" />
+        
 </menu>
