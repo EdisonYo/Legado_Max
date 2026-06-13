@@ -39,6 +39,7 @@ swiperefreshlayout = "1.2.0"
 collection = "1.5.0"
 
 zxingLite = "3.3.0"
+liquidglass = "1.0.3"
 
 #不要更新版本
 #noinspection NewerVersionAvailable
@@ -217,6 +218,7 @@ mozilla-rhino = { module = "org.mozilla:rhino", version.ref = "rhino" }
 
 renderscript-intrinsics-replacement-toolkit = { module = "com.github.TomasValenta:renderscript-intrinsics-replacement-toolkit", version = "8eaa829ddd" }
 zxing-lite = { module = "com.github.jenly1314:zxing-lite", version.ref = "zxingLite" }
+liquidglass = { module = "com.qmdeve.liquidglass:core", version.ref = "liquidglass" }
 
 [bundles]
 coroutines = ["kotlinx-coroutines-core", "kotlinx-coroutines-android"]
