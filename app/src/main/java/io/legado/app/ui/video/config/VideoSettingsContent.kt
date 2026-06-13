@@ -55,6 +55,10 @@ fun VideoSettingsContent(
             text = stringResource(R.string.config_settings),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
+<<<<<<< HEAD
+=======
+            color = MaterialTheme.colorScheme.onSurface,
+>>>>>>> Suml-1
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
@@ -283,6 +287,10 @@ fun SettingSwitchItem(
         Text(
             text = title,
             style = MaterialTheme.typography.bodyLarge,
+<<<<<<< HEAD
+=======
+            color = MaterialTheme.colorScheme.onSurface,
+>>>>>>> Suml-1
             modifier = Modifier.weight(1f)
         )
         Switch(
@@ -310,7 +318,12 @@ fun SettingClickItem(
     ) {
         Text(
             text = title,
+<<<<<<< HEAD
             style = MaterialTheme.typography.bodyLarge
+=======
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface
+>>>>>>> Suml-1
         )
         Text(
             text = summary,

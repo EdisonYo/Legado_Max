@@ -9,7 +9,11 @@
     android:clickable="true"
     android:focusable="true"
     android:background="@drawable/bg_discover_embedded_action"
+<<<<<<< HEAD
     android:paddingStart="12dp"
+=======
+    android:paddingStart="4dp"
+>>>>>>> Suml-1
     android:paddingEnd="8dp">
 
     <TextView

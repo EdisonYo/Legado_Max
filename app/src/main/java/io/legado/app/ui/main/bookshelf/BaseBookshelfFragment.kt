@@ -30,6 +30,7 @@ import io.legado.app.ui.file.HandleFileContract
 import io.legado.app.ui.main.MainFragmentInterface
 import io.legado.app.ui.main.MainViewModel
 import io.legado.app.ui.widget.dialog.WaitDialog
+import io.legado.app.ui.widget.number.NumberPickerDialog
 import io.legado.app.utils.checkByIndex
 import io.legado.app.utils.getCheckedIndex
 import io.legado.app.utils.isAbsUrl
@@ -194,12 +195,26 @@ abstract class BaseBookshelfFragment(layoutId: Int) : VMBaseFragment<BookshelfVi
                         spGroupStyle.setSelection(AppConfig.bookGroupStyle)
                         spBookView.setSelection(bookLayout)
                         spFolderView.setSelection(folderLayout)
+<<<<<<< HEAD
                         // 根据分组样式控制文件夹视图的可见性
                         llFolderView.visibility = if (AppConfig.bookGroupStyle == 1) View.VISIBLE else View.GONE
                         // 监听分组样式变化，动态更新文件夹视图的可见性
                         spGroupStyle.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
                             override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
                                 llFolderView.visibility = if (position == 1) View.VISIBLE else View.GONE
+=======
+                        // 根据分组样式控制文件夹视图和下拉选择分组的可见性
+                        llFolderView.visibility = if (AppConfig.bookGroupStyle == 1) View.VISIBLE else View.GONE
+                        // 下拉选择分组开关仅在分组样式为标签（position == 0）时显示
+                        swDropdownSelectGroup.visibility = if (AppConfig.bookGroupStyle == 0) View.VISIBLE else View.GONE
+                        swDropdownSelectGroup.isChecked = AppConfig.dropdownSelectGroup
+                        // 监听分组样式变化，动态更新文件夹视图和下拉选择分组的可见性
+                        spGroupStyle.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+                            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
+                                llFolderView.visibility = if (position == 1) View.VISIBLE else View.GONE
+                                // 下拉选择分组开关仅在分组样式为标签（position == 0）时显示
+                                swDropdownSelectGroup.visibility = if (position == 0) View.VISIBLE else View.GONE
+>>>>>>> Suml-1
                             }
                             override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
                         }
@@ -207,12 +222,57 @@ abstract class BaseBookshelfFragment(layoutId: Int) : VMBaseFragment<BookshelfVi
                         swShowLastUpdateTime.isChecked = AppConfig.showLastUpdateTime
                         swShowWaitUpBooks.isChecked = AppConfig.showWaitUpCount
                         swShowBookshelfFastScroller.isChecked = AppConfig.showBookshelfFastScroller
+<<<<<<< HEAD
+=======
+                        // 初始化"显示更多信息"相关开关状态
+                        llShowMoreInfo.visibility = if (bookLayout == 0) View.VISIBLE else View.GONE
+                        swShowMoreInfo.isChecked = AppConfig.showMoreInfoInList
+                        swShowIntro.isChecked = AppConfig.showIntroInList
+                        swShowTags.isChecked = AppConfig.showTagsInList
+                        // 子菜单可见性
+                        swShowIntro.visibility = if (AppConfig.showMoreInfoInList) View.VISIBLE else View.GONE
+                        swShowTags.visibility = if (AppConfig.showMoreInfoInList) View.VISIBLE else View.GONE
+                        // 简介行数选择器可见性（仅在显示简介勾选时显示）
+                        tvIntroLines.visibility = if (AppConfig.showMoreInfoInList && AppConfig.showIntroInList) View.VISIBLE else View.GONE
+                        // 更新简介行数显示文本
+                        tvIntroLines.text = "${getString(R.string.intro_lines)}: ${AppConfig.introLinesInList}"
+                        // 监听"显示更多信息"开关变化
+                        swShowMoreInfo.setOnCheckedChangeListener { _, isChecked ->
+                            swShowIntro.visibility = if (isChecked) View.VISIBLE else View.GONE
+                            swShowTags.visibility = if (isChecked) View.VISIBLE else View.GONE
+                            // 更新简介行数选择器可见性
+                            tvIntroLines.visibility = if (isChecked && swShowIntro.isChecked) View.VISIBLE else View.GONE
+                        }
+                        // 监听"显示简介"开关变化
+                        swShowIntro.setOnCheckedChangeListener { _, isChecked ->
+                            tvIntroLines.visibility = if (isChecked && swShowMoreInfo.isChecked) View.VISIBLE else View.GONE
+                        }
+                        // 点击简介行数选择器，弹出 NumberPickerDialog
+                        tvIntroLines.setOnClickListener {
+                            NumberPickerDialog(requireContext())
+                                .setTitle(getString(R.string.intro_lines))
+                                .setMinValue(1)
+                                .setMaxValue(10)
+                                .setValue(AppConfig.introLinesInList)
+                                .show { newValue ->
+                                    AppConfig.introLinesInList = newValue
+                                    tvIntroLines.text = "${getString(R.string.intro_lines)}: ${AppConfig.introLinesInList}"
+                                    // 立即刷新书架以应用简介行数变化
+                                    postEvent(EventBus.BOOKSHELF_REFRESH, "")
+                                }
+                        }
+>>>>>>> Suml-1
                         rgbLayout.checkByIndex(showBookname)
                         // 根据书籍视图控制书名显示选项的可见性
                         bookNameChoice.visibility = if (bookLayout > 1) View.VISIBLE else View.GONE
                         spBookView.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
                             override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
                                 bookNameChoice.visibility = if (position > 1) View.VISIBLE else View.GONE
+<<<<<<< HEAD
+=======
+                                // 根据书籍视图控制"显示更多信息"的可见性（仅在列表视图时显示）
+                                llShowMoreInfo.visibility = if (position == 0) View.VISIBLE else View.GONE
+>>>>>>> Suml-1
                             }
                             override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
                         }
@@ -259,6 +319,25 @@ abstract class BaseBookshelfFragment(layoutId: Int) : VMBaseFragment<BookshelfVi
                     if (AppConfig.showBookshelfFastScroller != swShowBookshelfFastScroller.isChecked) {
                         AppConfig.showBookshelfFastScroller = swShowBookshelfFastScroller.isChecked
                         postEvent(EventBus.BOOKSHELF_REFRESH, "")
+                    }
+                    // 保存"显示更多信息"相关配置
+                    if (AppConfig.showMoreInfoInList != swShowMoreInfo.isChecked) {
+                        AppConfig.showMoreInfoInList = swShowMoreInfo.isChecked
+                        refreshBookshelf = true
+                    }
+                    if (AppConfig.showIntroInList != swShowIntro.isChecked) {
+                        AppConfig.showIntroInList = swShowIntro.isChecked
+                        refreshBookshelf = true
+                    }
+                    if (AppConfig.showTagsInList != swShowTags.isChecked) {
+                        AppConfig.showTagsInList = swShowTags.isChecked
+                        refreshBookshelf = true
+                    }
+                    // 简介行数已在 NumberPickerDialog 回调中保存，无需在此处保存
+                    // 保存"下拉选择分组"开关配置
+                    if (AppConfig.dropdownSelectGroup != swDropdownSelectGroup.isChecked) {
+                        AppConfig.dropdownSelectGroup = swDropdownSelectGroup.isChecked
+                        recreate = true // 下拉选择分组改变需要重新创建Activity以更新标题栏行为
                     }
                     if (bookshelfSort != rgSort.getCheckedIndex()) {
                         AppConfig.bookshelfSort = rgSort.getCheckedIndex()
