@@ -22,14 +22,6 @@ import splitties.init.appCtx
  *
  * 提供方案的创建、加载、保存、删除和应用功能。
  * 方案存储在 SharedPreferences 中，使用 JSON 格式序列化。
- *
- * 主要功能：
- * - defaultEntry: 创建默认方案（固定布局、实心材质）
- * - loadEntries: 加载指定模式（日间/夜间）的所有方案
- * - loadEntry: 加载单个方案
- * - saveEntry: 保存方案（检查名称唯一性）
- * - deleteEntry: 删除方案（默认方案不可删除）
- * - apply: 应用方案并通知界面刷新
  */
 object NavigationBarManager {
 
@@ -41,9 +33,6 @@ object NavigationBarManager {
      *
      * 默认方案使用固定布局、实心材质，适用于日间或夜间模式。
      * dirName 固定为 "default"，来源标记为 BUILTIN（内置）。
-     *
-     * @param isNight 是否为夜间模式
-     * @return 默认方案实例
      */
     fun defaultEntry(isNight: Boolean): NavigationBarEntry {
         return NavigationBarEntry(
@@ -66,21 +55,18 @@ object NavigationBarManager {
      *
      * 返回列表始终包含默认方案作为第一个元素，后跟用户保存的自定义方案。
      * 只返回与指定模式（日间/夜间）匹配的方案。
-     *
-     * @param isNight 是否为夜间模式
-     * @return 方案列表，至少包含默认方案
+     * 过滤掉 dirName="default" 的 SP 条目，避免与内置默认方案重复。
      */
     fun loadEntries(isNight: Boolean): List<NavigationBarEntry> {
         val entries = mutableListOf<NavigationBarEntry>()
         entries.add(defaultEntry(isNight))
 
-        // 加载用户保存的方案（从 defaultSharedPreferences 读取，与 saveEntry 写入一致）
         val keys = appCtx.defaultSharedPreferences.all.keys
         keys.filter { it.startsWith(PREFIX) }.forEach { key ->
             val json = appCtx.getPrefString(key)
             json?.let {
                 val entry = GSON.fromJsonObject<NavigationBarEntry>(it).getOrNull()
-                if (entry != null && entry.config.isNightMode == isNight) {
+                if (entry != null && entry.config.isNightMode == isNight && entry.dirName != "default") {
                     entries.add(entry)
                 }
             }
@@ -94,9 +80,6 @@ object NavigationBarManager {
      *
      * 如果 dirName 为 "default"，返回当前主题模式对应的默认方案。
      * 否则从 SharedPreferences 加载指定名称的方案。
-     *
-     * @param dirName 方案目录名（唯一标识）
-     * @return 方案实例，不存在时返回 null
      */
     fun loadEntry(dirName: String): NavigationBarEntry? {
         if (dirName == "default") {
@@ -113,11 +96,15 @@ object NavigationBarManager {
      * 保存方案
      *
      * 检查方案名称的唯一性（同一模式下不允许重复名称）。
-     * 方案以 JSON 格式存储在 SharedPreferences 中。
-     *
-     * @param entry 要保存的方案
+     * 默认方案（dirName="default"）不允许保存到 SP。
      */
     fun saveEntry(entry: NavigationBarEntry) {
+        // 默认方案不允许保存到 SP（它是内置的，由 defaultEntry() 动态生成）
+        if (entry.dirName == "default") {
+            appCtx.toastOnUi("默认方案不可修改")
+            return
+        }
+
         val existingEntries = loadEntries(entry.config.isNightMode)
         if (existingEntries.any { it.config.name == entry.config.name && it.dirName != entry.dirName }) {
             appCtx.toastOnUi("方案名称已存在，请使用其他名称")
@@ -132,9 +119,6 @@ object NavigationBarManager {
      * 删除方案
      *
      * 默认方案（dirName="default"）不可删除。
-     * 删除操作从 SharedPreferences 中移除方案配置。
-     *
-     * @param dirName 要删除的方案目录名
      */
     fun deleteEntry(dirName: String) {
         if (dirName == "default") {
@@ -150,20 +134,16 @@ object NavigationBarManager {
      *
      * 将方案记录为当前激活方案（根据模式更新 AppConfig），
      * 并发送 EventBus 事件通知界面刷新底栏效果。
-     *
-     * @param entry 要应用的方案
      */
     fun apply(entry: NavigationBarEntry) {
         val config = entry.config
 
-        // 记录当前激活的方案
         if (config.isNightMode) {
             AppConfig.activeNavigationBarNight = entry.dirName
         } else {
             AppConfig.activeNavigationBarDay = entry.dirName
         }
 
-        // 发送事件通知主界面刷新
         postEvent(EventBus.NAVIGATION_BAR_CHANGED, config.isNightMode)
     }
 }

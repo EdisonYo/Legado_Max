@@ -20,16 +20,17 @@ import io.legado.app.utils.dpToPx
  *
  * 采用动态叠加方案：
  * - FIXED 模式：不修改底栏任何属性，保持原始默认样子
- * - FLOATING 模式：底栏背景设透明 + 添加 margin + 叠加效果层
+ * - FLOATING 模式：底栏背景透明 + 添加 margin + 叠加效果层
  *
  * 叠加层 z-order（从下到上）：
- * 1. LiquidGlassView — 折射/模糊渲染
- * 2. overlay View — 色调 + 边框（盖在玻璃效果上）
- * 3. LinearLayout — 底栏图标（最上层可点击）
+ * 1. LinearLayout — ViewPager + 底栏图标（背景透明）
+ * 2. LiquidGlassView — 折射/模糊渲染（绑定 ViewPager 作为采样源）
+ * 3. overlay View — 色调 + 高光 + 边框
  *
- * 材质模式差异：
- * - GLASS：有折射 + 中等模糊 + 轻色调 + 色散
- * - FROSTED：无折射 + 强模糊 + 重白色调 + 无色散
+ * 关键：LiquidGlassView 和 overlay 放在 LinearLayout 上面，
+ * isClickable=false 保证触摸事件穿透到底栏图标。
+ * LiquidGlassView 绑定 ViewPager（内容区域），
+ * 这样玻璃效果才能折射/模糊底栏后面的内容。
  */
 object NavigationBarEffectApplier {
 
@@ -38,6 +39,8 @@ object NavigationBarEffectApplier {
 
     /** 保存底栏原始背景（深拷贝） */
     private var originalBackground: android.graphics.drawable.Drawable? = null
+    /** 保存底栏容器（LinearLayout）原始背景 */
+    private var originalContainerBackground: android.graphics.drawable.Drawable? = null
     /** 保存底栏原始 margin（值拷贝，非引用） */
     private var originalNavMargins: IntArray? = null
 
@@ -81,11 +84,18 @@ object NavigationBarEffectApplier {
 
         val navView = binding.bottomNavigationView
 
-        // 保存原始状态（值拷贝，非引用）
         saveOriginalState(navView)
 
-        // 底栏背景设为透明，让玻璃效果透出
+        // 底栏图标背景透明
         navView.background = null
+
+        // 底栏容器（LinearLayout）背景也透明
+        val container = navView.parent as? ViewGroup
+        if (container != null && originalContainerBackground == null) {
+            originalContainerBackground = container.background?.constantState?.newDrawable()?.mutate()
+                ?: container.background
+        }
+        container?.background = null
 
         // 悬浮模式：给底栏加 margin
         val margin = 16.dpToPx()
@@ -95,16 +105,17 @@ object NavigationBarEffectApplier {
             navView.layoutParams = lp
         }
 
-        // z-order: index 0 = 最底层
-        // 第一层：LiquidGlassView（折射/模糊渲染）
+        // z-order: 追加到 FrameLayout 末尾 = 最上层
+        // LinearLayout 在 index 0（最底层）
+        // LiquidGlassView 在 index 1（中间层，折射/模糊）
+        // overlay 在 index 2（最上层，色调+边框）
+        // isClickable=false 保证触摸事件穿透到底栏图标
         val glassView = createGlassView(navView, binding, config)
-        rootView.addView(glassView, 0)
+        rootView.addView(glassView)
 
-        // 第二层：overlay View（色调 + 边框，盖在玻璃效果上）
         val overlay = createOverlayView(navView, config)
-        rootView.addView(overlay, 1)
+        rootView.addView(overlay)
 
-        // 悬浮模式的 margin
         applyMargins(overlay, glassView, margin)
     }
 
@@ -120,6 +131,13 @@ object NavigationBarEffectApplier {
 
         saveOriginalState(navView)
         navView.background = null
+
+        val container = navView.parent as? ViewGroup
+        if (container != null && originalContainerBackground == null) {
+            originalContainerBackground = container.background?.constantState?.newDrawable()?.mutate()
+                ?: container.background
+        }
+        container?.background = null
 
         val margin = 16.dpToPx()
         val lp = navView.layoutParams as? LinearLayout.LayoutParams
@@ -137,7 +155,7 @@ object NavigationBarEffectApplier {
             }
         } else {
             val overlay = createOverlayView(navView, config)
-            rootView.addView(overlay, 0)
+            rootView.addView(overlay)
             val overlayLp = overlay.layoutParams as? FrameLayout.LayoutParams
             if (overlayLp != null) {
                 overlayLp.setMargins(margin, 0, margin, margin)
@@ -159,12 +177,6 @@ object NavigationBarEffectApplier {
         }
     }
 
-    /**
-     * 创建 overlay View
-     *
-     * GLASS 模式：轻色调（半透明白），让折射效果透出
-     * FROSTED 模式：重色调（更不透明的白），模拟磨砂玻璃
-     */
     private fun createOverlayView(navView: View, config: NavigationBarConfig): View {
         return View(navView.context).apply {
             tag = TAG_OVERLAY
@@ -186,31 +198,23 @@ object NavigationBarEffectApplier {
         }
     }
 
-    /**
-     * 创建 overlay drawable
-     *
-     * GLASS：轻色调渐变（顶部 20% 白 → 底部 40% 白），让折射效果主导
-     * FROSTED：重色调渐变（顶部 50% 白 → 底部 80% 白），磨砂感
-     */
     private fun createOverlayDrawable(config: NavigationBarConfig): GradientDrawable {
         val cornerRadius = 24f.dpToPx().toFloat()
 
-        // 根据材质模式决定色调强度
         val (topAlpha, bottomAlpha) = when (config.materialMode) {
             MaterialMode.GLASS -> {
-                // 玻璃：轻色调，让折射效果透出
-                val base = (config.opacity / 100f * 0.2f * 255).toInt().coerceIn(0, 255)
-                Pair(base, (base * 2f).toInt().coerceAtMost(255))
+                val opacityFactor = config.opacity / 100f
+                val top = (0.35f * opacityFactor * 255).toInt().coerceIn(0, 255)
+                val bottom = (0.12f * opacityFactor * 255).toInt().coerceIn(0, 255)
+                Pair(top, bottom)
             }
             MaterialMode.FROSTED -> {
-                // 磨砂：重色调，模拟磨砂白
-                val base = (config.opacity / 100f * 0.5f * 255).toInt().coerceIn(0, 255)
-                Pair(base, (base * 1.6f).toInt().coerceAtMost(255))
+                val opacityFactor = config.opacity / 100f
+                val top = (0.70f * opacityFactor * 255).toInt().coerceIn(0, 255)
+                val bottom = (0.50f * opacityFactor * 255).toInt().coerceIn(0, 255)
+                Pair(top, bottom)
             }
-            else -> {
-                // SOLID 不应到这里
-                Pair(0, 0)
-            }
+            else -> Pair(0, 0)
         }
 
         return GradientDrawable().apply {
@@ -311,10 +315,18 @@ object NavigationBarEffectApplier {
             rootView.removeView(it)
         }
 
+        // 恢复底栏图标原始背景
         originalBackground?.let {
             navView.background = it
         }
 
+        // 恢复底栏容器原始背景
+        val container = navView.parent as? ViewGroup
+        originalContainerBackground?.let {
+            container?.background = it
+        }
+
+        // 恢复底栏原始 margin
         originalNavMargins?.let { margins ->
             val lp = navView.layoutParams as? LinearLayout.LayoutParams
             if (lp != null) {
@@ -327,8 +339,8 @@ object NavigationBarEffectApplier {
     /**
      * 配置 LiquidGlassView
      *
-     * GLASS 模式：有折射 + 中等模糊 + 色散 → 看到内容扭曲的玻璃感
-     * FROSTED 模式：无折射 + 强模糊 + 无色散 → 看到模糊的内容
+     * 绑定 ViewPager（内容区域）作为采样源，
+     * 这样玻璃效果才能折射/模糊底栏后面的内容。
      */
     private fun setupGlassView(
         glassView: LiquidGlassView,
@@ -338,32 +350,34 @@ object NavigationBarEffectApplier {
         try {
             glassView.visibility = View.VISIBLE
 
-            val linearLayout = binding.bottomNavigationView.parent as? ViewGroup
-            if (linearLayout != null) {
-                glassView.bind(linearLayout)
-            }
+            // 绑定 ViewPager 作为采样源
+            val viewPager = binding.viewPagerMain
+            glassView.bind(viewPager)
 
             glassView.setCornerRadius(24f.dpToPx().toFloat())
 
             when (config.materialMode) {
                 MaterialMode.GLASS -> {
-                    // 玻璃：有折射，中等模糊，可见色散
-                    glassView.setRefractionHeight(20f.dpToPx().toFloat())  // 折射高度 20dp
-                    glassView.setRefractionOffset(70f.dpToPx().toFloat())  // 折射偏移 70dp
-                    glassView.setBlurRadius(8f.dpToPx().toFloat())         // 中等模糊
-                    glassView.setDispersion(0.4f)                          // 明显色散
-                    glassView.setTintAlpha(0.08f)                          // 极轻色调
+                    glassView.setRefractionHeight(30f.dpToPx().toFloat())
+                    glassView.setRefractionOffset(90f.dpToPx().toFloat())
+                    glassView.setBlurRadius(12f.dpToPx().toFloat())
+                    glassView.setDispersion(0.5f)
+                    glassView.setTintColorRed(1.0f)
+                    glassView.setTintColorGreen(1.0f)
+                    glassView.setTintColorBlue(1.0f)
+                    glassView.setTintAlpha(0.05f)
                 }
                 MaterialMode.FROSTED -> {
-                    // 磨砂：无折射，强模糊，无色散
-                    glassView.setRefractionHeight(0f)                      // 无折射
+                    glassView.setRefractionHeight(0f)
                     glassView.setRefractionOffset(0f)
-                    glassView.setBlurRadius(25f.dpToPx().toFloat())        // 强模糊
-                    glassView.setDispersion(0f)                            // 无色散
-                    glassView.setTintAlpha(0.15f)                          // 轻色调
+                    glassView.setBlurRadius(40f.dpToPx().toFloat())
+                    glassView.setDispersion(0f)
+                    glassView.setTintColorRed(1.0f)
+                    glassView.setTintColorGreen(1.0f)
+                    glassView.setTintColorBlue(1.0f)
+                    glassView.setTintAlpha(0.25f)
                 }
                 else -> {
-                    // SOLID 不应到这里
                     glassView.setRefractionHeight(0f)
                     glassView.setBlurRadius(0f)
                     glassView.setTintAlpha(0f)
