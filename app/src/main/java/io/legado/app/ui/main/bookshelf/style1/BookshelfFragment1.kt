@@ -47,7 +47,7 @@ import kotlin.collections.set
 class BookshelfFragment1() : BaseBookshelfFragment(R.layout.fragment_bookshelf1),
     SearchView.OnQueryTextListener, TabLayout.OnTabSelectedListener {
 
-    constructor(position: Int) : this() {
+    constructor(position: Int) : this(){
         val bundle = Bundle()
         bundle.putInt("position", position)
         arguments = bundle
