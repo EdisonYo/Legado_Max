@@ -81,40 +81,43 @@ class ChangeBookSourceAdapter(
                     }
                 }
             }
-            val score = callBack.getBookScore(item)
-            if (score > 0) {
-                binding.ivBad.gone()
+            if (AppConfig.changeSourceShowScore) {
                 binding.ivGood.visible()
-                DrawableCompat.setTint(
-                    binding.ivGood.drawable,
-                    appCtx.getCompatColor(R.color.md_red_A200)
-                )
-                DrawableCompat.setTint(
-                    binding.ivBad.drawable,
-                    appCtx.getCompatColor(R.color.md_blue_100)
-                )
-            } else if (score < 0) {
-                binding.ivGood.gone()
                 binding.ivBad.visible()
-                DrawableCompat.setTint(
-                    binding.ivGood.drawable,
-                    appCtx.getCompatColor(R.color.md_red_100)
-                )
-                DrawableCompat.setTint(
-                    binding.ivBad.drawable,
-                    appCtx.getCompatColor(R.color.md_blue_A200)
-                )
+                val score = callBack.getBookScore(item)
+                if (score > 0) {
+                    binding.ivBad.gone()
+                    DrawableCompat.setTint(
+                        binding.ivGood.drawable,
+                        appCtx.getCompatColor(R.color.md_red_A200)
+                    )
+                    DrawableCompat.setTint(
+                        binding.ivBad.drawable,
+                        appCtx.getCompatColor(R.color.md_blue_100)
+                    )
+                } else if (score < 0) {
+                    binding.ivGood.gone()
+                    DrawableCompat.setTint(
+                        binding.ivGood.drawable,
+                        appCtx.getCompatColor(R.color.md_red_100)
+                    )
+                    DrawableCompat.setTint(
+                        binding.ivBad.drawable,
+                        appCtx.getCompatColor(R.color.md_blue_A200)
+                    )
+                } else {
+                    DrawableCompat.setTint(
+                        binding.ivGood.drawable,
+                        appCtx.getCompatColor(R.color.md_red_100)
+                    )
+                    DrawableCompat.setTint(
+                        binding.ivBad.drawable,
+                        appCtx.getCompatColor(R.color.md_blue_100)
+                    )
+                }
             } else {
-                binding.ivGood.visible()
-                binding.ivBad.visible()
-                DrawableCompat.setTint(
-                    binding.ivGood.drawable,
-                    appCtx.getCompatColor(R.color.md_red_100)
-                )
-                DrawableCompat.setTint(
-                    binding.ivBad.drawable,
-                    appCtx.getCompatColor(R.color.md_blue_100)
-                )
+                binding.ivGood.gone()
+                binding.ivBad.gone()
             }
 
             if (AppConfig.changeSourceLoadWordCount && !item.chapterWordCountText.isNullOrBlank()) {
@@ -133,7 +136,7 @@ class ChangeBookSourceAdapter(
 
     override fun registerListener(holder: ItemViewHolder, binding: ItemChangeSourceBinding) {
         binding.ivGood.setOnClickListener {
-            if (binding.ivBad.isVisible) {
+            if (!AppConfig.changeSourceShowScore) return@setOnClickListener {
                 DrawableCompat.setTint(
                     binding.ivGood.drawable,
                     appCtx.getCompatColor(R.color.md_red_A200)
@@ -154,7 +157,7 @@ class ChangeBookSourceAdapter(
             }
         }
         binding.ivBad.setOnClickListener {
-            if (binding.ivGood.isVisible) {
+            if (!AppConfig.changeSourceShowScore) return@setOnClickListener {
                 DrawableCompat.setTint(
                     binding.ivBad.drawable,
                     appCtx.getCompatColor(R.color.md_blue_A200)
