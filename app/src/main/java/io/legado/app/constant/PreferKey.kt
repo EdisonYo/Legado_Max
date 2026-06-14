@@ -83,6 +83,7 @@ object PreferKey {
     const val changeSourceLoadToc = "changeSourceLoadToc"
     const val changeSourceLoadInfo = "changeSourceLoadInfo"
     const val changeSourceLoadWordCount = "changeSourceLoadWordCount"
+    const val changeSourceShowScore = "changeSourceShowScore"
     const val chineseConverterType = "chineseConverterType"
     const val launcherIcon = "launcherIcon"
     const val textSelectAble = "selectText"
