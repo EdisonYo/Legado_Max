@@ -442,7 +442,7 @@ class BgTextConfigDialog : BaseDialogFragment(R.layout.dialog_read_bg_text) {
             ReadBookConfig.import(byteArray)
         }.onSuccess {
             ReadBookConfig.durConfig = it
-            postEvent(EventBus.UP_CONFIG, arrayListOf(1, 2, 5))
+            postEvent(EventBus.UP_CONFIG, arrayListOf(1, 2, 3, 5, 12))
             toastOnUi("导入成功")
         }.onError {
             it.printOnDebug()
