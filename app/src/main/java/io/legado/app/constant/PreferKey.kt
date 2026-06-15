@@ -256,7 +256,12 @@ object PreferKey {
     const val highlightRuleGroups = "highlightRuleGroups"
     const val highlightRuleCurrentGroup = "highlightRuleCurrentGroup"
 
+    const val blockRuleItems = "exploreBlockRuleItems"
+    const val blockRuleGroups = "exploreBlockRuleGroups"
+    const val blockRuleCurrentGroup = "exploreBlockRuleCurrentGroup"
+    const val blockRuleShowProgress = "exploreBlockRuleShowProgress"
     const val backupBookCache = "backupBookCache"
+
     const val sourceRecycleBinEnabled = "sourceRecycleBinEnabled"
 
     /** 发现列表网格模式列数配置，默认2列 */
