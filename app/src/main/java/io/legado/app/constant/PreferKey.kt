@@ -270,4 +270,7 @@ object PreferKey {
     const val exploreShowColumnWaterfall = "exploreShowColumnWaterfall"
     /** 发现列表布局模式，由"切换布局"菜单控制 */
     const val exploreGridMode = "exploreGridMode"
+
+    /** 跳转确认记忆，存储 JSON: {"sourceUrl":"allow|deny", ...} */
+    const val openUrlConfirmMemory = "openUrlConfirmMemory"
 }
