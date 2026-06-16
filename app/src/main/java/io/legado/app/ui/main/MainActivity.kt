@@ -64,9 +64,13 @@ import kotlinx.coroutines.withContext
 import splitties.views.bottomPadding
 import kotlin.coroutines.resume
 import androidx.core.view.get
+import io.legado.app.data.entities.LayoutMode
 import io.legado.app.help.update.AppUpdate
+import io.legado.app.model.NavigationBarEffectApplier
+import io.legado.app.model.NavigationBarManager
 import io.legado.app.ui.about.UpdateDialog
 import kotlin.time.Duration.Companion.hours
+
 
 /**
  * 主界面
@@ -101,6 +105,7 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         upBottomMenu()
         initView()
+        setupNavigationBar()
         upHomePage()
         onBackPressedDispatcher.addCallback(this) {
             if (pagePosition != 0) {
@@ -123,6 +128,12 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 从底栏管理界面返回时重新加载配置
+        setupNavigationBar()
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -204,6 +215,8 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
         if (AppConfig.isEInkMode) {
             bottomNavigationView.setBackgroundResource(R.drawable.bg_eink_border_top)
         }
+        // ThemeBottomNavigationVIew 在 init 中清除了 WindowInsetsListener，
+        // 重新设置使其为底栏添加导航栏高度的 bottomPadding，避免被系统手势条遮挡
         bottomNavigationView.setOnApplyWindowInsetsListenerCompat { view, windowInsets ->
             val height = windowInsets.navigationBarHeight
             view.bottomPadding = height
@@ -385,6 +398,123 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
         }
         observeEvent<String>(PreferKey.threadCount) {
             viewModel.upPool()
+        }
+        // 监听底栏液态玻璃方案变更事件
+        observeEvent<Boolean>(EventBus.NAVIGATION_BAR_CHANGED) {
+            setupNavigationBar()
+        }
+    }
+
+    /**
+     * 设置底栏液态玻璃效果
+     *
+     * 根据当前主题模式加载对应的激活方案并应用效果。
+     * SOLID 模式下不添加叠加层，底栏保持原始样式。
+     */
+    private fun setupNavigationBar() {
+        val isNight = AppConfig.isNightTheme
+        val dirName = AppConfig.activeDirName(isNight)
+        val entry = NavigationBarManager.loadEntry(dirName)
+        if (entry != null) {
+            NavigationBarEffectApplier.applyEffect(entry.config, binding)
+            applyTabIcons(entry.config)
+        }
+    }
+
+    /**
+     * 应用 Tab 图标配置
+     *
+     * 根据方案配置中每个 tab 的图标设置，动态替换 BottomNavigationView 的菜单图标。
+     * 如果 tab 配置了自定义图标路径，则加载自定义图片；
+     * 否则根据预设名称加载对应的 drawable 资源。
+     */
+    private fun applyTabIcons(config: io.legado.app.data.entities.NavigationBarConfig) {
+        val menu = binding.bottomNavigationView.menu
+        val iconMap = mapOf(
+            R.id.menu_bookshelf to config.safeBookshelfIcon,
+            R.id.menu_discovery to config.safeDiscoveryIcon,
+            R.id.menu_rss to config.safeRssIcon,
+            R.id.menu_my_config to config.safeMyIcon
+        )
+        val tabKeyMap = mapOf(
+            R.id.menu_bookshelf to "bookshelf",
+            R.id.menu_discovery to "discovery",
+            R.id.menu_rss to "rss",
+            R.id.menu_my_config to "my"
+        )
+
+        // 判断是否存在自定义图标，存在则全局禁用 tint
+        val hasCustomIcon = iconMap.values.any { it.isCustom }
+        if (hasCustomIcon) {
+            // 禁用 BottomNavigationView 整体的图标 tint
+            binding.bottomNavigationView.itemIconTintList = null
+        }
+
+        iconMap.forEach { (menuId, iconConfig) ->
+            val tabKey = tabKeyMap[menuId] ?: return@forEach
+            val menuItem = menu.findItem(menuId) ?: return@forEach
+
+            if (iconConfig.isCustom) {
+                // 加载自定义图标
+                try {
+                    val file = java.io.File(iconConfig.customIconPath)
+                    if (file.exists()) {
+                        val bitmap = android.graphics.BitmapFactory.decodeFile(file.absolutePath)
+                        if (bitmap != null) {
+                            // 用 mutate() 创建独立 drawable 实例，避免 tint 在所有菜单项上累积
+                            val drawable = android.graphics.drawable.BitmapDrawable(resources, bitmap)
+                            drawable.setTintList(null)
+                            drawable.isFilterBitmap = true
+                            menuItem.icon = drawable
+                        }
+                    }
+                } catch (e: Exception) {
+                    // 自定义图标加载失败，使用预设
+                    val resId = io.legado.app.model.TabIconPreset.getDrawableResId(tabKey, iconConfig)
+                    if (resId != null) {
+                        menuItem.setIcon(resId)
+                    }
+                }
+            } else {
+                // 使用预设图标
+                val resId = io.legado.app.model.TabIconPreset.getDrawableResId(tabKey, iconConfig)
+                if (resId != null) {
+                    menuItem.setIcon(resId)
+                }
+            }
+        }
+    }
+
+    /**
+     * 覆写系统导航栏颜色设置
+     *
+     * BaseActivity.setupSystemBar() 会在 onCreate/onConfigurationChanged 中调用此方法，
+     * 将 window.navigationBarColor 设为不透明颜色。
+     * 但在 FLOATING 模式下，系统导航栏必须透明才能让底栏内容延伸到系统导航栏区域，
+     * 否则底栏下方会出现一块不透明的系统导航栏。
+     */
+    override fun upNavigationBarColor() {
+        val isNight = AppConfig.isNightTheme
+        val dirName = AppConfig.activeDirName(isNight)
+        val entry = NavigationBarManager.loadEntry(dirName)
+        // 只要布局是 FLOATING，就让系统导航栏透明
+        // （无论 materialMode 是 SOLID/GLASS/FROSTED，悬浮底栏都需要系统导航栏透明）
+        val isFloating = entry != null && entry.config.layoutMode == LayoutMode.FLOATING
+
+        if (isFloating) {
+            // FLOATING 模式：保持透明，让底栏内容延伸到系统导航栏区域
+            window.navigationBarColor = android.graphics.Color.TRANSPARENT
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                // 禁止系统为透明导航栏自动添加半透明 scrim
+                window.isNavigationBarContrastEnforced = false
+            }
+        } else {
+            // 其他模式：走默认逻辑
+            super.upNavigationBarColor()
+            // FIXED 模式：恢复系统自动添加 scrim
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = true
+            }
         }
     }
 

@@ -17,7 +17,8 @@ object EventBus {
     const val RECREATE = "RECREATE"                         // 重建 Activity
     const val NOTIFY_MAIN = "notifyMain"                    // 通知主界面刷�?
     const val WEB_SERVICE = "webService"                    // Web 服务状态变�?
-    const val DEBUG_MODE_CHANGED = "debugModeChanged"       // 调试模式开关变�?
+    const val DEBUG_MODE_CHANGED = "debugModeChanged"       // 调试模式开关变化
+    const val NAVIGATION_BAR_CHANGED = "navigationBarChanged" // 底栏液态玻璃方案变化
 
     // ── 书架 ──
     const val UP_BOOKSHELF = "upBookToc"                    // 书籍目录更新

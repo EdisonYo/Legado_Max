@@ -23,6 +23,7 @@ import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookGroup
 import io.legado.app.databinding.FragmentBookshelf1Binding
 import io.legado.app.help.config.AppConfig
+import io.legado.app.lib.dialogs.selector
 import io.legado.app.lib.theme.accentColor
 import io.legado.app.lib.theme.primaryColor
 import io.legado.app.lib.theme.primaryTextColor
@@ -44,10 +45,9 @@ import kotlin.collections.set
  * 2. 下拉选择模式（下拉选择分组开关勾选）：点击标题栏弹出下拉选择分组菜单
  */
 class BookshelfFragment1() : BaseBookshelfFragment(R.layout.fragment_bookshelf1),
-    TabLayout.OnTabSelectedListener,
-    SearchView.OnQueryTextListener {
+    SearchView.OnQueryTextListener, TabLayout.OnTabSelectedListener {
 
-    constructor(position: Int) : this() {
+    constructor(position: Int) : this(){
         val bundle = Bundle()
         bundle.putInt("position", position)
         arguments = bundle
@@ -257,8 +257,8 @@ class BookshelfFragment1() : BaseBookshelfFragment(R.layout.fragment_bookshelf1)
     // TabLayout 模式：Tab 再次选中回调（显示分组书籍数量）
     override fun onTabReselected(tab: TabLayout.Tab) {
         selectedGroup?.let { group ->
-            fragmentMap[group.groupId]?.let {
-                toastOnUi("${group.groupName}(${it.getBooksCount()})")
+            fragmentMap[group.groupId]?.let { fragment ->
+                toastOnUi("${group.groupName}(${fragment.getBooksCount()})")
             }
         }
     }

@@ -75,6 +75,8 @@
     <string name="setting">Settings</string>
     <string name="theme_setting">Theme settings</string>
     <string name="theme_setting_s">Some settings related to interface or color</string>
+    <string name="navigation_bar_manage">Navigation Bar Manage</string>
+    <string name="navigation_bar_manage_summary">Manage navigation bar liquid glass effect schemes</string>
     <string name="other_setting">Other settings</string>
     <string name="other_setting_s">Some function-related settings</string>
     <string name="precise_manage">Precise Management</string>
@@ -1765,7 +1767,7 @@
     <string name="clear_all_records">Clear all records</string>
     <string name="search_url_record_hint">Search URL/Domain/Source</string>
     <string name="filter_by_domain">Filter by Domain</string>
-    
+
     <!-- TTS Debug -->
     <string name="play_audio">Play Audio</string>
     <string name="view_js_lib">View JS Library</string>
@@ -1779,6 +1781,7 @@
     <string name="export_matched_sources">Export Matched Sources</string>
     <string name="url_source_code">URL Source Code</string>
     <string name="result_source_code">Result Source Code</string>
+    <string name="preview_dict">Preview Dict</string>
     <string name="select_rule">Select Rule</string>
     <string name="preset_rules">Preset Rules</string>
     <string name="import_rules">Import Rules</string>
@@ -1930,6 +1933,8 @@
     <string name="quick_jump_back_b">Rewind %d minutes</string>
     <string name="quick_jump_forward_b">Forward %d minutes</string>
     <string name="quick_jump_forward_a">Forward %d minutes</string>
+
+    <!-- Explore Block Rule -->
     <string name="explore_block_rule">Block Rules</string>
     <string name="explore_block_rule_config">Block Rules</string>
     <string name="explore_block_rule_add">Add block rule</string>

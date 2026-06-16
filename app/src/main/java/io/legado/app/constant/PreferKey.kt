@@ -280,4 +280,9 @@ object PreferKey {
     const val exploreShowColumnWaterfall = "exploreShowColumnWaterfall"
     /** 发现列表布局模式，由"切换布局"菜单控制 */
     const val exploreGridMode = "exploreGridMode"
+
+    /** 底栏液态玻璃效果 - 日间模式方案包名 */
+    const val navigationBarPackageDay = "navigationBarPackageDay"
+    /** 底栏液态玻璃效果 - 夜间模式方案包名 */
+    const val navigationBarPackageNight = "navigationBarPackageNight"
 }

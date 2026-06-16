@@ -367,4 +367,7 @@ dependencies {
     implementation(libs.soraEditor.core)
     implementation(libs.soraEditor.language.textmate)
 
+    // liquidglass 液态玻璃效果
+    implementation(libs.liquidglass)
+
 }
