@@ -273,4 +273,7 @@ object PreferKey {
 
     /** 跳转确认记忆，存储 JSON: {"sourceUrl":"allow|deny", ...} */
     const val openUrlConfirmMemory = "openUrlConfirmMemory"
+
+    /** 书源排序即时保存 */
+    const val bookSourceSortSave = "bookSourceSortSave"
 }
