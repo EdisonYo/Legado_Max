@@ -17,6 +17,11 @@
                 android:checkable="true"
                 android:title="@string/sort_desc" />
 
+            <item
+                android:id="@+id/menu_sort_save"
+                android:checkable="true"
+                android:title="@string/sort_save" />
+
             <group
                 android:id="@+id/menu_group_sort"
                 android:checkableBehavior="single">
@@ -26,11 +31,6 @@
                     android:checkable="true"
                     android:checked="true"
                     android:title="@string/sort_manual" />
-
-                <item
-                    android:id="@+id/menu_sort_auto"
-                    android:checkable="true"
-                    android:title="@string/sort_auto" />
 
                 <item
                     android:id="@+id/menu_sort_name"
@@ -49,13 +49,8 @@
 
                 <item
                     android:id="@+id/menu_sort_respondTime"
-                    android:checkable="true"
+                android:checkable="true"
                     android:title="@string/sort_by_respondTime" />
-
-                <item
-                    android:id="@+id/menu_sort_enable"
-                    android:checkable="true"
-                    android:title="@string/is_enabled" />
 
             </group>
 
@@ -108,7 +103,7 @@
 
     </item>
 
-    
+
 
     <item
         android:id="@+id/menu_add_book_source"

@@ -24,6 +24,7 @@ import io.legado.app.R
 import io.legado.app.base.VMBaseActivity
 import io.legado.app.constant.AppLog
 import io.legado.app.constant.EventBus
+import io.legado.app.constant.PreferKey
 import io.legado.app.data.AppDatabase
 import io.legado.app.data.appDb
 import io.legado.app.data.entities.BookSourcePart
@@ -58,10 +59,12 @@ import io.legado.app.utils.cnCompare
 import io.legado.app.utils.dpToPx
 import io.legado.app.utils.flowWithLifecycleAndDatabaseChange
 import io.legado.app.utils.flowWithLifecycleAndDatabaseChangeFirst
+import io.legado.app.utils.getPrefBoolean
 import io.legado.app.utils.isAbsUrl
 import io.legado.app.utils.launch
 import io.legado.app.utils.observeEvent
 import io.legado.app.help.ExportResultHandler
+import io.legado.app.utils.putPrefBoolean
 import io.legado.app.utils.sendToClip
 import io.legado.app.utils.setEdgeEffectColor
 import io.legado.app.utils.share
@@ -82,6 +85,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import splitties.init.appCtx
 
 /**
  * 书源管理界面
@@ -108,6 +112,10 @@ class BookSourceActivity : VMBaseActivity<ActivityBookSourceBinding, BookSourceV
         private set
     override var isSortAscending = true
         private set
+    private var isSortSaveEnabled: Boolean
+        get() = appCtx.getPrefBoolean(PreferKey.bookSourceSortSave, false)
+        set(value) = appCtx.putPrefBoolean(PreferKey.bookSourceSortSave, value)
+    private var sortSavePending = false
     private var snackBar: Snackbar? = null
 
 
@@ -180,6 +188,7 @@ class BookSourceActivity : VMBaseActivity<ActivityBookSourceBinding, BookSourceV
         groupMenu = menu.findItem(R.id.menu_group).subMenu
         val sortSubMenu = menu.findItem(R.id.action_sort).subMenu!!
         sortSubMenu.findItem(R.id.menu_sort_desc).isChecked = !isSortAscending
+        sortSubMenu.findItem(R.id.menu_sort_save).isChecked = isSortSaveEnabled
         sortSubMenu.setGroupCheckable(R.id.menu_group_sort, true, true)
         upGroupMenu()
         return super.onPrepareOptionsMenu(menu)
@@ -203,45 +212,46 @@ class BookSourceActivity : VMBaseActivity<ActivityBookSourceBinding, BookSourceV
                 upBookSource(searchView.query?.toString())
             }
 
+            R.id.menu_sort_save -> {
+                isSortSaveEnabled = !isSortSaveEnabled
+                item.isChecked = isSortSaveEnabled
+                if (isSortSaveEnabled && sort != BookSourceSort.Default) {
+                    sortSavePending = true
+                    upBookSource(searchView.query?.toString())
+                }
+            }
+
             R.id.menu_sort_manual -> {
                 item.isChecked = true
                 sort = BookSourceSort.Default
                 upBookSource(searchView.query?.toString())
             }
 
-            R.id.menu_sort_auto -> {
-                item.isChecked = true
-                sort = BookSourceSort.Weight
-                upBookSource(searchView.query?.toString())
-            }
-
             R.id.menu_sort_name -> {
                 item.isChecked = true
                 sort = BookSourceSort.Name
+                if (isSortSaveEnabled) sortSavePending = true
                 upBookSource(searchView.query?.toString())
             }
 
             R.id.menu_sort_url -> {
                 item.isChecked = true
                 sort = BookSourceSort.Url
+                if (isSortSaveEnabled) sortSavePending = true
                 upBookSource(searchView.query?.toString())
             }
 
             R.id.menu_sort_time -> {
                 item.isChecked = true
                 sort = BookSourceSort.Update
+                if (isSortSaveEnabled) sortSavePending = true
                 upBookSource(searchView.query?.toString())
             }
 
             R.id.menu_sort_respondTime -> {
                 item.isChecked = true
                 sort = BookSourceSort.Respond
-                upBookSource(searchView.query?.toString())
-            }
-
-            R.id.menu_sort_enable -> {
-                item.isChecked = true
-                sort = BookSourceSort.Enable
+                if (isSortSaveEnabled) sortSavePending = true
                 upBookSource(searchView.query?.toString())
             }
 
@@ -268,13 +278,6 @@ class BookSourceActivity : VMBaseActivity<ActivityBookSourceBinding, BookSourceV
             R.id.menu_disabled_explore_group -> {
                 searchView.setQuery(getString(R.string.disabled_explore), true)
             }
-
-
-
-
-
-
-
 
             R.id.menu_help -> showHelp("SourceMBookHelp")
 
@@ -353,15 +356,8 @@ class BookSourceActivity : VMBaseActivity<ActivityBookSourceBinding, BookSourceV
                     appDb.bookSourceDao.flowSearch(searchKey)
                 }
             }.map { data ->
-
-
-
-
-
-
                 if (isSortAscending) {
                     when (sort) {
-                        BookSourceSort.Weight -> data.sortedBy { it.weight }
                         BookSourceSort.Name -> data.sortedWith { o1, o2 ->
                             o1.bookSourceName.cnCompare(o2.bookSourceName)
                         }
@@ -369,19 +365,10 @@ class BookSourceActivity : VMBaseActivity<ActivityBookSourceBinding, BookSourceV
                         BookSourceSort.Url -> data.sortedBy { it.bookSourceUrl }
                         BookSourceSort.Update -> data.sortedByDescending { it.lastUpdateTime }
                         BookSourceSort.Respond -> data.sortedBy { it.respondTime }
-                        BookSourceSort.Enable -> data.sortedWith { o1, o2 ->
-                            var sort = -o1.enabled.compareTo(o2.enabled)
-                            if (sort == 0) {
-                                sort = o1.bookSourceName.cnCompare(o2.bookSourceName)
-                            }
-                            sort
-                        }
-
                         else -> data
                     }
                 } else {
                     when (sort) {
-                        BookSourceSort.Weight -> data.sortedByDescending { it.weight }
                         BookSourceSort.Name -> data.sortedWith { o1, o2 ->
                             o2.bookSourceName.cnCompare(o1.bookSourceName)
                         }
@@ -389,14 +376,6 @@ class BookSourceActivity : VMBaseActivity<ActivityBookSourceBinding, BookSourceV
                         BookSourceSort.Url -> data.sortedByDescending { it.bookSourceUrl }
                         BookSourceSort.Update -> data.sortedBy { it.lastUpdateTime }
                         BookSourceSort.Respond -> data.sortedByDescending { it.respondTime }
-                        BookSourceSort.Enable -> data.sortedWith { o1, o2 ->
-                            var sort = o1.enabled.compareTo(o2.enabled)
-                            if (sort == 0) {
-                                sort = o1.bookSourceName.cnCompare(o2.bookSourceName)
-                            }
-                            sort
-                        }
-
                         else -> data.reversed()
                     }
                 }
@@ -413,6 +392,14 @@ class BookSourceActivity : VMBaseActivity<ActivityBookSourceBinding, BookSourceV
                 }
                 itemTouchCallback.isCanDrag =
                     sort == BookSourceSort.Default
+                if (sortSavePending && sort != BookSourceSort.Default) {
+                    sortSavePending = false
+                    val sortedItems = data.mapIndexed { index, item ->
+                        item.customOrder = if (isSortAscending) index else -index
+                        item
+                    }
+                    viewModel.upOrder(sortedItems)
+                }
                 tryLocateSource(data)
                 delay(500)
             }
@@ -600,10 +587,6 @@ class BookSourceActivity : VMBaseActivity<ActivityBookSourceBinding, BookSourceV
         }
     }
 
-
-
-
-
     private fun resumeCheckSource() {
         if (!Debug.isChecking) {
             return
@@ -777,12 +760,6 @@ class BookSourceActivity : VMBaseActivity<ActivityBookSourceBinding, BookSourceV
         binding.selectActionBar
             .upCountView(adapter.selection.size, adapter.itemCount)
     }
-
-
-
-
-
-
 
     override fun onQueryTextChange(newText: String?): Boolean {
         newText?.let {

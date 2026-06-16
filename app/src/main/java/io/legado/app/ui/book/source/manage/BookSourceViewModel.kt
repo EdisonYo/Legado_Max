@@ -220,7 +220,6 @@ class BookSourceViewModel(application: Application) : BaseViewModel(application)
             }
         }.let { data ->
             if (isSortAscending) when (sort) {
-                BookSourceSort.Weight -> data.sortedBy { it.weight }
                 BookSourceSort.Name -> data.sortedWith { o1, o2 ->
                     o1.bookSourceName.cnCompare(o2.bookSourceName)
                 }
@@ -228,18 +227,9 @@ class BookSourceViewModel(application: Application) : BaseViewModel(application)
                 BookSourceSort.Url -> data.sortedBy { it.bookSourceUrl }
                 BookSourceSort.Update -> data.sortedByDescending { it.lastUpdateTime }
                 BookSourceSort.Respond -> data.sortedBy { it.respondTime }
-                BookSourceSort.Enable -> data.sortedWith { o1, o2 ->
-                    var sortNum = -o1.enabled.compareTo(o2.enabled)
-                    if (sortNum == 0) {
-                        sortNum = o1.bookSourceName.cnCompare(o2.bookSourceName)
-                    }
-                    sortNum
-                }
-
                 else -> data
             }
             else when (sort) {
-                BookSourceSort.Weight -> data.sortedByDescending { it.weight }
                 BookSourceSort.Name -> data.sortedWith { o1, o2 ->
                     o2.bookSourceName.cnCompare(o1.bookSourceName)
                 }
@@ -247,14 +237,6 @@ class BookSourceViewModel(application: Application) : BaseViewModel(application)
                 BookSourceSort.Url -> data.sortedByDescending { it.bookSourceUrl }
                 BookSourceSort.Update -> data.sortedBy { it.lastUpdateTime }
                 BookSourceSort.Respond -> data.sortedByDescending { it.respondTime }
-                BookSourceSort.Enable -> data.sortedWith { o1, o2 ->
-                    var sortNum = o1.enabled.compareTo(o2.enabled)
-                    if (sortNum == 0) {
-                        sortNum = o1.bookSourceName.cnCompare(o2.bookSourceName)
-                    }
-                    sortNum
-                }
-
                 else -> data.reversed()
             }
         }

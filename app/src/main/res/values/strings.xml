@@ -1889,4 +1889,5 @@
     <string name="explore_block_rule_scope_rss_intro">简介</string>
     <string name="block_rule_manage">屏蔽规则</string>
     <string name="block_rule_manage_summary">管理发现、搜索和订阅源的屏蔽规则</string>
+    <string name="sort_save">排序即时保存</string>
 </resources>
