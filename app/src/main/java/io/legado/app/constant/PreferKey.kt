@@ -260,6 +260,7 @@ object PreferKey {
     const val blockRuleGroups = "exploreBlockRuleGroups"
     const val blockRuleCurrentGroup = "exploreBlockRuleCurrentGroup"
     const val blockRuleShowProgress = "exploreBlockRuleShowProgress"
+    const val blockRuleEnabled = "exploreBlockRuleEnabled"
     const val backupBookCache = "backupBookCache"
 
     const val sourceRecycleBinEnabled = "sourceRecycleBinEnabled"
