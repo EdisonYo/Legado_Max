@@ -125,7 +125,7 @@ class ChangeBookSourceAdapter(
             } else {
                 ivGood.gone()
                 ivBad.gone()
-                setTextLeftMargin(binding, 10.dpToPx())
+                setTextLeftMargin(binding, 22.dpToPx())
             }
 
             if (AppConfig.changeSourceLoadWordCount && !item.chapterWordCountText.isNullOrBlank()) {
