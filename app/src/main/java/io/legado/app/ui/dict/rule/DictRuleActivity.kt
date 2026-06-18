@@ -17,6 +17,7 @@ import io.legado.app.data.appDb
 import io.legado.app.data.entities.DictRule
 import io.legado.app.databinding.ActivityDictRuleBinding
 import io.legado.app.databinding.DialogEditTextBinding
+
 import io.legado.app.help.DirectLinkUpload
 import io.legado.app.lib.dialogs.alert
 import io.legado.app.lib.theme.primaryColor
@@ -95,6 +96,8 @@ class DictRuleActivity : VMBaseActivity<ActivityDictRuleBinding, DictRuleViewMod
         binding.recyclerView.setEdgeEffectColor(primaryColor)
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         binding.recyclerView.adapter = adapter
+        binding.recyclerView.setFastScrollEnabled(true)
+        binding.recyclerView.isVerticalScrollBarEnabled = false
         binding.recyclerView.addItemDecoration(VerticalDivider(this))
         val itemTouchCallback = ItemTouchCallback(adapter)
         itemTouchCallback.isCanDrag = true

@@ -104,4 +104,9 @@
         android:title="@string/log"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/menu_export_charset_help"
+        android:title="@string/help"
+        app:showAsAction="never" />
+        
 </menu>

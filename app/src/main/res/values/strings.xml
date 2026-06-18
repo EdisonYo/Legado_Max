@@ -835,10 +835,10 @@
     <string name="disable_return_key">禁用返回键</string>
     <string name="text_accent_color">强调颜色</string>
     <string name="show_search_progress">显示搜索进度</string>
-    <string name="debug_mode">调试模式</string>
+    <string name="debug_mode">调试工具</string>
     <string name="debug_mode_summary">开启后显示调试工具入口</string>
-    <string name="debug_log_floating_ball">调试日志悬浮球</string>
-    <string name="debug_log_floating_ball_summary">开启后在应用内任何页面显示调试日志悬浮球</string>
+    <string name="debug_log_floating_ball">日志悬浮球</string>
+    <string name="debug_log_floating_ball_summary">开启后在应用内任何页面显示日志悬浮球</string>
     <string name="copy_crash_log_title">崩溃时复制日志</string>
     <string name="copy_crash_log_summary">应用崩溃后再次进入app将自动将日志复制到剪贴板</string>
     <string name="md_link_inner_browser">用内置浏览器打开</string>
@@ -1783,17 +1783,19 @@
     <string name="bcs_total_size">总大小: %s</string>
     <string name="bcs_deselect_all">取消全选</string>
     <!-- File Validation Dialog -->
-    <string name="fvd_title">选择要恢复的文件</string>
+    <string name="fvd_title">选择恢复内容</string>
     <string name="fvd_detect_format">检测格式</string>
     <string name="fvd_select_all">全选</string>
     <string name="fvd_deselect_all">全不选</string>
     <string name="fvd_valid">有效</string>
+    <string name="fvd_warning">警告</string>
     <string name="fvd_invalid">无效</string>
     <string name="fvd_validating">验证中</string>
     <string name="fvd_view_details">查看详情</string>
     <string name="fvd_missing_fields">缺少字段: %s</string>
     <string name="fvd_can_restore">可以正常恢复</string>
     <string name="fvd_cannot_restore">无法恢复</string>
+    <string name="fvd_selected_info">已选 %1$d/%2$d 项，%3$s</string>
     <string name="fvd_reading_backup">读取备份文件...</string>
     <string name="fvd_backup_empty">备份文件中没有可恢复的内容</string>
     <string name="fvd_format_detect_error">格式检测出错: %s</string>
@@ -1891,5 +1893,6 @@
     <string name="explore_block_rule_scope_rss_intro">简介</string>
     <string name="block_rule_manage">屏蔽规则</string>
     <string name="block_rule_manage_summary">管理发现、搜索和订阅源的屏蔽规则</string>
+    <string name="preview_dict">预览字典</string>
     <string name="sort_save">排序即时保存</string>
 </resources>

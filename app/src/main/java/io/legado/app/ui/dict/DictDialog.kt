@@ -48,6 +48,13 @@ class DictDialog() : BaseDialogFragment(R.layout.dialog_dict) {
         }
     }
 
+    constructor(word: String, dictRule: DictRule) : this() {
+        arguments = Bundle().apply {
+            putString("word", word)
+            putParcelable("dictRule", dictRule)
+        }
+    }
+
     private val viewModel by viewModels<DictViewModel>()
     private val binding by viewBinding(DialogDictBinding::bind)
     private var word: String? = null
@@ -79,6 +86,7 @@ class DictDialog() : BaseDialogFragment(R.layout.dialog_dict) {
             dismiss()
             return
         }
+        val singleDictRule = arguments?.getParcelable<DictRule>("dictRule")
         binding.tabLayout.setBackgroundColor(backgroundColor)
         binding.tabLayout.setSelectedTabIndicatorColor(accentColor)
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
@@ -158,14 +166,24 @@ class DictDialog() : BaseDialogFragment(R.layout.dialog_dict) {
                 }
             }
         })
-        viewModel.initData {
-            it.forEach { d  ->
-                binding.tabLayout.addTab(binding.tabLayout.newTab().apply {
-                    text = d.name
-                    tag = d
-                })
+        // 如果传入单个字典规则，只显示这一个
+        if (singleDictRule != null) {
+            binding.tabLayout.addTab(binding.tabLayout.newTab().apply {
+                text = singleDictRule.name
+                tag = singleDictRule
+            })
+            binding.tabLayout.tabMode = TabLayout.MODE_FIXED
+            binding.tabLayout.tabGravity = TabLayout.GRAVITY_FILL
+        } else {
+            viewModel.initData {
+                it.forEach { d  ->
+                    binding.tabLayout.addTab(binding.tabLayout.newTab().apply {
+                        text = d.name
+                        tag = d
+                    })
+                }
+                setupTabLayoutMode(it.size)
             }
-            setupTabLayoutMode(it.size)
         }
     }
 
