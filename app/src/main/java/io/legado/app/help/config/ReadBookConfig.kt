@@ -280,53 +280,6 @@ object ReadBookConfig {
             config.textBold = value
         }
 
-    var titleBold: Int
-        get() = config.titleBold
-        set(value) {
-            config.titleBold = value
-        }
-
-    /**
-     * 获取正文字重值
-     * 
-     * 根据当前模式返回对应的字重值：
-     * - 精细模式：直接返回 textBold 值（100~900）
-     * - 粗略模式：将 textBold 值转换为标准字重
-     *   - 0 (正常) -> 400
-     *   - 1 (粗体) -> 700
-     *   - 2 (细体) -> 300
-     * 
-     * @return 实际字重值，范围 100~900
-     */
-    fun getTextBoldWeight(): Int {
-        val boldValue = textBold
-        return if (AppConfig.textBoldMode == 1) {
-            boldValue.coerceIn(100, 900)
-        } else {
-            when (boldValue) {
-                1 -> 700
-                2 -> 300
-                else -> 400
-            }
-        }
-    }
-
-    /**
-     * 获取标题字重值
-     * 
-     * 精细模式下返回独立的标题字重值；
-     * 粗略模式下标题使用 BOLD (700)。
-     * 
-     * @return 实际字重值，范围 100~900
-     */
-    fun getTitleBoldWeight(): Int {
-        return if (AppConfig.textBoldMode == 1) {
-            titleBold.coerceIn(100, 900)
-        } else {
-            700 // 粗略模式下标题固定使用 BOLD
-        }
-    }
-
     var textSize: Int
         get() = config.textSize
         set(value) {
@@ -643,8 +596,7 @@ object ReadBookConfig {
         private var pageAnim: Int = 0,//翻页动画
         private var pageAnimEInk: Int = 4,
         var textFont: String = "",//字体
-        var textBold: Int = 0,//正文字重 粗略模式: 0=正常, 1=粗体, 2=细体; 精细模式: 100~900
-        var titleBold: Int = 0,//标题字重 精细模式专用: 100~900，粗略模式下忽略此值
+        var textBold: Int = 0,//正文字重 0=常规, 1=粗体, 2=细体
         var textSize: Int = 20,//文字大小
         var letterSpacing: Float = 0.1f,//字间距
         var lineSpacingExtra: Int = 12,//行间距
@@ -941,7 +893,6 @@ object ReadBookConfig {
             "pageAnimEInk" to pageAnimEInk,
             "textFont" to textFont,
             "textBold" to textBold,
-            "titleBold" to titleBold,
             "textSize" to textSize,
             "letterSpacing" to letterSpacing,
             "lineSpacingExtra" to lineSpacingExtra,

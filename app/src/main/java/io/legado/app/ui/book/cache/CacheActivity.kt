@@ -56,6 +56,7 @@ import io.legado.app.utils.isContentScheme
 import io.legado.app.utils.observeEvent
 import io.legado.app.utils.setIconCompat
 import io.legado.app.utils.showDialogFragment
+import io.legado.app.utils.showHelp
 import io.legado.app.utils.startService
 import io.legado.app.utils.toastOnUi
 import io.legado.app.utils.verificationField
@@ -250,6 +251,7 @@ class CacheActivity : VMBaseActivity<ActivityCacheBookBinding, CacheViewModel>()
             R.id.menu_export_file_name -> alertExportFileName()
             R.id.menu_export_type -> showExportTypeConfig()
             R.id.menu_export_charset -> showCharsetConfig()
+            R.id.menu_export_charset_help -> showHelp("导出编码说明")
             R.id.menu_cache_rate -> showCacheRateDialog()
             R.id.menu_log -> showDialogFragment<AppLogDialog>()
             else -> if (item.groupId == R.id.menu_group) {
@@ -682,6 +684,9 @@ class CacheActivity : VMBaseActivity<ActivityCacheBookBinding, CacheViewModel>()
 
     override val cacheChapters: HashMap<String, HashSet<String>>
         get() = viewModel.cacheChapters
+
+    override val cacheSizes: HashMap<String, Long>
+        get() = viewModel.cacheSizes
 
     override fun exportProgress(bookUrl: String): Int? {
         return ExportBookService.exportProgress[bookUrl]

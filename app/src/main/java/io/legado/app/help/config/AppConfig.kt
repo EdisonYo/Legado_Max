@@ -7,6 +7,7 @@ import io.legado.app.constant.AppConst
 import io.legado.app.constant.MangaReadMode
 import io.legado.app.constant.PreferKey
 import io.legado.app.data.appDb
+import io.legado.app.model.debug.DebugCategory
 import io.legado.app.utils.GSON
 import io.legado.app.utils.canvasrecorder.CanvasRecorderFactory
 import io.legado.app.utils.fromJsonObject
@@ -985,27 +986,19 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
 
     val autoUpdateVariant get() = appCtx.getPrefBoolean("autoUpdateVariant", true)
 
-    // ==================== 字重精细调整配置 ====================
-    
-    /**
-     * 是否已显示过精细调整首次提示
-     * 用于控制只在第一次切换到精细模式时显示提示对话框
-     */
-    var textBoldFineTipShown: Boolean
-        get() = appCtx.getPrefBoolean(PreferKey.textBoldFineTipShown, false)
-        set(value) {
-            appCtx.putPrefBoolean(PreferKey.textBoldFineTipShown, value)
-        }
+    // ==================== 调试级别日志模式 ====================
+    /** 总开关 */
+    var debugLogOnlyEnabled: Boolean
+        get() = appCtx.getPrefBoolean(PreferKey.debugLogOnlyEnabled, true)
+        set(value) { appCtx.putPrefBoolean(PreferKey.debugLogOnlyEnabled, value) }
 
-    /**
-     * 字重调整模式
-     * - 0: 粗略模式，三个固定选项（正常/粗体/细体）
-     * - 1: 精细模式，SeekBar 进度条（100~900）
-     */
-    var textBoldMode: Int
-        get() = appCtx.getPrefInt(PreferKey.textBoldMode, 0)
+    /** 模块（按逗号分隔） */
+    var debugLogOnlyCategories: Set<DebugCategory>
+        get() {
+            val raw = appCtx.getPrefString(PreferKey.debugLogOnlyCategories) ?: ""
+            return DebugLogOnlyConfig.parseCategories(raw)
+        }
         set(value) {
-            appCtx.putPrefInt(PreferKey.textBoldMode, value)
+            appCtx.putPrefString(PreferKey.debugLogOnlyCategories, DebugLogOnlyConfig.serializeCategories(value))
         }
 }
-

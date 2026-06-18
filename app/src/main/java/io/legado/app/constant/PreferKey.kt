@@ -49,6 +49,8 @@ object PreferKey {
     const val debugLogFloatingBall = "debugLogFloatingBall" // 调试日志悬浮球开关，控制应用内悬浮球显示
     const val debugFloatingBallPosX = "debugFloatingBallPosX" // 调试悬浮球拖动位置 X（像素）
     const val debugFloatingBallPosY = "debugFloatingBallPosY" // 调试悬浮球拖动位置 Y（像素）
+    const val debugLogOnlyEnabled = "debugLogOnlyEnabled" // 调试级别日志总开关
+    const val debugLogOnlyCategories = "debugLogOnlyCategories" // 调试级别日志模块开关，以逗号分隔
     const val copyCrashLog = "copyCrashLog" // 崩溃时复制日志到剪贴板
     const val mdLinkInnerBrowser = "mdLinkInnerBrowser" // MD链接用内置浏览器打开
     const val bookshelfLayout = "bookshelfLayout"
@@ -246,7 +248,6 @@ object PreferKey {
     const val showBoardLine = "showBoardLine"
     const val recordUrl = "recordUrl"
     const val textBoldFineTipShown = "textBoldFineTipShown"
-    const val textBoldMode = "textBoldMode"
     const val readRecordDisplayMode = "readRecordDisplayMode"
     const val bookInfoShowReadRecord = "bookInfoShowReadRecord"
     const val highlightRuleDialog = "highlightRuleDialog"

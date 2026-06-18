@@ -1,5 +1,6 @@
 package io.legado.app.data.entities
 
+import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -7,10 +8,12 @@ import io.legado.app.model.analyzeRule.AnalyzeRule
 import io.legado.app.model.analyzeRule.AnalyzeRule.Companion.setCoroutineContext
 import io.legado.app.model.analyzeRule.AnalyzeUrl
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.parcelize.Parcelize
 
 /**
  * 字典规则
  */
+@Parcelize
 @Entity(tableName = "dictRules")
 data class DictRule(
     @PrimaryKey
@@ -21,7 +24,7 @@ data class DictRule(
     var enabled: Boolean = true,
     @ColumnInfo(defaultValue = "0")
     var sortNumber: Int = 0
-) {
+) : Parcelable {
 
     override fun hashCode(): Int {
         return name.hashCode()

@@ -15,6 +15,7 @@ import io.legado.app.help.config.DictDebugConfig
 import io.legado.app.lib.theme.accentColor
 import io.legado.app.lib.theme.primaryColor
 import io.legado.app.ui.book.source.debug.BookSourceDebugAdapter
+import io.legado.app.ui.dict.DictDialog
 import io.legado.app.ui.widget.dialog.TextDialog
 import io.legado.app.utils.applyNavigationBarPadding
 import io.legado.app.utils.setEdgeEffectColor
@@ -141,6 +142,17 @@ class DictRuleDebugActivity : VMBaseActivity<ActivityDictRuleDebugBinding, DictR
                     showDialogFragment(TextDialog("结果源码", viewModel.resultSrc))
                 } else {
                     toastOnUi("请先执行搜索")
+                }
+            }
+            R.id.menu_preview_dict -> {
+                val word = searchView.query?.toString()?.trim()
+                val rule = viewModel.dictRule
+                if (word.isNullOrBlank()) {
+                    toastOnUi("请先输入关键词")
+                } else if (rule == null) {
+                    toastOnUi("字典规则未初始化")
+                } else {
+                    showDialogFragment(DictDialog(word, rule))
                 }
             }
             R.id.menu_help -> showHelp("dictRuleHelp")

@@ -17,7 +17,6 @@ import io.legado.app.help.config.ReadBookConfig
 import io.legado.app.model.ReadBook
 import io.legado.app.ui.book.read.page.entities.TextChapter
 import io.legado.app.utils.RealPathUtil
-import io.legado.app.utils.buildMainHandler
 import io.legado.app.utils.dpToPx
 import io.legado.app.utils.isContentScheme
 import io.legado.app.utils.isPad
@@ -136,12 +135,6 @@ object ChapterProvider {
     @JvmStatic
     var visibleRect = RectF()
 
-    private val handler by lazy {
-        buildMainHandler()
-    }
-
-    private var upViewSizeRunnable: Runnable? = null
-
     init {
         upStyle()
     }
@@ -233,42 +226,26 @@ object ChapterProvider {
         } ?: Typeface.DEFAULT
     }
 
-    /**
-     * 创建标题和正文的画笔
-     * 
-     * 根据系统版本和字重配置创建对应的字体画笔：
-     * - Android 9+ 精细模式：支持精细字重（100~900），标题和正文分别设置
-     * - Android 9+ 粗略模式 / Android 9 以下：保持旧版行为
-     * 
-     * @param typeface 基础字体
-     * @return Pair<标题画笔, 正文画笔>
-     */
     private fun getPaints(typeface: Typeface?): Pair<TextPaint, TextPaint> {
+        // 字体统一处理
         val bold = Typeface.create(typeface, Typeface.BOLD)
         val normal = Typeface.create(typeface, Typeface.NORMAL)
-        
-        val (titleFont, textFont) = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && AppConfig.textBoldMode == 1) {
-            // 精细模式：使用独立的标题和正文字重
-            val textWeight = ReadBookConfig.getTextBoldWeight()
-            val titleWeight = ReadBookConfig.getTitleBoldWeight()
-            Pair(Typeface.create(typeface, titleWeight, false), Typeface.create(typeface, textWeight, false))
-        } else {
-            // 粗略模式或老版本：保持旧版行为
-            when (ReadBookConfig.textBold) {
-                1 -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-                        Pair(Typeface.create(typeface, 900, false), bold)
-                    else
-                        Pair(bold, bold)
-                }
-                2 -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-                        Pair(normal, Typeface.create(typeface, 300, false))
-                    else
-                        Pair(normal, normal)
-                }
-                else -> Pair(bold, normal)
+        val (titleFont, textFont) = when (ReadBookConfig.textBold) {
+            1 -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                    Pair(Typeface.create(typeface, 900, false), bold)
+                else
+                    Pair(bold, bold)
             }
+
+            2 -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                    Pair(normal, Typeface.create(typeface, 300, false))
+                else
+                    Pair(normal, normal)
+            }
+
+            else -> Pair(bold, normal)
         }
 
         //标题
@@ -302,22 +279,7 @@ object ChapterProvider {
             return
         }
         if (width != viewWidth || height != viewHeight) {
-            if (width == viewWidth) {
-                // 纯高度变化（如状态栏显隐导致的微调）延迟 300ms 防抖处理
-                // 但必须立即清除预加载章节缓存，否则在延迟窗口内切换章节
-                // 会使用按旧高度排版的缓存数据，导致内容显示不全
-                ReadBook.prevTextChapter = null
-                ReadBook.nextTextChapter = null
-                upViewSizeRunnable = handler.postDelayed(300) {
-                    upViewSizeRunnable = null
-                    notifyViewSizeChange(width, height)
-                }
-            } else {
-                notifyViewSizeChange(width, height)
-            }
-        } else if (upViewSizeRunnable != null) {
-            handler.removeCallbacks(upViewSizeRunnable!!)
-            upViewSizeRunnable = null
+            notifyViewSizeChange(width, height)
         }
     }
 

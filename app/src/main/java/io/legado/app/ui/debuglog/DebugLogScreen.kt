@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -64,6 +65,7 @@ import io.legado.app.ui.config.ConfigTag
 import io.legado.app.ui.debug.DebugToolsActivity
 import io.legado.app.ui.debuglog.DebugFloatingBallManager
 import io.legado.app.ui.debuglog.components.DebugCategoryTabs
+import io.legado.app.ui.debuglog.components.DebugCategoryVisibilityDialog
 import io.legado.app.ui.debuglog.components.DebugLogItem
 import io.legado.app.ui.debuglog.components.DebugLogDetailDialog
 import io.legado.app.ui.debuglog.components.FlowLogDetailDialog
@@ -139,6 +141,7 @@ fun DebugLogScreen(
     var showSearch by remember { mutableStateOf(false) }
     // 订阅源执行情况显示状态
     var showExecutionStatus by remember { mutableStateOf(false) }
+    var showCategoryVisibilityDialog by remember { mutableStateOf(false) }
 
     // 进入界面时刷新日志，确保显示最新数据
     LaunchedEffect(Unit) {
@@ -160,7 +163,7 @@ fun DebugLogScreen(
                         titleContentColor = MaterialTheme.colorScheme.onSecondary,
                         actionIconContentColor = MaterialTheme.colorScheme.onSecondary
                     ),
-                    title = { Text("") },
+                    title = { Text("日志") },
                     navigationIcon = { },
                     actions = {
                         // 刷新按钮：手动刷新日志列表
@@ -267,10 +270,22 @@ fun DebugLogScreen(
                                     colors = menuItemColors
                                 )
 
+                                DropdownMenuItem(
+                                    text = { Text("调试级别日志") },
+                                    onClick = {
+                                        showOverflowMenu = false
+                                        showCategoryVisibilityDialog = true
+                                    },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.Visibility, contentDescription = null)
+                                    },
+                                    colors = menuItemColors
+                                )
+
                                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                                 DropdownMenuItem(
-                                    text = { Text("关闭调试球") },
+                                    text = { Text("关闭日志球") },
                                     onClick = {
                                         showOverflowMenu = false
                                         context.putPrefBoolean(PreferKey.debugLogFloatingBall, false)
@@ -337,6 +352,12 @@ fun DebugLogScreen(
             }
         }
     ) { paddingValues ->
+        if (showCategoryVisibilityDialog) {
+            DebugCategoryVisibilityDialog(
+                onDismiss = { showCategoryVisibilityDialog = false }
+            )
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
