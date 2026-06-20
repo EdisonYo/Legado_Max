@@ -35,11 +35,68 @@ data class BlockRule(
     var rssScope: String? = null,
 ) {
 
+    /** 瞬态缓存：预解析后的书源作用域集合 */
+    @Transient
+    private var _scopeSet: Set<String>? = null
+
+    /** 瞬态缓存：预解析后的订阅源作用域集合 */
+    @Transient
+    private var _rssScopeSet: Set<String>? = null
+
+    /** 瞬态缓存：编译后的正则表达式对象 */
+    @Transient
+    private var _regex: Regex? = null
+
     /** 检查书源作用范围是否包含指定的标志 */
     fun hasScope(flag: Int): Boolean = (targetScope and flag) != 0
 
     /** 检查订阅源作用范围是否包含指定的标志 */
     fun hasRssScope(flag: Int): Boolean = (rssTargetScope and flag) != 0
+
+    /** 预解析后的书源作用域集合，空集合=全部生效 */
+    fun scopeSet(): Set<String> {
+        if (_scopeSet == null) {
+            _scopeSet = scope?.split(";")
+                ?.map { it.trim() }
+                ?.filter { it.isNotBlank() }
+                ?.toSet()
+                ?: emptySet()
+        }
+        return _scopeSet!!
+    }
+
+    /** 预解析后的订阅源作用域集合，空集合=全部生效 */
+    fun rssScopeSet(): Set<String> {
+        if (_rssScopeSet == null) {
+            _rssScopeSet = rssScope?.split(";")
+                ?.map { it.trim() }
+                ?.filter { it.isNotBlank() }
+                ?.toSet()
+                ?: emptySet()
+        }
+        return _rssScopeSet!!
+    }
+
+    /** 获取缓存的正则表达式，若编译失败或非正则模式则返回 null */
+    fun regex(): Regex? {
+        if (!isRegex || pattern.isBlank()) return null
+        if (_regex == null) {
+            _regex = runCatching { Regex(pattern) }.getOrNull()
+        }
+        return _regex
+    }
+
+    /** 更新作用的书源字符串，同时清空预解析缓存 */
+    fun updateScope(newScope: String?) {
+        scope = newScope
+        _scopeSet = null
+    }
+
+    /** 更新作用的订阅源字符串，同时清空预解析缓存 */
+    fun updateRssScope(newRssScope: String?) {
+        rssScope = newRssScope
+        _rssScopeSet = null
+    }
 
     /**
      * 判断书籍是否匹配该屏蔽规则
@@ -56,7 +113,7 @@ data class BlockRule(
         if (searchTargets.isEmpty()) return false
         return searchTargets.any { text ->
             if (isRegex) {
-                runCatching { Regex(pattern).containsMatchIn(text) }.getOrDefault(false)
+                regex()?.containsMatchIn(text) == true
             } else {
                 text.contains(pattern)
             }
@@ -69,12 +126,9 @@ data class BlockRule(
      * - scope 非空时，仅对匹配书源URL的书源生效
      */
     fun matchesScope(sourceUrl: String): Boolean {
-        val scopeVal = scope
-        if (!scopeVal.isNullOrBlank()) {
-            val items = scopeVal.split(";").map { it.trim() }.filter { it.isNotBlank() }
-            if (!items.any { sourceUrl.contains(it) }) return false
-        }
-        return true
+        val set = scopeSet()
+        if (set.isEmpty()) return true
+        return set.any { sourceUrl.contains(it) }
     }
 
     /**
@@ -83,12 +137,9 @@ data class BlockRule(
      * - rssScope 非空时，仅对匹配订阅源URL的订阅源生效
      */
     fun matchesRssScope(sourceUrl: String): Boolean {
-        val rssScopeVal = rssScope
-        if (!rssScopeVal.isNullOrBlank()) {
-            val items = rssScopeVal.split(";").map { it.trim() }.filter { it.isNotBlank() }
-            if (!items.any { sourceUrl.contains(it) }) return false
-        }
-        return true
+        val set = rssScopeSet()
+        if (set.isEmpty()) return true
+        return set.any { sourceUrl.contains(it) }
     }
 
     /**
@@ -104,7 +155,7 @@ data class BlockRule(
         if (searchTargets.isEmpty()) return false
         return searchTargets.any { text ->
             if (isRegex) {
-                runCatching { Regex(pattern).containsMatchIn(text) }.getOrDefault(false)
+                regex()?.containsMatchIn(text) == true
             } else {
                 text.contains(pattern)
             }

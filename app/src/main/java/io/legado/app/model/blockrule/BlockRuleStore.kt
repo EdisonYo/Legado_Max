@@ -26,21 +26,22 @@ object BlockRuleStore {
     /**
      * 加载所有屏蔽规则
      * 优先从缓存读取，缓存未命中时从 SharedPreferences 反序列化
+     * 返回不可变列表（直接引用缓存），调用者不应修改返回的列表
      */
-    fun load(context: Context): MutableList<BlockRule> {
-        cachedRules?.let { return it.toMutableList() }
+    fun load(context: Context): List<BlockRule> {
+        cachedRules?.let { return it }
         val stored = context.getPrefString(PreferKey.blockRuleItems)
         if (stored.isNullOrBlank()) {
-            return mutableListOf()
+            return emptyList()
         }
-        val rules = GSON.fromJsonArray<BlockRule>(stored).getOrNull()?.toMutableList()
+        val rules = GSON.fromJsonArray<BlockRule>(stored).getOrNull()
         if (rules != null) {
             val sanitized = rules.map { sanitizeRule(it) }
             cachedRules = sanitized
             BlockRuleGroupStore.ensureFromRules(context, sanitized)
-            return sanitized.toMutableList()
+            return sanitized
         }
-        return mutableListOf()
+        return emptyList()
     }
 
     /** 加载已启用且有匹配模式的规则 */
