@@ -1,0 +1,1333 @@
+[33mec5bb7a1[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;33mtag: [m[1;33mbeta-3.26.062020[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m 屏蔽规则+
+[33mc8614be6[m[33m ([m[1;31morigin/0620-10[m[33m, [m[1;32m0620-10[m[33m)[m 06-20
+[33m934dc724[m[33m ([m[1;31morigin/beta[m[33m)[m 合并(keep)
+[33mcbf96b19[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061921[m[33m, [m[1;31msuml/main[m[33m, [m[1;31msuml/HEAD[m[33m, [m[1;31morigin/suml-main[m[33m)[m 更新日志
+[33m78502994[m 拉取来自EdisonYo的更新 * [搜索进度条]：  * [功能]：响应超过10秒的书源实时在进度条提示  * [功能]：搜索结束后，提示错误概览  * [功能]：点击进度条可展开信息面板  * [功能]：信息面板支持点击书源进行调试  * [优化]：合并屏蔽信息 06-19
+[33m2cd52475[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061920[m[33m)[m 扩展搜索进度条
+[33mde19db94[m[33m ([m[1;31morigin/0619-15[m[33m, [m[1;32m0619-15[m[33m)[m 06-19
+[33m7bff8425[m 删除
+[33m6c6cf8c4[m[33m ([m[1;31morigin/0[m[33m)[m 合并(keep)
+[33m5b31a452[m keep
+[33m6c0e4025[m[33m ([m[1;31morigin/0618-3[m[33m, [m[1;32m0618-3[m[33m)[m 06-18
+[33mb6955433[m beta合并(keep)
+[33me90b668d[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061800[m[33m)[m 补上缺的字符串资源
+[33m8cb3e2bc[m fix：选择恢复内容界面优化
+[33m808b72fa[m fix：去除300ms防抖延迟造成文字上下跳动，选择恢复文件界面优化按钮颜色
+[33m4d37397f[m fix：多个界面默认显示快速滚动条
+[33m50c75956[m feat：离线缓存界面增加文件大小，字典规则界面增加快速滚动条
+[33m92849184[m 完善调试专属日志分流与配置入口
+[33mca9526dc[m 调试日志：新增 AppConfig 的专属开关和分类配置
+[33m474601a5[m 调试日志：回滚 AppConfig.debugLogOnlyCategories 测试
+[33m104b81a1[m 调试日志：新增 AppConfig.debugLogOnlyCategories 测试
+[33m95d1a556[m 调试日志：新增调试专属日志模式的 PreferKey 常量
+[33m6d7f39e8[m 文档：补充调试专属日志功能实现计划
+[33m29fbefe0[m 文档：修正调试专属日志设计说明中的 putNotSave 描述
+[33mdeaede08[m 文档：补充调试专属日志设计说明
+[33m34e34dcc[m fix：调试模式改为调试工具
+[33m92190914[m[33m ([m[1;31mupstream/beta[m[33m, [m[1;31mupstream/Suml-1[m[33m)[m fix：选择恢复内容界面优化
+[33me28a8a3e[m fix：去除300ms防抖延迟造成文字上下跳动，选择恢复文件界面优化按钮颜色
+[33m0304eff9[m fix：多个界面默认显示快速滚动条
+[33m8a8cabe1[m feat：离线缓存界面增加文件大小，字典规则界面增加快速滚动条
+[33mdc432e34[m 完善调试专属日志分流与配置入口
+[33m66d695e5[m 调试日志：新增 AppConfig 的专属开关和分类配置
+[33m99399a97[m 调试日志：回滚 AppConfig.debugLogOnlyCategories 测试
+[33maf755e49[m 调试日志：新增 AppConfig.debugLogOnlyCategories 测试
+[33mbf18f90e[m 调试日志：新增调试专属日志模式的 PreferKey 常量
+[33m769e1407[m 文档：补充调试专属日志功能实现计划
+[33mf7a08c12[m 文档：修正调试专属日志设计说明中的 putNotSave 描述
+[33mebf29b99[m 文档：补充调试专属日志设计说明
+[33m786593a1[m keep
+[33m70efb5cb[m 微
+[33mdc1f1118[m[33m ([m[1;31morigin/0617-4[m[33m, [m[1;32m0617-4[m[33m)[m 06-17
+[33m01c239c3[m 合并(keep)
+[33mebdeed8c[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061713[m[33m, [m[1;31morigin/upstream-beta[m[33m)[m 优化与封装Compose的AppConfirmDialog的dialog
+[33m2b9fa83f[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061712[m[33m)[m ui微调
+[33me6bac335[m 优化与封装Compose的AppConfirmDialog的dialog
+[33mcd4e6111[m 封装Compose dialog
+[33mc0b59ec7[m 页眉和页脚上下边距最大值从100dp改为200dp
+[33mebcca323[m 优化悬浮播放关闭按钮
+[33maf4959dd[m fix：普通朗读模式下按返回可以关闭朗读
+[33m0e0576fd[m fix：调试模式改为调试工具
+[33mcff6d7c0[m 优化与封装Compose的AppConfirmDialog的dialog
+[33m823fed42[m 封装Compose dialog
+[33m0f478121[m 页眉和页脚上下边距最大值从100dp改为200dp
+[33m35379286[m 优化悬浮播放关闭按钮
+[33mb94d04cc[m fix：普通朗读模式下按返回可以关闭朗读
+[33m6cb25ff9[m Merge pull request #101 from Suml-1/0616-18
+[33mbcd80f4a[m[33m ([m[1;31msuml/0616-18[m[33m)[m Merge branch 'youfengknight-beta' into 0616-18
+[33mafcc73f0[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061616[m[33m)[m 更新日志
+[33m19e52f9f[m 修复备份时已删除的背景图片仍被打包的问题
+[33m544f8f0b[m 屏蔽规则功能增强与 Bug 修复
+[33m7edb880c[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061611[m[33m, [m[1;31morigin/test[m[33m)[m 支持排序后即时保存
+[33mcf3f0975[m[33m ([m[1;31morigin/0616-2[m[33m, [m[1;32m0616-2[m[33m)[m 06-16
+[33mba0c61eb[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061601[m[33m)[m 跳转确认界面支持记住选择
+[33mcbd9c23e[m[33m ([m[1;31morigin/0616[m[33m, [m[1;32m0616[m[33m)[m 06-16
+[33m7a9169b6[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061522[m[33m)[m 修复列表布局下作者、当前章节、最新章节行间距不一的情况
+[33m0bc46ead[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061520[m[33m)[m 修复导入样式备份文件后，背景图透明度与翻页动画无法应用的问题
+[33m6ea19c81[m[33m ([m[1;31morigin/0615-6[m[33m, [m[1;32m0615-6[m[33m)[m 06-15
+[33m14568694[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061516[m[33m)[m 正文重新渲染
+[33m8dcb0988[m[33m ([m[1;31morigin/0615-5[m[33m, [m[1;32m0615-5[m[33m)[m 06-15
+[33m4bb317d7[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061515[m[33m)[m 合并屏蔽规则&keep
+[33m93532952[m 合并(keep)
+[33m86dfa2af[m[33m ([m[1;31morigin/0615-3[m[33m, [m[1;32m0615-3[m[33m)[m 06-15
+[33m77b9831c[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061513[m[33m)[m 更新日志
+[33m13ee2550[m 标签的外框跟着书籍外框变动
+[33m3e2cf707[m fix: 修复横竖屏切换导致章节内容显示不全
+[33m3b97112e[m 列表布局作者和更新时间等高
+[33m836f0eb6[m 修改列表布局标题与作者之间的距离
+[33mcf38cb13[m 修复屏蔽规则作用范围持久化及订阅源 Fragment detached 崩溃
+[33md5abf0db[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061512[m[33m)[m 重新区分搜索范围与搜索菜单的分组启用状态
+[33m5ac46e4a[m[33m ([m[1;31morigin/0615-1[m[33m, [m[1;32m0615-1[m[33m)[m 06-15
+[33md2359fb2[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061500[m[33m)[m 书架布局：新增书籍外边框显示开关并优化列表间距
+[33mad42f026[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061422[m[33m)[m 常规
+[33mae0cc52a[m[33m ([m[1;31morigin/0614-7[m[33m, [m[1;32m0614-7[m[33m)[m 06-14
+[33m09e7460e[m 屏蔽规则功能全面增强
+[33mf2576fec[m 将 .workbuddy 目录加入 .gitignore 忽略列表，避免项目工作数据被版本控制跟踪
+[33mfcdf11c5[m 优化屏蔽规则
+[33m881edbf5[m fix：高亮规则编辑界面的开关颜色修复
+[33me5c8b2e4[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061418[m[33m)[m 换源时支持关闭关闭评分
+[33m8c5c7f75[m 微调
+[33m43bfe89c[m[33m ([m[1;31morigin/0614-5[m[33m, [m[1;32m0614-5[m[33m)[m 06-14
+[33m08f226f6[m[33m ([m[1;31mupstream/youfengknight[m[33m)[m fix：高亮规则编辑界面的开关颜色修复
+[33m3d6e7e1c[m fix：修复底栏编辑界面无法滚动
+[33m7fd33b1c[m 更新
+[33m21f0a2ec[m 更新打包流程
+[33m2d7198a2[m 更新
+[33me3c2e69a[m fix：修改自动打包分支
+[33m675a76d5[m fix：修复下拉选择分组bug
+[33m40b7474d[m fix：去掉冲突
+[33mfea2d41b[m 两个分支冲突解决完成
+[33me7caadd7[m feat：底栏管理中可以切换图标
+[33me1acbe7e[m feat：底栏选择悬浮模式后底栏会透明
+[33m01ba83ed[m fix：底栏管理界面主题优化
+[33m0b95d75a[m feat：底栏管理界面基本可用
+[33mb0a8fd08[m feat: 将导航栏配置存储功能添加至应用配置中
+[33m5deb1fb7[m feat: 添加导航栏配置数据结构
+[33m443f3abd[m fix: 添加tools:overrideLibrary配置，以兼容liquidglass软件开发工具包
+[33mb67df9e3[m feat: 添加导航栏配置项与事件
+[33mcffbacd9[m feat: 添加liquidglass依赖项
+[33mcf5aded0[m 更新
+[33m80e36c85[m 优化
+[33mb4972c23[m refactor: 使用 showHelp 扩展函数简化帮助菜单处理
+[33m566b5caa[m feat: 实现导出编码帮助菜单点击处理
+[33mf56dcc4f[m feat: 在缓存与导出菜单中添加帮助菜单项
+[33me2fd3f77[m feat: 添加导出编码说明文档到帮助文档系统
+[33m6c2cd90f[m fix：缓存导出界面书名颜色修复
+[33mda24178c[m feat：字典规则调试支持预览
+[33mbd95f43f[m fix(书架): 修复单行Item时底部margin缺失问题
+[33m03ba42ea[m fix(书架): 修复混合布局时行号计算错误导致margin不正确
+[33m75a576a5[m feat(书架): 新增文件夹视图和书籍视图独立配置
+[33mf38a338c[m 合并来自EdisonYo的一些优化
+[33mbecb6fce[m feat(书架): 将分组样式标签切换分组改为下拉选择
+[33m029a6ab5[m 优化中英文资源文件
+[33m970a9f37[m 更新日志
+[33m977134b1[m feat(阅读): 高亮规则支持背景颜色选择
+[33mdc5dfab8[m fix(阅读): 修复高亮规则偶现不立即生效的问题
+[33m80c50e56[m 调整简体中文模式下代码编辑器主题的名称
+[33m116d6534[m fix(i18n): 删除values-zh中btn_next和btn_previous的重复定义
+[33mda3665d4[m fix(i18n): 补充values-zh缺失的67个字符串资源
+[33md84faff9[m fix(i18n): 删除values-zh中重复的字符串定义
+[33m6715709a[m fix(i18n): 补充values-zh缺失的字符串资源
+[33m56f1df72[m fix(阅读): 修复正文高亮规则偶现高亮不完全的问题
+[33m62c1e71c[m fix(i18n): 修复英语strings.xml中的中文字符串翻译问题
+[33m009e7d71[m fix(书架): 修复发现界面书籍详情页加入分组后未加入书架的竞态条件
+[33mfcf19f93[m 试修复悬浮球在部分机型点击书架书籍重置位置的问题
+[33m1ab1a08f[m 更新日志
+[33m423d388b[m feat(封面): 瀑布流布局支持封面设置，优化缓存管理
+[33m6323b2fd[m 优化发现界面瀑布流布局简介行数
+[33m10104c46[m 调整搜索进度条字号
+[33m9753bbf0[m 优化缓存并发率
+[33m35cc6014[m 更新日志
+[33m11a08d44[m style(video): 全屏快捷跳转按钮居中显示
+[33m7b0ad9b7[m refactor(video): 全屏快捷跳转按钮融入控制栏底部行
+[33m56e445da[m fix(video): 修复静音立即生效、添加全屏快捷跳转按钮（静音的修复尚未成功）
+[33m93f5108e[m fix(video): 修复快捷跳转按钮显示不完全、静音播放立即生效
+[33m9976ea5f[m style(video): 快捷跳转按钮字号调整为8sp
+[33m134d38e2[m fix(video): 修复快捷跳转按钮分钟数更新、A图案双箭头、静音播放实时生效
+[33m955e81b4[m fix(video): 修复图标引用错误 - 使用Icons.Default替代AutoMirrored
+[33m3c9b5b26[m fix(video): 修复快捷跳转按钮状态更新、配置菜单多余文本、A>=B验证、静音播放实时生效
+[33m20b5661b[m fix(video): 修复视频播放器手势控制多个问题 - 滑动提示消失、按钮图标化、音量调节逻辑、系统UI隐藏
+[33m4a9416de[m feat(video): 增强视频播放器手势控制功能 - 双击快退/快进、快捷跳转按钮、滑动调节亮度/音量、Compose重构设置界面
+[33m3fcaa69c[m fix(BookInfo): upBook(intent) 重新加载书籍时同步更新书架状态
+[33m1b4cdfcd[m fix(BookInfo): 详情页从搜索记录加载书籍时同步检测书架状态(成功一半)
+[33m2d928957[m fix(BookInfo): 从书籍详情页加入书架后同步更新 ReadBook.inBookshelf 状态 （成功一半）
+[33me01f64d9[m chore: .gitignore 排除 gradle-daemon-jvm.properties
+[33mc1b57a4e[m feat(explore): 网格和瀑布流间距随列数等比缩放
+[33m4d6eb362[m fix(explore): 发现页列数变化时封面图重新加载
+[33m525407ad[m 发现页布局设定按书源分别记忆
+[33ma8c4ea3d[m Revert "feat(bookshelf): 增加独立的文件夹视图布局设置"
+[33m7c432566[m feat(bookshelf): 增加独立的文件夹视图布局设置
+[33m26dd34f3[m fix(debug): 悬浮球位置仅退出阅读再进入时重置，其他场景保持记忆
+[33mece6f650[m 更新日志
+[33m4f101c23[m fix(发现页): 切换布局和列数时保持滚动位置，不再跳回顶部
+[33m053f2c38[m docs(发现页): 更新 handleSwitchLayout 和 scrollToBottom 注释以匹配当前代码行为
+[33m634df01f[m 网格布局与瀑布流布局独立列数
+[33m0585ba66[m 更新
+[33m1ed48f35[m cleanup：删除废弃的自定义帮助文档弹窗
+[33m5344c597[m feat：增加自定义文档字符串资源
+[33m962d8d6a[m docs: 更新日志补充06/04-06/05发现页布局相关更新
+[33m43c4707a[m style(发现页): 网格和瀑布流布局封面右上角增加书架绿点标识
+[33m0e29e6e1[m style(发现页): 已在书架绿点从书名左侧移至封面右上角
+[33m526de090[m feat(发现页): 瀑布流加卡片边框并显示完整信息，简介按列数动态调整行数
+[33me09abe53[m cleanup: 清理Adapter死代码columnCount属性及bindWaterfall加tag去重优化
+[33maf957036[m fix: 移除Glide centerCrop()变换,只保留ImageView scaleType=centerCrop - 核心修复
+[33mefa9f3b2[m fix: cardWidth改用屏幕宽度计算替代parent.width避免测量前为0导致极窄
+[33mf7b6411e[m fix: 显式设置ImageView像素宽高替代MATCH_PARENT实现瀑布流 - 按用户方案(设备宽-留白)/列数=列宽
+[33m3d2d2a8c[m fix: 移除notifyItemChanged纯靠adjustViewBounds实现瀑布流错落 - 对齐RSS方案,菜单标题加当前状态
+[33mef7f5137[m fix(发现页): 修复 bindWaterfall 重绑优化跳过 notifyItemChanged 回调节点
+[33m9f026b1c[m fix(发现页): 按 RSS 原版方案——用 parent.width 算列宽 + MATCH_PARENT 宽度
+[33meb2efce8[m fix(发现页): 智能检测比例+动态调整容器高度实现瀑布流错落效果
+[33m0661f2ea[m fix(发现页): 按 RSS 瀑布流方案重写——缓存宽高比+显式计算高度
+[33me74a605a[m fix(发现页): 瀑布流使用独立 ImageView 布局实现真正错落效果
+[33m9e8aa21b[m fix(发现页): 修复旧版 Boolean 值读取导致的 ClassCastException 崩溃
+[33m086acac4[m feat(发现页): 新增瀑布流布局，删除适配宽图功能
+[33m2df74783[m fix(发现): 网格模式返回时封面不再闪烁，同bookUrl跳过重复load
+[33mf18a534a[m fix(发现): 冷却期内延迟重试加载，解决滑到底部卡死不加载的bug
+[33m8615ba1c[m fix(发现): 冷却限制仅在网格模式下生效，列表模式不受影响
+[33mfb5b2f07[m refactor(发现): 加载冷却限制改为仅列数>3时生效
+[33mb1b06a77[m feat(发现): 加载下一页增加2秒冷却限制，防止多列时频繁请求
+[33me56f4cf7[m fix(发现): 修复加载下一页时已显示封面闪烁
+[33m302315e4[m 优化网格发现页
+[33mc0f4128a[m feat(发现): 新增切换布局功能，支持1-10列网格展示
+[33m22f0384f[m 添加发现页“适配宽图”开关
+[33m6521635f[m 更新日志
+[33mb3e85fde[m 于主题设置>封面设置增加适配宽图开关
+[33m256b69af[m 修改变基冲突
+[33mf0392d19[m Merge pull request #99 from Suml-1/main
+[33md51dc143[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061323[m[33m)[m 更新封面规则
+[33m09761a02[m[33m ([m[1;31morigin/0613-1[m[33m, [m[1;32m0613-1[m[33m)[m 06-13
+[33m313d1b81[m Revert "优化滚动条"
+[33meecead72[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061322[m[33m)[m 优化滚动条
+[33m1644f994[m fix(发现): 修复起效规则不实时更新，增加展开查看匹配书籍
+[33m7bac1236[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061319[m[33m)[m 更新日志
+[33mdf29a79d[m feat(发现): 添加书源发现界面屏蔽规则功能
+[33m8a8cb06c[m feat(阅读): 高亮规则添加书籍作用域功能
+[33mda99e8e1[m 拉取来自EdisonYo的“搜索范围支持临时调用未开启的书源/分组，不需要改变其日常的启用状态” 06-12 (cherry picked from commit 88d7d0d1f617b640aab4f32f749e5b87b4deae79)
+[33m6a6856c5[m Merge suml/main (keep local)
+[33m3fa46cc6[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061221[m[33m)[m 更新日志
+[33mee31ea90[m fix(阅读): 修复小窗模式切换到全屏模式后章节显示不全的问题
+[33m436fc7c9[m 优化视频设置里的文字在不同主题下的显示
+[33mf60b80c3[m feat(书架): 优化书架布局菜单界面样式并添加下拉选择分组功能
+[33mf8a74e96[m Merge pull request #98 from Suml-1/main
+[33m8839fbaa[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061219[m[33m, [m[1;31morigin/1[m[33m, [m[1;31morigin/0612-11[m[33m, [m[1;32mbackup-main-20260613-112811[m[33m, [m[1;32mbackup-main-20260613-111819[m[33m, [m[1;32mbackup-main-20260613-111323[m[33m, [m[1;32mbackup-main-[m[33m, [m[1;32m0612-11[m[33m)[m Merge remote-tracking branch 'suml/main' into 0612-11
+[33ma67353a4[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061217[m[33m)[m 搜索范围支持临时调用未开启的书源/分组，不需要改变其日常的启用状态
+[33m88d7d0d1[m 06-12
+[33m8f6a7ee2[m 更新日志
+[33m9d471e67[m fix(bookshelf): 修复标签分组样式下滑动切换分组名称不更新问题
+[33mde3b222d[m Merge branch '0612-14'
+[33m944753a9[m feat(bookshelf): 列表视图添加显示更多信息功能
+[33m8f670963[m 更新日志
+[33mc55908d8[m 更新日志
+[33m7fbe21c0[m 06-12 拉取来自EdisonYo的“优化内容查询的分类筛选机的逻辑” (cherry picked from commit b1109b106537d69e8e43c8b2815e8353e0677bde)
+[33mde58f4fd[m 06-11 拉取来自EdisonYo的“完善内容查询的搜索历史面板” (cherry picked from commit ecd47c8f93eca0f514812bb70a137b13dd14798b)
+[33m68800b2b[m 06-11 拉取来自EdisonYo的“修复一个恢复备份后的崩溃问题” (cherry picked from commit ef211a28283c5db8bfdf0445ad0250d24d2285ee)
+[33m35ffe1ae[m 优化分组样式为标签时的切换分组下拉菜单
+[33m5e7813f1[m Merge pull request #97 from Suml-1/main
+[33m9dd55508[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061211[m[33m)[m 优化内容查询的分类筛选机的逻辑
+[33mb1109b10[m[33m ([m[1;31morigin/单筛[m[33m, [m[1;31morigin/0612-5[m[33m, [m[1;32m0612-5[m[33m)[m 06-12
+[33m6d241d8f[m fix(书架): 修复单行Item时底部margin缺失问题
+[33m921b11db[m fix(书架): 修复混合布局时行号计算错误导致margin不正确
+[33m54480471[m feat(书架): 新增文件夹视图和书籍视图独立配置
+[33mb2c1c14a[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061200[m[33m, [m[1;32m0612-2[m[33m, [m[1;32m0612-1[m[33m)[m 修复一个恢复备份后的崩溃问题
+[33mef211a28[m[33m ([m[1;31morigin/0611-7[m[33m, [m[1;32m0611-7[m[33m)[m 06-11
+[33meca285e6[m 合并来自EdisonYo的一些优化
+[33m70299735[m feat(书架): 将分组样式标签切换分组改为下拉选择
+[33m212df42f[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061114[m[33m)[m 修复正文高亮规则偶现高亮不完全的问题
+[33mdcb91553[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061112[m[33m, [m[1;31morigin/0611[m[33m)[m 完善内容查询的搜索历史面板
+[33mecd47c8f[m[33m ([m[1;31morigin/0611-4[m[33m, [m[1;32m0611-4[m[33m)[m 06-11
+[33m59586705[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061109[m[33m)[m 修正源管理内容查询的异常逻辑，并适配主题
+[33mb30b6a81[m[33m ([m[1;31morigin/0611-1[m[33m, [m[1;32m0611-1[m[33m)[m 06-11
+[33m3d9f7380[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061020[m[33m)[m 常规
+[33m2d6a474e[m[33m ([m[1;31morigin/0610-7[m[33m, [m[1;32m0610-7[m[33m)[m 06-10
+[33mf4d62247[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061013[m[33m)[m Merge branch '0610-10'
+[33mc6f00a4b[m 优化中英文资源文件
+[33m635880f1[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061012[m[33m, [m[1;31morigin/0610[m[33m)[m 语言文件
+[33md6c762b4[m 批量删除
+[33m06e8f971[m[33m ([m[1;31morigin/0610-2[m[33m, [m[1;32m0610-2[m[33m)[m 批量删除
+[33mf492d09f[m[33m ([m[1;32m0610[m[33m)[m 06-10
+[33m417082a7[m feat(阅读): 高亮规则支持背景颜色选择
+[33mcb016530[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061000[m[33m)[m 更新日志
+[33m8b6cb01c[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060923[m[33m, [m[1;31morigin/0910[m[33m, [m[1;31morigin/0609[m[33m)[m 备份选择器改用Compose界面，支持反选
+[33md31c240f[m feat(阅读): 高亮规则支持背景颜色选择
+[33md7a5d12a[m[33m ([m[1;31morigin/0609-14[m[33m, [m[1;32m0609-14[m[33m)[m 06-09
+[33m030e168c[m fix(阅读): 修复高亮规则偶现不立即生效的问题
+[33m7d90aa49[m 调整简体中文模式下代码编辑器主题的名称
+[33meb7af65b[m fix(i18n): 删除values-zh中btn_next和btn_previous的重复定义
+[33mfecbbc9e[m fix(i18n): 补充values-zh缺失的67个字符串资源
+[33m24c4b094[m fix(i18n): 删除values-zh中重复的字符串定义
+[33m9b1e82cd[m fix(i18n): 补充values-zh缺失的字符串资源
+[33ma453c7e6[m fix(阅读): 修复正文高亮规则偶现高亮不完全的问题
+[33m3482fd36[m fix(i18n): 修复英语strings.xml中的中文字符串翻译问题
+[33m5ce9b56c[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060909[m[33m)[m fix
+[33m220b224e[m[33m ([m[1;32m0609[m[33m)[m 06-09
+[33m974b1f2a[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060819[m[33m)[m 长按文本菜单的“菜单管理”始终放置于溢出菜单的最后一项
+[33m753200fc[m[33m ([m[1;31morigin/0608-5[m[33m, [m[1;32m0608-5[m[33m)[m 06-08
+[33me7d911a2[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060814[m[33m)[m 日志更新
+[33md9166cad[m 合并处理冲突
+[33md081acc3[m Merge remote-tracking branch 'suml/main'
+[33m4505fafc[m 合并处理冲突
+[33m169d650a[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060811[m[33m)[m fix(书架): 修复发现界面书籍详情页加入分组后未加入书架的竞态条件
+[33mb08787c6[m 试修复悬浮球在部分机型点击书架书籍重置位置的问题
+[33m4141b8ff[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060803[m[33m, [m[1;31morigin/0608[m[33m)[m 恢复标记
+[33m620d4479[m 冲突合并处理
+[33ma9f310d4[m[33m ([m[1;31morigin/0608-3[m[33m, [m[1;32m0608-3[m[33m)[m 06-08
+[33mc95ede4d[m 修复悬浮窗与加入书架的冲突
+[33m4772e84e[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060802[m[33m)[m 修复视频悬浮窗与阅读记录的冲突
+[33m46e65c6e[m[33m ([m[1;31morigin/0608-2[m[33m, [m[1;32m0608-2[m[33m)[m 06-08
+[33m8c3cd871[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060801[m[33m)[m 视频播放器音量悬浮窗同步
+[33mbcf10c4d[m[33m ([m[1;31morigin/0608-1[m[33m, [m[1;32m0608-1[m[33m)[m 06-08
+[33mea5cfa04[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060723[m[33m)[m 更新日志
+[33m78cd0ea9[m feat(封面): 瀑布流布局支持封面设置，优化缓存管理
+[33mc1e11db7[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060720[m[33m)[m 优化发现界面瀑布流布局简介行数
+[33m71a00f35[m 调整搜索进度条字号
+[33m757e0860[m 优化缓存并发率
+[33m43582c62[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060718[m[33m, [m[1;31morigin/0607[m[33m)[m fix
+[33m6ec25c23[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060717[m[33m)[m 更新日志
+[33mc29fb552[m style(video): 全屏快捷跳转按钮居中显示
+[33m0924ce2a[m refactor(video): 全屏快捷跳转按钮融入控制栏底部行
+[33mbe251303[m fix(video): 修复静音立即生效、添加全屏快捷跳转按钮（静音的修复尚未成功）
+[33m3cbb9e6a[m fix(video): 修复快捷跳转按钮显示不完全、静音播放立即生效
+[33m6f96b41a[m style(video): 快捷跳转按钮字号调整为8sp
+[33mcfb775b7[m fix(video): 修复快捷跳转按钮分钟数更新、A图案双箭头、静音播放实时生效
+[33m4d0e4eff[m fix(video): 修复图标引用错误 - 使用Icons.Default替代AutoMirrored
+[33m65c7c5f0[m fix(video): 修复快捷跳转按钮状态更新、配置菜单多余文本、A>=B验证、静音播放实时生效
+[33mbe95287a[m fix(video): 修复视频播放器手势控制多个问题 - 滑动提示消失、按钮图标化、音量调节逻辑、系统UI隐藏
+[33m43d036c4[m feat(video): 增强视频播放器手势控制功能 - 双击快退/快进、快捷跳转按钮、滑动调节亮度/音量、Compose重构设置界面
+[33m5c14719c[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060702[m[33m)[m 初始化，压缩提交历史
+[33m1cc63620[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060701[m[33m)[m fix(BookInfo): upBook(intent) 重新加载书籍时同步更新书架状态
+[33m2be56ff6[m fix(BookInfo): 详情页从搜索记录加载书籍时同步检测书架状态(成功一半)
+[33m461e5892[m fix(BookInfo): 从书籍详情页加入书架后同步更新 ReadBook.inBookshelf 状态 （成功一半）
+[33m2744c390[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060622[m[33m)[m chore: .gitignore 排除 gradle-daemon-jvm.properties
+[33m120a70b5[m feat(explore): 网格和瀑布流间距随列数等比缩放
+[33mf9830818[m fix(explore): 发现页列数变化时封面图重新加载
+[33m27a31454[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060620[m[33m)[m Merge pull request #1 from EdisonYo/patch-1
+[33m68359ec7[m Revert "feat(bookshelf): 增加独立的文件夹视图布局设置"
+[33m55abe1e8[m 发现页布局设定按书源分别记忆
+[33m0d5fb2f5[m feat(bookshelf): 增加独立的文件夹视图布局设置
+[33m048ac836[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060616[m[33m)[m fix(debug): 悬浮球位置仅退出阅读再进入时重置，其他场景保持记忆
+[33mae02cad1[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060615[m[33m)[m 更新日志
+[33m2eddf750[m fix(发现页): 切换布局和列数时保持滚动位置，不再跳回顶部
+[33m9533bbc1[m docs(发现页): 更新 handleSwitchLayout 和 scrollToBottom 注释以匹配当前代码行为
+[33m6a32d69b[m 网格布局与瀑布流布局独立列数
+[33m5d2b7c9c[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060522[m[33m)[m Merge branch 'main' of github.com:Suml-1/Legado_Max
+[33m99e4a907[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.061723[m[33m, [m[1;33mtag: [m[1;33mbeta-3.26.061408[m[33m, [m[1;31mupstream/main[m[33m, [m[1;31mupstream/HEAD[m[33m)[m 更新
+[33mab28b8db[m fix：修复复用 WebView 没有恢复导致搜索页空白的问题
+[33m05464d7d[m cleanup：删除废弃的自定义帮助文档弹窗
+[33m94ddfdbe[m fix：添加的文档分组显示在最后
+[33m7cb65a0a[m feat：文档级联选择增加自定义分组和文件
+[33m7f1abe4f[m feat：文本弹窗支持编辑自定义文档
+[33m6a1f33df[m feat：文本弹窗增加自定义文档管理按钮
+[33m6a62efe0[m feat：增加自定义文档添加弹窗
+[33m6e8c08d8[m fix：补充帮助文档相关导入
+[33mab4d0ae1[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060521[m[33m)[m docs: 更新日志补充06/04-06/05发现页布局相关更新
+[33m55d65e0d[m style(发现页): 网格和瀑布流布局封面右上角增加书架绿点标识
+[33mb676f062[m style(发现页): 已在书架绿点从书名左侧移至封面右上角
+[33m2b6d70db[m feat(发现页): 瀑布流加卡片边框并显示完整信息，简介按列数动态调整行数
+[33mcf1b7918[m cleanup: 清理Adapter死代码columnCount属性及bindWaterfall加tag去重优化
+[33md22daac1[m fix: 移除Glide centerCrop()变换,只保留ImageView scaleType=centerCrop - 核心修复
+[33m9792f127[m fix: cardWidth改用屏幕宽度计算替代parent.width避免测量前为0导致极窄
+[33m37e30da2[m fix: 显式设置ImageView像素宽高替代MATCH_PARENT实现瀑布流 - 按用户方案(设备宽-留白)/列数=列宽
+[33m35393e72[m fix: 移除notifyItemChanged纯靠adjustViewBounds实现瀑布流错落 - 对齐RSS方案,菜单标题加当前状态
+[33md8b87974[m fix(发现页): 修复 bindWaterfall 重绑优化跳过 notifyItemChanged 回调节点
+[33me4cd82e0[m fix(发现页): 按 RSS 原版方案——用 parent.width 算列宽 + MATCH_PARENT 宽度
+[33m5b6fa413[m fix(发现页): 智能检测比例+动态调整容器高度实现瀑布流错落效果
+[33m067e0176[m fix(发现页): 按 RSS 瀑布流方案重写——缓存宽高比+显式计算高度
+[33mc37a2b56[m fix(发现页): 瀑布流使用独立 ImageView 布局实现真正错落效果
+[33m29177d05[m fix(发现页): 修复旧版 Boolean 值读取导致的 ClassCastException 崩溃
+[33m7c8f4c4a[m feat(发现页): 新增瀑布流布局，删除适配宽图功能
+[33m9f020fda[m fix(发现): 网格模式返回时封面不再闪烁，同bookUrl跳过重复load
+[33m20822f5f[m feat：增加自定义分组添加弹窗
+[33m880328ad[m feat：增加自定义文档字符串资源
+[33m499cfa15[m feat：文本弹窗显示自定义文档分组
+[33me6b97330[m feat：帮助搜索支持自定义文档
+[33mbc78e53b[m feat：帮助文档管理器支持自定义文档
+[33m94b73a38[m feat：实现自定义帮助文档管理器核心功能
+[33m523e887d[m feat：增加自定义帮助文档数据模型
+[33m4f8c9116[m docs：文档修改
+[33m76e2eaff[m docs：增加java/Android的api文档
+[33m57202648[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060500[m[33m)[m Merge branch 'youfengknight:main' into main
+[33m9b688d71[m fix(发现): 冷却期内延迟重试加载，解决滑到底部卡死不加载的bug
+[33mce836b0c[m fix(发现): 冷却限制仅在网格模式下生效，列表模式不受影响
+[33mc89ca7b8[m refactor(发现): 加载冷却限制改为仅列数>3时生效
+[33m9e06a0a6[m feat(发现): 加载下一页增加2秒冷却限制，防止多列时频繁请求
+[33me76184bc[m fix(发现): 修复加载下一页时已显示封面闪烁
+[33md9d74a9e[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060423[m[33m)[m feat：书籍缓存选择界面字体颜色优化，增加搜索，传统缓存界面也增加按钮
+[33m2d13ff41[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060422[m[33m)[m 优化网格发现页
+[33mb1fbeee5[m fix：修复正式版缓存无法备份问题
+[33mae8f4abd[m feat(发现): 新增切换布局功能，支持1-10列网格展示
+[33m00e0d7ec[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060419[m[33m)[m 添加发现页“适配宽图”开关
+[33mdab8d4d9[m 更新日志
+[33m0422bef8[m Merge branch 'main' of github.com:Suml-1/Legado_Max
+[33mb6071435[m 于主题设置>封面设置增加适配宽图开关
+[33m7d9a035b[m 优化
+[33m426d1119[m docs：增加几个文档
+[33m1ef02f1c[m fix：高亮规则界面按钮颜色优化
+[33m5f6a5e30[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060416[m[33m)[m 试优化书籍封面宽图不适配的问题
+[33m1e00e925[m feat：替换编辑界面增加高亮说明菜单
+[33m2c33d5cd[m fix：增加高亮规则文档，修改缓存选择界面的选中颜色
+[33m720de6d7[m 更新
+[33me955f58b[m docs: 更新书籍缓存帮助文档，说明导出仅支持本地
+[33m2e48ec6f[m feat: 实现书籍缓存选择界面帮助按钮点击逻辑
+[33ma11ef775[m fix: 使用字符串资源替代硬编码的帮助按钮描述
+[33mf38a8f6b[m feat: 书籍缓存选择界面添加帮助按钮
+[33m52cacd5a[m feat: 注册书籍缓存备份机制帮助文档到HelpDocManager
+[33mbbe3b143[m docs: 添加书籍缓存备份机制帮助文档
+[33m0cecae89[m fix：修复缓存单独无法恢复的bug，修复闪退bug
+[33m43390f32[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060410[m[33m)[m Merge pull request #90 from Suml-1/main
+[33m164aead6[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060402[m[33m)[m 更新日志
+[33ma369191f[m Merge branch 'main' of github.com:Suml-1/Legado_Max
+[33m195ef879[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060401[m[33m)[m 优化
+[33m503e4530[m fix：修复缓存备份恢复问题
+[33m6b883dda[m 更新日志
+[33mc6896ff5[m 重新上传
+[33m1716c44b[m 优化source.putConcurrent()与缓存可能存在的冲突
+[33m2fff70da[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060323[m[33m)[m 更新
+[33m15c4ceaf[m 增加搜索进度开关(默认关闭)
+[33m53bc732e[m fix：备份页面多语言优化
+[33m48961af4[m fix：阅读记录多语言优化
+[33m18bc2a56[m fix：阅读记录多语言优化
+[33me9438e38[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060321[m[33m)[m 优化章节信息显示
+[33m3c7e3d9b[m 优化
+[33m0dd28184[m fix：封面html代码预览正常
+[33ma4c691ee[m fix：优化对话框
+[33m85090215[m fix：优化规则回收站选中颜色显示
+[33mc9cca79b[m 优化
+[33mf6d657f7[m feat：垃圾桶增加搜索引擎规则
+[33m0f27f0bf[m feat：垃圾桶增加搜索框
+[33m734b29af[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060318[m[33m)[m 更新日志
+[33m3ba060c0[m feat(缓存): 支持自定义缓存并发率
+[33mce191638[m fix：优化内容查询界面字体颜色显示
+[33m183a79d7[m 优化繁体
+[33m0bf1ca02[m 优化繁体
+[33m137b61c7[m 优化繁体
+[33mce3073b1[m 优化繁体
+[33m37b62083[m 优化繁体
+[33me256ecb3[m fix：优化繁体字显示
+[33mf123f62a[m fix：优化字符串编码
+[33mbcdc5f7c[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060316[m[33m)[m 优化
+[33m400fe2ce[m feat：Room版本升级99，增加规则回收站
+[33m312b342f[m feat：切换规则保存后自动跳转到对应位置
+[33m89b286b4[m 注释
+[33m3c73e40e[m 注释
+[33m6ec11a32[m feat：上传历史长按显示全名
+[33meb1762a9[m fix：直链上传规则编辑改成多行文本
+[33m1a032748[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060302[m[33m, [m[1;33mtag: [m[1;33mbeta-3.26.060301[m[33m)[m 修复
+[33mfb066bb2[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060300[m[33m)[m Update README.md
+[33m3b819a78[m 更新
+[33m124a3e0b[m feat：文档选择改成级联分组
+[33mc9b2b727[m feat：文档选择器增加标题
+[33mf3489d0c[m 更新
+[33mfbb49a30[m feat：增加回调，备份和恢复能看到进度
+[33m6e603b86[m 更新
+[33ma5057d7f[m fix：修改规则解析器，让它们兼容旧字符串格式，不再因单个规则字段导致整次恢复失败
+[33m305b720b[m fix：修复订阅源定位
+[33mfd0cbfa4[m fix：修复定位功能失效问题
+[33mfa569466[m 更新
+[33m9dc4d0e1[m feat：展开菜单所有菜单名都可修改
+[33m37259d16[m feat：展开菜单可以修改每个菜单名称
+[33m6561511a[m 优化
+[33m6fb1ace2[m feat：菜单配置增加直接显示数量修改
+[33m8b68569e[m 优化
+[33m5a7788de[m feat：调试日志溢出菜单增加其他设置选项
+[33mc68697a1[m feat：增加查看恢复信息界面
+[33mf5abf669[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060221[m[33m)[m Merge pull request #84 from Suml-1/main
+[33ma24ef9b9[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060218[m[33m)[m Merge branch 'youfengknight:main' into main
+[33me15d60aa[m feat(search): 优化搜索界面进度条
+[33m58e8b425[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060123[m[33m)[m 更新
+[33m76ad5278[m feat：调试日志溢出菜单增加精准管理菜单
+[33md1a9d8e6[m 注释
+[33m8c863d4c[m feat：增加模块运行状态界面
+[33mf1bfa246[m 优化
+[33m0f1cb024[m feat：增加关闭阅读记录按钮
+[33m8d066e5c[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060121[m[33m)[m 更新
+[33m63843dd1[m feat：增加菜单配置功能，长按文字显示
+[33mef44501d[m 优化
+[33m8ce81027[m fix：长按菜单默认显示7个
+[33m12318a15[m 更新
+[33mf7590cdf[m fix：字重调整界面实时显示效果
+[33m6400b08e[m 修复搜索引擎选中项文字颜色
+[33m209f573d[m 修复网页搜索夜间模式显示
+[33m0fddfa01[m 优化网页搜索引擎管理面板
+[33mbaea96f7[m 保存网页搜索默认引擎
+[33m61c2d0a9[m 支持编辑网页搜索引擎
+[33m491b4722[m 添加网页搜索工具栏操作
+[33m7695651b[m 添加阅读页网页搜索面板
+[33m06ffed51[m 添加网页搜索文本菜单项
+[33m16d74d21[m Merge pull request #83 from Suml-1/main
+[33m2b16583d[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060120[m[33m)[m 合并上游后对冲突作出调整，重新上传
+[33m7f84fea5[m Merge remote-tracking branch 'origin/main'
+[33m11e6e771[m Merge remote-tracking branch 'origin/main'
+[33md34e31f4[m 新增功能：视频类书源也能被记录阅读记录
+[33m434e234d[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.060117[m[33m)[m 更新
+[33mba784be3[m feat：恢复选择菜单增加全选全不选功能 优化帮助界面菜单文字颜色
+[33m1bacff65[m fix：修复帮助界面菜单文字颜色选择
+[33m5a8f1b35[m feat：源和正文编辑内容的界面增加View 版滚动条
+[33mf18bdf2b[m feat：封面图集增加导入和导出zip功能
+[33m64a51c78[m feat：增加封面图集备份和恢复
+[33mb5f09fb5[m 优化封面图集
+[33me18ef5ba[m feat：封面图集随机使用分组图
+[33m270aacae[m feat：增加封面图集功能，数据库版本升级98
+[33m510da375[m feat：日志球屏幕边缘吸附
+[33m6250506d[m feat：存储管理显示路径并且能跳转路径
+[33mc8ed86ce[m feat：增加WebView缓存显示、优化存储管理
+[33mee7482df[m fix：修复用户级 CA 证书无法抓包的问题
+[33m019adec1[m refact：内容查询功能重构
+[33m7d7a7252[m feat：长按复制日志详情字段
+[33mb7ba5b98[m 修复因ReadBook.kt被修改导致书籍详情页阅读记录章节名未被记录的bug
+[33mf8098b27[m 搜索结果界面以"结果X~进度a/b"呈现进度
+[33m6175ad10[m - 搜索可多选书源进行搜索 - 搜索范围界面利用原有组件构建滑动块
+[33m66ea8403[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.053119[m[33m)[m Merge pull request #79 from Suml-1/main
+[33m824955b3[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.053118[m[33m)[m 刚刚的部分提交使书源未填写infoMap.save()的情况同样保留按钮的切换值，回退这一部分
+[33m6d2d69da[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.053115[m[33m)[m 修复在infoMap.save()作用下select和toggle按钮未正确保存切换值的bug
+[33m967a7719[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.053114[m[33m)[m Merge pull request #78 from EdisonYo/pull_正文懒加载缓存
+[33m574d949f[m Update ContentEditDialog.kt
+[33md3bf33e6[m Update ContentEditDialog.kt
+[33m91cd7976[m Update CacheBook.kt
+[33m29a60be3[m Update ContentEditDialog.kt
+[33m256484a4[m Update ContentEditDialog.kt
+[33m66f04971[m Update TextChapter.kt
+[33m847eeba5[m Update LazyContentManager.kt
+[33m1bf6e819[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.053111[m[33m)[m Merge pull request #76 from EdisonYo/正文懒加载pull
+[33mfb54a137[m Update TextPageFactory.kt
+[33m411c8430[m Update TextPage.kt
+[33mc55ca730[m Update TextChapterLayout.kt
+[33mf43a75f5[m Update ReadBook.kt
+[33m432e01c3[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.053100[m[33m)[m Merge pull request #75 from GEd520/main
+[33m1b9d4917[m 修复界面问题
+[33md549ebe7[m 修复上传
+[33m3a416ebd[m Merge pull request #74 from Suml-1/main
+[33m4d79236e[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.053020[m[33m)[m 优化详情页阅读时长统计
+[33me6519994[m 添加sha1，sha256，sha512编码
+[33mf67256d0[m 改星星为空心
+[33mc883c25b[m 修复背景显示问题
+[33ma99ca0e1[m 优化详情页阅读时长统计
+[33m210d9cd2[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.053015[m[33m)[m Merge pull request #73 from GEd520/main
+[33m279dda2f[m 优化调试日志悬浮球初始位置
+[33m5048613b[m 优化调试日志球
+[33m148677b5[m 优化漫画浏览
+[33ma6ed9edd[m 添加日漫模式
+[33mc5da817f[m 改默认主题
+[33m55a21684[m 优化调试悬浮球
+[33m4b46c15f[m Merge branch 'main' of github.com:GEd520/legados
+[33md1ea9efd[m 优化界面
+[33m494b088a[m Merge pull request #72 from Suml-1/main
+[33m83f40507[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.053001[m[33m)[m 数据库97?
+[33m29876c11[m 优化书籍阅读记录界面，优化数据库迁移
+[33m866b514b[m 优化书籍详情页阅读记录
+[33m6f8b65fc[m Merge branch 'main' of github.com:Suml-1/Legado_Max
+[33ma6d29673[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.052923[m[33m, [m[1;33mtag: [m[1;33mbeta-3.26.052922[m[33m)[m Merge pull request #71 from GEd520/main
+[33mf9ea6eeb[m 更新日志
+[33ma57197e4[m 优化书籍详情页阅读记录
+[33m5610400b[m Merge branch 'main' of github.com:GEd520/legados
+[33me4077d1d[m 修复合并打包
+[33m437c67ce[m 修复阅读记录空指针bug
+[33maa3b56cd[m 优化useweb高度收缩
+[33m082840cd[m 尝试优化阅读记录过多时的加载过慢及点击阅读记录界面的书籍卡顿问题
+[33m0ec68e78[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.052918[m[33m)[m 优化书源详情页的阅读记录，解决一分钟内多次阅读记录的问题
+[33mbe53b1a9[m 增加书源详情页的阅读记录
+[33m62a1c98f[m Merge branch 'youfengknight:main' into main
+[33m565bb986[m 增加书源详情页的阅读记录
+[33m0a6a3160[m Merge pull request #69 from GEd520/main
+[33m89f3d377[m 修复网页查询高亮问题
+[33m9da02a62[m 修复视频静音问题
+[33m03c04d69[m 优化适配颜色
+[33mc60f8d76[m 优化电量图标稳定
+[33m99094ce0[m 优化图标高度
+[33mf7a5563e[m 优化漫画图标和页脚
+[33m0d291ab4[m Merge pull request #63 from GEd520/main
+[33m5d80b953[m 优化和修复
+[33m6a53426c[m 保存
+[33mb308d6e8[m 优化漫画浏览
+[33m27eb461e[m 修复和优化
+[33mb72ea094[m 优化刷新强调色
+[33mada7fc42[m 优化动态图片和调试工具
+[33m5ad9bb7f[m Merge pull request #62 from GEd520/main
+[33me2266cc5[m 修复null情况
+[33mbd14962b[m 补日志
+[33m57a37b1d[m 优化收缩
+[33m780fe094[m 高亮加备份和恢复
+[33m8b8e34e2[m 修复高亮bug
+[33mbf8a97a8[m 更新
+[33mbc00edd1[m fix：修复Glide生命周期导致漫画浏览模式崩溃
+[33ma8708f97[m Merge pull request #61 from GEd520/main
+[33m094f1742[m 优化生命周期
+[33m6c088d0b[m 优化bug
+[33m6fcd9446[m 补日志
+[33m3cf01983[m 合并代码
+[33mdca71fbe[m 更新
+[33m31082e15[m fix：修复批量缓存因为日志过多导致软件崩溃
+[33m2229c8a9[m 优化漫画正文
+[33m6251ee22[m 更新
+[33m73fc93d4[m feat：增加目录不完全加载间隔
+[33m00afad6f[m 优化目录不完全加载的目录文字优化和调试优化
+[33m88e4237d[m fix：目录不完全加载功能修复，调试和阅读只加载一页目录即可开始阅读
+[33m8c6eed8e[m fix：目录渐进加载事件改用 sticky + 延迟重试兜底
+[33m88c1242a[m fix：目录渐进加载条件化 + 底部加载指示器
+[33m90a9ff6d[m fix：详情页支持目录渐进加载，无需等全部章节加载完
+[33m8e412fb1[m 优化漫画格式
+[33ma6f49157[m fix：并行优化离线缓存中的进度显示速度
+[33m91f7d36d[m 优化漫画预览格式
+[33m88de1bed[m fix：书籍缓存单独导出成zip
+[33m1c421425[m 改朗读逻辑
+[33md04c140e[m feat：选中书籍缓存可以单独导出，但需优化
+[33m0fd09ca0[m fix：书籍缓存选择改成独立Compose 界面
+[33m300fdc05[m Merge branch 'main' of github.com:GEd520/legados
+[33m4992e0a6[m 注释
+[33md4bbc455[m 注释
+[33m9815b8b0[m feat：所有书签增加全部展开/折叠
+[33mc32af84f[m 注释
+[33ma34de6a7[m feat：开启漫画浏览和不开启同时共享相同的漫画本地缓存
+[33m7abffe72[m feat：增加全局下划线离文字的远近设置
+[33mcbf6ded2[m fix：关闭"允许更新"时，会显示 toast
+[33m6866a580[m 更新
+[33m6a9c7b1f[m 更新
+[33mb074eb01[m 修复阅读记录bug
+[33mbaf64c39[m 优化卷名
+[33m4672f622[m 优化朗读强调色
+[33md47c79a1[m 订阅源加手动跳页
+[33m5a173780[m Merge pull request #60 from GEd520/main
+[33m7720dd1b[m 合并代码
+[33m2775d5ce[m Merge branch 'main' of github.com:GEd520/legados
+[33m31e3c76b[m 优化封面显示
+[33mfd03c5c9[m 更新
+[33m41fb7937[m fix：静音播放视频功能修复
+[33m9dc94694[m 优化卷名逻辑
+[33m4abacaec[m 优化朗读
+[33mb09c2035[m 优化卷名和加折叠开关
+[33m002d2787[m 注释
+[33mb4d2c814[m feat：增加订阅源调试预览url、启动页、描述规则、内容页功能
+[33mefae86b3[m feat：订阅源调试增加预览内容页功能
+[33mffe53791[m 注释
+[33m7b46318e[m 优化调试界面的订阅源执行情况日志
+[33m110f8baa[m 优化
+[33m065fce54[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.052213[m[33m)[m 更新
+[33m97d32cb8[m feat：源搜索内容增加展开和收缩分组功能
+[33m089d6e03[m feat：增加订阅源内容搜索
+[33m75fdada0[m feat：订阅源网页增加eruda调试工具
+[33me3fd3421[m feat：增加书源内容查询功能
+[33mc1c4d282[m 下载管理界面优化
+[33m9b0c5b09[m feat: 已完成下载点击弹出操作菜单
+[33m61f3056f[m feat: ViewModel 添加打开文件/文件夹/复制路径方法
+[33mb448f9e7[m 优化
+[33m52360f06[m fix: 空状态文案适配 Tab 上下文并清理死代码
+[33m7ea21286[m feat: 下载管理 UI 添加 TabRow 分组、速度显示和来源信息
+[33mecc993a1[m feat: ViewModel 添加 Tab 过滤逻辑
+[33mbd27f36b[m feat: 各下载调用方传入来源页面 URL
+[33m97f1c7ea[m feat: Download.start() 支持 sourceUrl 参数
+[33m25d165f2[m feat: DownloadService 传递下载来源 URL
+[33mc2d35195[m feat: 扩展 DownloadTask 支持下载速度和来源信息
+[33m93b8048a[m perf: 预构建 sessionEndMap 避免 O(n) 查找
+[33m5ce4c086[m feat: RssExecutionStatus 重构为按源分组的展开/收缩卡片
+[33m02d3cd20[m feat：Rss.kt 入口集成会话管理和 URL 校验
+[33m8924e5fb[m fix: endSession 后清理会话状态
+[33m6b49cd40[m feat：改造 RssExecutionRecorder 支持按源分组和执行会话管理
+[33m744e3105[m feat: RSS执行记录增加源标识和执行会话字段
+[33m85339cc4[m 更新
+[33mdb0509e9[m feat：调试日志订阅源执行记录板块
+[33m4f11ee74[m fix：调试日志订阅源板块补全信息显示
+[33m0c5c2d8f[m refact：重构调试日志逻辑
+[33me3a2b6c9[m Merge pull request #59 from GEd520/main
+[33m1a8d78ff[m 优化
+[33m76aa70ce[m 合并代码
+[33m4cc8d9ca[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.052118[m[33m)[m 更新
+[33mf6ffdf6f[m 更新
+[33m2a2e4167[m feat：增加订阅源内容页查询网页内容菜单
+[33mbcad408a[m 补日志
+[33m02eaeef1[m feat：订阅源WebView界面增加搜索网页内容功能
+[33m4cb90df2[m 优化电池显示
+[33m510a36da[m feat: webBook/AnalyzeRule 调用点传入 bookSource，FlowLogDetailDialog 补全实体显示
+[33m10801b71[m feat: FlowLogItem 新增 bookSource 字段，FlowLogRecorder 扩展 bookSource 参数
+[33m82449e84[m feat: FlowLogDetailDialog 新增实体显示 section
+[33m2393ee95[m fix：webBook 调用点传入 book/bookChapter 实体到 FlowLogRecorder
+[33mbd0af9c1[m feat: AnalyzeRule 调用点传入 book/chapter 实体到 FlowLogRecorder
+[33m05f7a60c[m feat: FlowLogRecorder 日志方法扩展 book/bookChapter 参数
+[33m6153c343[m feat: FlowLogItem 新增 book 和 bookChapter 字段
+[33m0d424ef4[m docs: 新增 FlowLogDetailDialog 实体显示 section 设计规格和实现计划
+[33m01ea96cb[m 更新
+[33m25799e8a[m feat: DebugLogScreen 集成 EntityDisplay 组件
+[33m6c8a3d18[m fix: 缓存 EntityDisplay 中 toFieldList() 和 bookSources 查询，移除 RuleEntityCard 无用泛型
+[33m3abc2e37[m feat：新增 EntityDisplay 组件用于调试日志界面展示书源实体配置
+[33m1d09311b[m feat: ViewModel 新增书源状态管理
+[33made1f6b8[m feat: 新增实体显示子分类枚举值 ENTITY
+[33md72231ee[m docs: 新增实体显示功能设计规格和实现计划
+[33m0e907b78[m fix：优化懒加载显示日志,只有开启下一页懒加载的源才显示
+[33m3a8d9dcd[m 优化排版
+[33mdab22ea0[m fix：优化Compose主题代码文字颜色过淡的问题
+[33m25f5f11f[m 优化调试日志界面某些字体看不清的问题
+[33m2d664790[m fix： Roomv90~v95 覆盖安装 v96 不丢数据
+[33mb69227b2[m fix：Room版本v90 覆盖安装现在Room版本v96不会丢失数据
+[33m602c9835[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.052100[m[33m)[m 优化
+[33mac8ea5ab[m feat: 流程日志详情中长文本组件统一改为可展开/折叠
+[33mdaede508[m fix: rememberScrollState 提升到条件分支外避免 slot 错位
+[33mc8f3163e[m feat: FlowLogDetailDialog DetailRow 支持点击展开/折叠
+[33md7da1d23[m perf: needsExpand 添加 remember 缓存避免重复计算
+[33mfbd21395[m feat: DebugLogDetailDialog 字段值支持点击展开/折叠
+[33md905d524[m fix: 移除 init 中重复的 refreshFlowLogs 调用
+[33md119c319[m fix: 切换到流程子分类时自动刷新日志
+[33mf491e4a3[m fix: 流程日志订阅建立时立即加载当前数据
+[33m90b917c1[m fix: 缩短流程日志 debounce 至 100ms，改善实时性
+[33ma19e3442[m feat：增加superpowers的SKILL
+[33m7330a70f[m feat：调试日志增加数据流转板块
+[33mc72cb863[m Merge pull request #57 from GEd520/main
+[33m3e8b4790[m 合并代码
+[33md50ff458[m 补日志
+[33mfbd5b364[m 优化悬浮球日志界面
+[33m52f92e2a[m 优化储存管理显示
+[33md2697b32[m 加阅读记录开关和改界面排版
+[33m6850a81f[m 优化上传
+[33m1c3e8aae[m 高亮添加作用域
+[33mb59031fb[m Merge branch 'main' of github.com:GEd520/legados
+[33md8795d21[m 优化朗读
+[33m89620ec9[m fix：Webdav恢复备份走备份选择器逻辑
+[33m69cdf02e[m fix：去除完全备份按钮
+[33maa19104e[m fix：书籍缓存不选择默认不备份书籍缓存
+[33m90992f1b[m 更新
+[33me5645558[m 更新
+[33m5186a6c3[m feat：调试日志界面增加关闭悬浮球按钮
+[33m6bbe57f8[m 注释
+[33m3d2e0b35[m feat：调试日志加上滚动条
+[33mcb184f5f[m feat：网络日志加上了 requestHeaders 和 cookie 展示，正则规则执行时补上了捕获组记录
+[33m1de3ce7d[m 优化自动刷新目录和调试日志显示 feat：toast的调试日志显示规则类型和脚本行号
+[33me5c86de7[m Merge pull request #54 from GEd520/main
+[33ma78637be[m Merge branch 'youfengknight:main' into main
+[33mba1a6c17[m 适配图标
+[33mfd1c10fd[m 优化低版本图标
+[33m25163246[m 修复闪退
+[33me57d546c[m 朗读适配低版安卓
+[33m1ddff2c1[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.051917[m[33m)[m 更新
+[33m2ac9898e[m 优化朗读切换功能
+[33meb1a7c0d[m fix：优化离线缓存界面显示下载进度的速度
+[33mf683717e[m fix：切换链接访问记录的icon fix：优化存储管理书籍缓存中显示0章的问题
+[33m86c24acf[m 优化
+[33med1845d9[m Readme增加注意事项
+[33m3e9af897[m 更新
+[33ma73901a0[m 优化朗读性能
+[33m81302051[m 优化日志输出的同步机制，统一同步机制，把协程和线程锁只用一个不混用。添加线程保护、线程安全修复、修复源调试完打开调试日志直接崩溃的问题
+[33m83c39046[m feat：增加小说书籍缓存备份，恢复后直接读取备份中的目录和章节内容
+[33mf99abb3a[m 注释
+[33m8f1bc6bd[m fix：修复帮助文档搜索内容点击后没跳转的问题
+[33m058a5a09[m feat：增加已有书源定位功能
+[33m184a0cf9[m 优化URL访问记录界面
+[33m841c1c88[m fix：正则测试界面优化
+[33m441341ed[m Merge pull request #51 from GEd520/main
+[33m5b932f20[m 优化段评显示
+[33md441c3d5[m 修复电量显示
+[33m8347eb52[m 修复和优化
+[33m42282ce9[m Merge branch 'youfengknight:main' into main
+[33m3717cdd6[m 优化电池和朗读
+[33m18aa493a[m Merge pull request #50 from GEd520/main
+[33m7ed71e21[m 优化gitee上传
+[33mb8679bd7[m 更新
+[33m9f79c29d[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.051813[m[33m)[m fix：优化存储管理界面文本被压缩不显示的问题
+[33m4e3adc1e[m 注释
+[33m77d7a51d[m 优化
+[33m9c1f0f73[m feat：增加下载管理界面
+[33ma329321b[m feat：增加下载管理菜单
+[33mc7c0c839[m fix：优化存储管理性能
+[33m5ffcbc80[m feat：调试日志书源流程板块点击请求ID头部区域即可切换展开/收缩，显示日志个数。 feat：优化流程板块性能问题
+[33m2b390e55[m feat：调试日志里的toast板块增加显示界面的Activity和书源/订阅某行导致的
+[33mabca3555[m feat：调试日志板块的书源板块增加变量存取小版块，所有 JS 变量存取方式都已追踪
+[33mdced5a75[m feat：调试日志流程板块追踪getElements() 和 getElement() 方法
+[33m24e5f098[m feat：调试日志的流程小版块增加显示规则执行路径和JS执行环境
+[33m2da9aeb4[m 优化
+[33mff5bb88b[m 优化电池
+[33mbaa93cb4[m Merge pull request #49 from GEd520/main
+[33m6dcf88f5[m 优化朗读
+[33m620dea4d[m 优化悬浮窗
+[33m268896cf[m 修复闪退
+[33mc47b8faf[m 优化拖动
+[33m0360f082[m 优化朗读
+[33meea8c2d0[m 修复日志
+[33m6076d010[m 合并代码
+[33m68840453[m docs: 补充 2026/05/16 更新日志
+[33m1323f312[m 优化全文下划线
+[33m380ee3e9[m 更新
+[33m5b8e5582[m faet：订阅源增加搜索框，书源和订阅源支持分类调试
+[33m4688554f[m 注释
+[33m89d1d4e0[m feat：内置两个新背景 feat：字典规则和TXT目录规则界面增加搜索
+[33m3aab2791[m 注释
+[33m5a0ff4c7[m fix：文件管理界面改为Compose
+[33m7bd7ebd0[m fix：url记录菜单换位置
+[33m94657cbc[m fix：修复web服务的订阅源调试功能无法使用问题 fix：优化web服务订阅源调试代码
+[33meefe0cd5[m feat：存储管理界面逻辑和显示
+[33m622294da[m feat：增加存储管理菜单
+[33m9ad28225[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.051613[m[33m)[m 更新
+[33m26860ce6[m fix：修复web服务订阅源编辑后无法保存的问题
+[33mea9be53e[m fix：解决web服务备份压缩包后显示的错误
+[33m96fe3e99[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.051611[m[33m)[m 注释
+[33md6575adc[m feat：显示订阅源性能分析日志
+[33m3eaf11b1[m fix：修复导出 EPUB后再导入epub，标题重复问题
+[33m6b8be225[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.051600[m[33m)[m Merge pull request #44 from GEd520/main
+[33mea687433[m 修复bug
+[33m52c77872[m 优化赖加载
+[33m16d7ecf4[m Merge branch 'main' of github.com:GEd520/legados
+[33m13212381[m 优化检验界面和阅读界面
+[33md3a7e5d9[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.051520[m[33m)[m 更新
+[33m375e74cd[m fix：优化书源切换规则的字段名 fix：查询规则跳转光标会跳到查到的内容后
+[33m08026341[m fix：优化订阅源切换规则代码
+[33mee8feeca[m fix：修复订阅源切换规则中的字段名
+[33m0ede4205[m 调整正文设置高度
+[33m71efc1a5[m Merge branch 'main' of github.com:GEd520/legados
+[33m01e1ed1f[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.051517[m[33m)[m 更新
+[33m3817d3c3[m fix：修复开启下一页懒加载缓存导致toast过多导致的闪退
+[33m330da4df[m 修复主题问题
+[33m70be1330[m 优化高亮
+[33mf3f7e82d[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.051516[m[33m)[m feat：不开启下一页懒加载，源导出JSON就不显示这个字段。打开则显示
+[33md5ed9b85[m feat：文档增加
+[33maaa50cbb[m feat：懒加载下一页在正文内容添加，勉强可用 feat：增加文档
+[33m93ac976c[m feat：TextChapterLayout 需要支持动态追加内容
+[33m72430967[m fix：懒加载大框架
+[33m90a72384[m fix：本地书拆分超长章节功能改为默认关闭
+[33m677a05d7[m feat：增加书源下一页懒加载checkBox，调试代码修改
+[33m79563331[m fix：未填正文下一页规则勾选下一页懒加载checkBox，就toast"未填正文下一页规则"
+[33m82188133[m fix：修复Room数据库校验失败问题，更新至96
+[33md10f078c[m feat：启用下一页懒加载必须填写正文下一页规则
+[33m8bba2d4d[m feat：书源增加下一页懒加载可选框，数据库版本更新为95
+[33m7080d54d[m 优化
+[33m8d7f0725[m Merge pull request #42 from GEd520/main
+[33mc7281a51[m 添加主题列表，修改默认主题
+[33md2c12b58[m 修复bug
+[33m2553652f[m 优化高亮规则
+[33ma563a2b8[m 优化
+[33m6af812da[m 修复图标指向
+[33ma217e3c8[m 优化主题
+[33me3a79dd0[m 修复朗读问题
+[33mcead2dfa[m 优化高亮规则
+[33me23ae412[m 优化
+[33mf9f988f9[m 优化卷名
+[33m57dbd6e0[m Merge pull request #40 from GEd520/main
+[33mfe2b4d01[m 改名
+[33m4a5d160e[m Merge branch 'main' of github.com:GEd520/legados
+[33md4d8fe7e[m 改图标
+[33m32d622dc[m 优化书源编辑界面切换
+[33m941bd69a[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.051318[m[33m)[m fix：优化文档流程图，适合手机观看
+[33m8c84cdca[m fix：备份信息界面显示备份的所有信息 fix：修复app一直存在的订阅源bug：写描述规则，不写内容规则，在网页刷新后显示空白 JSON feat：增加订阅源机制详解文档
+[33m5b05a805[m fix：展开文本菜单配置界面受到app主题系统影响
+[33m301d1bd5[m feat：日志详情界面显示Dialog名称
+[33m6fced5c8[m feat：增加书源登录信息与运行变量备份机制文档
+[33ma1283f61[m fix：备份的几个界面把书源登录信息和运行变量显示书源运行数据
+[33m8940b7e9[m feat：调试日志的字段提取板块增加更多信息
+[33m7be96f36[m feat：调试日志界面的"数据替换"子版块显示原始数据
+[33m9ae36736[m feat：调试日志字段提取板块显示搜索结果和详情
+[33m4cf45d7f[m fix：调试日志界面RSS板块正常显示
+[33m9fc88657[m 注释
+[33mef8e2caf[m feat：调试日志分类显示每个分类日志数量
+[33m6aed4800[m Merge pull request #39 from GEd520/main
+[33mcbea6a4c[m 修复
+[33mdd8c9b4f[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.051300[m[33m)[m fix：调试日志书源子分类增加水平滚动
+[33mab777166[m feat：调试日志增加校验和崩溃两个板块
+[33m3522955a[m 合并代码
+[33mffd1fc58[m fix：修复调试日志在某些界面打开不显示日志问题
+[33medc1eae9[m 优化高亮
+[33m8d36f416[m feat：内置webview下载会在调试日志界面显示日志
+[33m0da2d9b7[m 更新
+[33m8f497da9[m 优化
+[33me07e8cce[m feat：更新界面菜单新增了"全部版本"按钮
+[33m3c254f46[m fix：Web端备份分类关键词修正
+[33m80da7be6[m fix：所有书签页面每本书名箭头和标题字对齐
+[33m33392abf[m feat：所有书签可收起，增加展开箭头
+[33md024bc13[m fix：文字下划线调整更精细
+[33m6b628fe7[m feat：增加文字下划线粗细设置调整按钮
+[33mebdc413e[m 优化
+[33m19e502d3[m merge updateLog.md
+[33mf245e589[m feat：增加三个文档
+[33m8e418d83[m 注释
+[33m90a30bae[m feat：增加点线，优化虚线和点线(完全放弃 DashPathEffect ，改为手动逐段绘制,任何设备上都 100% 可靠)
+[33m820c01a5[m 更新文档内容
+[33ma98b2715[m feat：增加JS 变量存储机制详解文档
+[33mc017c5bd[m Merge pull request #36 from GEd520/main
+[33m2de21ab9[m 优化下划线粗细
+[33m0d9c164f[m 阅读记录加批量删除
+[33m60d23b9e[m 优化
+[33mbf2e8cb7[m 修复bug
+[33mb553a2d1[m 优化bug
+[33m0f6a0b2c[m Merge branch 'main' of github.com:GEd520/legados
+[33m88d9f335[m 优化
+[33m5533c0a0[m 优化问题
+[33m0f515068[m 优化高亮规则
+[33m905c0007[m 优化高亮界面
+[33mc63ce5c5[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.051119[m[33m)[m 更新
+[33m45f4c5e8[m feat：所有书签页面增加搜索
+[33m714eb13c[m fix：文本菜单配置改成展开文本菜单配置
+[33m336869d9[m feat：文本菜单配置增加管理其他应用显示菜单
+[33m666bb530[m 优化文字下划线的波浪线，美观流畅
+[33m403380fa[m 更新
+[33m76680af9[m 更新
+[33m569da66f[m fix：修复第一次导出url却显示没有可用规则问题 fix：直链上传历史界面选择的直链规则的名字只显示最多6个字，多出的字用省略号
+[33mff4fb269[m feat：调试日志系统中添加了缓存和导出相关的详细日志 feat：调试日志中书源板块每个部分都能点击
+[33m1138877f[m 优化高亮，添加自定义
+[33md1fcd0f3[m feat：调试日志中显示缓存和导出详细日志
+[33m644f945d[m fix：普通文档帮助界面去除放大镜
+[33m0840ada1[m 优化高亮规则
+[33m98a541ff[m fix：一个源只能同时下载一本书，当前书下载暂停或者停止下载时才能下载其他书
+[33mc921d0e1[m 更新
+[33m822b691a[m Merge pull request #33 from GEd520/main
+[33m1d9ff97f[m Merge branch 'main' of github.com:GEd520/legados
+[33m5bab8968[m 加高亮，待优化
+[33mddcb9e00[m[33m ([m[1;33mtag: [m[1;33m3.26.051100[m[33m)[m 更新
+[33mb930fd1a[m Merge branch 'youfengknight:main' into main
+[33m64a59b9d[m 暂存
+[33m0747807c[m fix：选择要恢复文件界面Dialog 风格与项目其他 Compose Dialog 保持一致
+[33m73555523[m feat：检测出有问题的文件点击后显示的界面写上是否能正常恢复
+[33m8ca3a7ef[m fix：选择要恢复的文件dialog可以跟随主题变色
+[33ma2282c74[m feat：选择要恢复的界面改成Compose feat：增加检测格式功能
+[33m57b1eb87[m fix
+[33m3622674e[m fix：直链上传名称修改后，历史记录自动显示最新名称
+[33m12c487b2[m 更新
+[33m8567f45b[m 更新SKILL，业务逻辑深度检查，数据源一致性检查
+[33m85650bf5[m fix：上传直链导出显示名称仍是默认名称问题
+[33m4eed8958[m fix：重构导出URL的界面逻辑
+[33m92df16b6[m 更新
+[33m60c87511[m fix：预下载改成全称：向后预下载
+[33mb116265e[m feat：不显示切换列表的帮助界面就不显示放大镜
+[33m2f8c286d[m 更新
+[33mf65accbe[m feat：主题切换增加对钩表示当前选择的主题
+[33m8a4c19da[m 优化正文标题
+[33ma3723e86[m 合并代码
+[33m70f13c4d[m 完全备份可备份登录信息，源变量等
+[33m63cfea28[m fix：现在所有日志入口都受调试日志悬浮球开关控制，关闭后不会再记录任何日志到内存。
+[33m7403b01b[m fix：关闭调试日志悬浮球不再记录日志，日志最多只记录500条
+[33m819e4b08[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.051012[m[33m)[m feat：增加侧滑关闭调试日志界面功能
+[33mbe27fa3e[m 更新
+[33mc43c71ad[m feat：让jsPackagesHelp能在帮助中打开
+[33ma822a778[m feat：增加jsPackagesHelp文档
+[33m900a5a86[m 补日志
+[33md072bcfb[m feat：直链上传历史复制和删除有toast提示
+[33md3ffff09[m 去除
+[33m84712ebf[m 更新
+[33me6de3c24[m feat：主题列表长按增加置顶功能
+[33m23d5fd9a[m 注释
+[33m12f1264d[m feat：增加三个背景图
+[33m2536bf25[m fix：切换规则名称修改规范
+[33m2443b081[m feat：直链上传配置上传历史增加复制链接功能
+[33m28360ffe[m 优化
+[33maa4def2d[m 优化
+[33m2e299dfc[m fix：修复文档名错误导致闪退bug
+[33m9969122b[m Merge pull request #31 from GEd520/main
+[33m3b87d694[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.05092302[m[33m)[m fix：修复bug
+[33m0f3d5a54[m 更新
+[33mabaa6db1[m feat：调试日志界面打开时自动刷新，立即显示当前日志。 feat：提供手动刷新按钮，用户可以随时刷新 feat：使用缓冲区机制，减少日志丢失风险 feat：同步获取当前日志快照，避免异步延迟 feat：帮助界面下拉菜单增加订阅源字段规则类型对照表和书源字段规则类型对照表
+[33me29b0bb8[m 注释
+[33mba789b3b[m feat：调试日志板块中的替换板块记录js的替换方法
+[33mcc81c40d[m feat：调试日志板块增加流程子版块，子版块除了替换其余都可以正常显示日志
+[33m599d50d5[m fix：规则调试的日志会正确显示在"规则"子分类中
+[33mb1027f6e[m feat：书源板块下增加两个子版块
+[33m1e816aa4[m fix：调整应用板块为显示软件自身的所有日志，如启动、配置更新、通用错误等。 fix：调整源板块显示与书源相关的日志，如书籍更新、源调试、规则执行等
+[33m0ac3824f[m feat：其他设置界面增加详细更新日志功能 feat：帮助文档选择器增加书架和订阅下拉刷新流程与机制文档
+[33m87e7281c[m fix：替换规则流程与机制文档重写
+[33m3ba9ca95[m 优化
+[33mca2a7dc7[m feat：下拉刷新书架日志在调试日志的应用板块显示 feat：帮助下拉菜单增加"替换规则流程与机制"文档
+[33mfb5c2db6[m fix：书架下拉刷新每刻同一个源只能更新一本书，一本书更新完毕后再更新下一本 fix：订阅源的切换规则显示名称正常
+[33ma431e5ee[m fix：只要"展开文本选择菜单"开关是关闭的，长按文本后就会一直显示最后的三个点（更多按钮） fix：编辑内容界面切换规则后标题栏字段名不更新问题
+[33me35672fc[m fix：订阅源查询规则正常查询
+[33m32a51dc0[m fix： icon4 图标作为软件默认图标
+[33m6aaa0d6b[m feat：网络板块的日志详情增加请求头，ua，显示cookie
+[33m73415b61[m feat：集成短Toast和长Toast
+[33m61eb85bd[m fix：调试日志界面书源板块和订阅源板块显示内容修复
+[33ma3ce88fc[m fix：调试日志界面去除规则板块
+[33md214e9a9[m 修复问题
+[33m60ce9e06[m 优化弹出问题
+[33m35cf2c47[m 修复检查最新问题
+[33mb8a9b6b0[m 修复内部检查问题
+[33m30e8c072[m 优化阅读日历
+[33ma481cb39[m Merge pull request #29 from GEd520/main
+[33m8e0b5635[m Merge branch 'main' of github.com:GEd520/legados
+[33m003b4cbb[m Merge branch 'youfengknight:main' into main
+[33m97d32cb7[m 优化阅读记录
+[33ma4e42acf[m 优化备份
+[33mf993befc[m 优化内部更新
+[33m2b5acba8[m 改内部更新
+[33m088c4398[m 优化内部更新
+[33m4e0cb316[m Merge pull request #28 from GEd520/main
+[33m83c7ef85[m 保存
+[33m958b3aa1[m 修改
+[33m0e1ce02a[m 修改内部更新
+[33m10677f57[m 优化时间覆盖
+[33m4415a1f2[m 优化内部更新
+[33m05a43df1[m Merge pull request #27 from GEd520/main
+[33m167204e6[m 加打包推送到gitee
+[33m9ff77187[m 优化缓存书架管理界面
+[33m472a8ad1[m 优化字典调试
+[33mfb4d93f2[m 缓存显示封面
+[33m4ea421f3[m 优化tts
+[33m7f324720[m 优化界面字体
+[33m6c6a204c[m Merge branch 'main' of github.com:GEd520/legados
+[33m627e715a[m 优化字体显示
+[33mb639e335[m 更新
+[33mf1f3d11b[m fix：文本菜单配置与展开文本选择菜单放在一起
+[33mec89a2ce[m 优化界面
+[33mc029c416[m fix：修复长按文本显示的菜单问题
+[33ma2c710f2[m 优化
+[33m50228940[m fix：去除规则板块,书源规则部分放到书源板块下 feat：悬浮日志增加搜索
+[33m1bd319dd[m 优化
+[33ma8d1fc4a[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.05081158[m[33m)[m fix：优化调试日志界面
+[33m0c79ada9[m fix：提前加载下一章优化 feat：增加悬浮球组件
+[33m354cc52f[m 更新
+[33m975269dc[m 更新
+[33mf1fe6b42[m Merge pull request #25 from GEd520/main
+[33m47e4b597[m 优化阅读记录界面
+[33me906d5eb[m 优化界面，加入统一配置
+[33md697cd28[m 合并
+[33m1d300a13[m 优化发现链接bug
+[33m2670d0ba[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.05071609[m[33m)[m feat：增加恢复显示选择菜单，软件默认打开
+[33m2e11a40c[m fix：备份信息界面同步备份选择器 feat：书源检测新界面增加选择书源功能以及补全部分功能 feat：URL访问记录开启和关闭会显示toast
+[33m7767193f[m feat：增加备份选择器 feat：URL记录开关显示toast fix：修复书源检测新界面问题
+[33m73b38c63[m feat：增加校验书源新界面 fix：备份去除readRecordSession.json
+[33mec2c9351[m fix：点击切换图标菜单崩溃问题 fix：加载前后章节的行为受预下载设置控制
+[33mf846a76e[m feat：增加向前预下载菜单，默认0章
+[33m5fc2e380[m feat：tts调试界面增加试听功能 feat：长按文本菜单选择界面改成Compose
+[33mcd81ecf0[m fix：TTS调试可以正常调试 fix：html封面界面改成Compose
+[33m845354e2[m 加净化规则滚动条
+[33m6c8d951c[m 优化直链上传
+[33ma6104fbf[m feat：tts调试优化登陆配置界面和增加调试日志、增加源码查看
+[33m5f94feee[m 优化tts调试和html封面
+[33m6b86377a[m 优化阅读记录
+[33m01ee6aae[m feat：增加tts源调试界面
+[33m61337fbc[m 优化
+[33m84ad9de9[m fix：全部清理缓存优化
+[33m7e60f929[m feat：单本书在缓存管理界面可删除缓存
+[33mb1fc20b8[m fix：优化文本菜单配置的界面
+[33ma380c6f0[m feat：增加文本菜单配置按钮
+[33mfa3e185e[m feat：正文标题靠右 feat：长按文本显示的菜单可修改
+[33m67fae3cc[m feat：文本操作菜单能自己修改
+[33mcfcc2f71[m 注释
+[33m2ad7885f[m 合并
+[33mad1cdf50[m feat:书源分组管理支持长按拖拽排序
+[33m8af0ee25[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.05061321[m[33m)[m 优化
+[33ma5465f4d[m fix：备份信息去掉sourceSub.json
+[33mb5c4a8f8[m 优化
+[33m81ddca7c[m 优化
+[33m1185edb6[m 优化
+[33mb7cb6437[m fix：备份信息界面优化
+[33ma6ac07eb[m feat：增加粘贴规则和拷贝规则
+[33m052048a0[m 注释
+[33m65449917[m 优化：正则测试界面统一为Compose 优化：直链上传历史功能修复
+[33m7a905e5c[m 优化
+[33mb0fcde7a[m feat：增加直链测试功能和导入默认规则功能
+[33m3acfbdb3[m feat：直链上传配置界面改为Compose feat：增加上传历史功能 feat：增加可选多个上传直链
+[33m7fe59a0a[m 优化
+[33mfbca3f2e[m 优化
+[33m978a17fa[m fix：优化正则测试界面和http调试
+[33mf27a7b4f[m 优化字重调整和http源码调试
+[33m2f99ce28[m fix：图标8
+[33m9f016d98[m feat：增加http调试源码滚动条
+[33me7868324[m feat：搜索高亮
+[33m5208941c[m 优化响应体源码和请求体源码界面成HTTP请求界面主题类似
+[33mf187050e[m 注释
+[33m46a57068[m 优化
+[33m23259d34[m fix：调试工具界面改成Compose
+[33mf7e0a948[m fix：调试工具主界面重构Compose
+[33mc8d39288[m 注释
+[33m6c9d9900[m 优化
+[33m76d5f574[m 注释
+[33mb4cc35df[m fix：开启URL记录按钮优化
+[33m27da7b94[m fix：用compose改URL记录界面
+[33m11c83b25[m md更新
+[33m617ef353[m 更新
+[33mc9742139[m feat：URL访问记录增加域名选择
+[33m856cf113[m 更新
+[33m3c6c4b91[m 注释
+[33m0d0436db[m Merge pull request #22 from GEd520/main
+[33mb63066e2[m 优化阅读记录bug 优化备份替换
+[33m5bded944[m 优化本地书籍
+[33m6dd8d4e1[m 优化合并
+[33m96c52d77[m 优化bug
+[33m9e908b58[m Merge branch 'main' of github.com:GEd520/legados
+[33m985bda57[m Merge branch 'youfengknight:main' into main
+[33mb69310ba[m 优化web
+[33m04c2275c[m 优化阅读记录bug
+[33mca06f66b[m 优化崩溃
+[33mbcb3ba33[m 优化华米魔改系统打开巨量书源代码时造成编辑内容崩溃(比如jslib中有5000行以上代码)
+[33mcb9320d3[m feat：URL记录增加搜索
+[33m0722fb26[m Merge branch 'main' of github.com:GEd520/legados
+[33m32193305[m Merge branch 'youfengknight:main' into main
+[33m45ed3f68[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.05022329[m[33m)[m 优化
+[33m17dd285b[m 优化
+[33m1317a23a[m 优化字重调整功能
+[33m676aeec0[m 注释
+[33m3e034986[m feat：增加精细调整字重
+[33m2a3d7276[m fix：修复从编辑内容界面到源编辑界面的光标位置
+[33mff000e20[m fix：修复URL记录的协程作用域问题
+[33m175e678b[m 优化
+[33m6177ff9a[m 注释
+[33m42ccb59c[m 注释
+[33m3b286495[m feat：增加URL访问界面
+[33m934241da[m fix：从编辑内容界面保存回源编辑界面光标跟随移动
+[33m5ff4c9a8[m 优化
+[33m90369c3c[m 优化阅读记录
+[33md228a739[m 书架管理优化
+[33m7da1765b[m Merge branch 'main' of github.com:GEd520/legados
+[33m4961daeb[m 优化文件夹滚动条
+[33m2d538563[m Merge pull request #21 from GEd520/main
+[33m7e8f22e5[m 优化阅读记录
+[33meaf0fed6[m 优化订阅源和目录规则
+[33mc457431c[m 优化滚动条显示
+[33m0bd20ec4[m 优化滚动条
+[33m2233f77e[m Merge branch 'main' of github.com:GEd520/legados
+[33me59da627[m 优化滚动条
+[33m90a53d5e[m ignore Java hprof memory dump files
+[33m7bd32293[m 优化
+[33m23e226e5[m 去除快照文件
+[33m02d4294d[m 更新
+[33m76ea6562[m 优化
+[33m1884ddde[m 更新
+[33m09e377d4[m 静音播放优化
+[33m855f4b8e[m 注释
+[33m16fed41b[m fix：默认预下载修改为0章
+[33m7adb67de[m 注释
+[33mdfb4ceeb[m 更新
+[33m50701aa7[m 注释
+[33m0ad66e6a[m feat：视频设置界面增加是否静音功能
+[33m8e559e20[m feat：翻页速度可自由调节
+[33m00b7f052[m 更新
+[33mc1604f2d[m 注释
+[33m72428c27[m 优化帮助文档搜索无限Dialog问题
+[33mf97e29aa[m 优化滚动条消失的问题
+[33m0baafa94[m feat：增加查询规则功能
+[33m02ac3f45[m fix：滚动条优化
+[33mde3571e7[m 魔改原生滚动条
+[33m3dbf451b[m Merge pull request #20 from GEd520/main
+[33m7f42c8d1[m 恢复目录滚动条
+[33mb4e5d038[m Merge branch 'main' of github.com:GEd520/legados
+[33m441c6dc3[m 优化备份已有背景覆盖
+[33m93370ae6[m 优化滚动条
+[33m08ef9db4[m 关闭滚动条
+[33m2ee65376[m 恢复
+[33m3c9f81ec[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.05011502[m[33m)[m fix：去除书源编辑滚动条
+[33m944d6f50[m  优化删掉不必要的滚动条
+[33m22d1a732[m 注释
+[33m5c1d0b1e[m 更新
+[33m6d4fccd5[m feat：在编辑内容界面菜单增加切换规则菜单
+[33m6af4b2d8[m 注释
+[33m3ee3aed1[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.05011117[m[33m)[m fix：文档隐藏选择器正常
+[33mce7490b2[m 优化帮助文档选择
+[33me1f576ee[m 本地备份默认保留多份备份文件
+[33m690d5575[m fix：优化帮助文档切换选择
+[33m73617459[m 优化
+[33me1352934[m Merge pull request #19 from GEd520/main
+[33mde2b929a[m 优化合并
+[33m757e5be4[m Merge branch 'youfengknight:main' into main
+[33mc21411ec[m 优化useweb
+[33m4ff0d165[m 优化发现跳动问题
+[33m9baf1855[m 优化
+[33m02ccca7c[m 优化导出JSON到剪贴板功能
+[33mf8357070[m fix：去除一些帮助文档切换
+[33m4010977e[m 优化
+[33ma1cbdbbc[m Merge pull request #18 from GEd520/main
+[33m449afcf0[m 优化书架滚动条
+[33m12929ec7[m Merge pull request #16 from GEd520/main
+[33m72b92495[m 优化书源分组问题
+[33m705d9a85[m 修复书源分组
+[33md1c05ffd[m 优化不流畅问题
+[33mf17ea616[m 优化书架不流畅
+[33md37869d4[m 优化书架分组卡顿
+[33m5efe6123[m 优化帮助界面
+[33m5c06dca3[m 优化阅读记录bug
+[33m6b42b051[m 注释
+[33mc1a56ef5[m fix：书源编辑界面滚动条向编辑内容界面滚动条学习
+[33m41648886[m fix：将搜索帮助转移至帮助界面
+[33me3449e79[m Merge pull request #13 from GEd520/main
+[33m50bc7e0c[m 优化日历bug
+[33m3ab35708[m 优化bug 改文档
+[33m0c280448[m 修复备份bug
+[33m602f8cb9[m 优化阅读记录
+[33m1de84ae0[m 优化bug
+[33mf9848291[m Merge remote changes and resolve conflicts
+[33m7b71cf7d[m 优化阅读记录
+[33m6b5a2d68[m 更新
+[33m10ea2183[m fix：书源编辑界面滚动条固定
+[33mebcfba40[m fix：书源的编辑内容和订阅排序正常
+[33mf2fe36ae[m fix：修改Readme.md和English.md
+[33m341b690c[m fix：导出书单为JSON到剪贴板位置修改 优化
+[33m21d63647[m fix：书源编辑界面的滚动条缩短 feat：书源编辑界面增加编辑内容菜单
+[33mc038b518[m feat：编辑内容菜单增加搜索 fix：书源编辑界面的滚动条优化
+[33m26ab2718[m 优化
+[33m07960614[m fix：修改因Room版本升级后内置订阅显示不见的问题 feat：增加订阅源排序功能
+[33mf122950b[m fix：Room数据库版本更新至91
+[33m766269dd[m 暂存
+[33m69b0e626[m fix：去除快速滚动条触发的气泡
+[33mf0b2cdf9[m fix：帮助文档全局搜索界面改善，书源编辑界面增加下滑块
+[33m25dedf6a[m 暂存
+[33mec2bf13d[m 更新
+[33m032930b3[m feat：增加帮助文档全局搜索
+[33ma4ca7905[m feat：书签界面增加搜索筛选
+[33mc2662157[m 更新
+[33m2248ae64[m 修复正文bug
+[33mb71f54a1[m Merge branches 'main' and 'main' of github.com:GEd520/legados
+[33me3bda52c[m Merge pull request #12 from GEd520/main
+[33m6e61f505[m 修改下载链接
+[33m5d9fddd9[m 修改贡献地址
+[33mfd499e6b[m Merge branch 'youfengknight:main' into main
+[33m6c07420f[m 优化bug
+[33m6752a358[m[33m ([m[1;33mtag: [m[1;33m3.26.042714[m[33m)[m feat：发现和订阅界面增加滚动条
+[33mb40e4138[m feat：其他设置增加搜索
+[33m2f874b12[m 合并代码
+[33m0a672fcb[m 优化bug
+[33med1160d7[m 更新
+[33m39899264[m 优化
+[33m310be5ee[m feat：文字下划线增加波浪线
+[33mbca881ec[m feat：内置浏览器增加查看cookie菜单
+[33m606c68e4[m 添加更新日志
+[33m1311010d[m 修复web编码问题
+[33m0b902c18[m 更新日志修改
+[33m567bfb30[m feat：发现页面右上角增加全部添加书架功能
+[33mb16b62ea[m 修复主题背景备份
+[33m241e335a[m fix：帮助界面编辑内容正常
+[33m0175afeb[m 优化
+[33mfa921740[m 合并代码
+[33m9a80e126[m Merge pull request #10 from GEd520/main
+[33mdbd7c240[m 三包打包
+[33m83ecf0ab[m 优化
+[33m81c7fe81[m 保存
+[33m904f632e[m 合并
+[33maf2ddf70[m Merge fix: resolve conflicts in updateLog and strings
+[33me8eb3798[m feat：增加MD链接用内置浏览器打开功能
+[33m8da8b428[m 优化
+[33meb130605[m feat：增加帮助文档快速切换菜单
+[33m0071869d[m 暂存
+[33m4e50f1c2[m feat:主题列表支持批量删除，导出和导入
+[33me5cf1e82[m fix：本地配置订阅更新完毕
+[33m908ee730[m fix：打包正常
+[33mc6c14e80[m fix：修改两个包的名称
+[33mb111f8df[m 修改繁字体名称
+[33md670ea6d[m fix：提取封装一套高亮逻辑
+[33mf780813b[m 修复备份图片背景问题
+[33m81679482[m feat：软件崩溃自动复制日志到剪贴板
+[33md5f925b8[m 修改github打包流程
+[33me3d79ba7[m feat：日志和崩溃日志增加搜索
+[33mfcf02925[m[33m ([m[1;33mtag: [m[1;33mbeta-3.26.04251758[m[33m)[m 暂存
+[33m85a8904a[m 项目配置文件更新
+[33m59e4f080[m 保存
+[33m875ef494[m Merge pull request #7 from GEd520/main
+[33meb6e3556[m 优化bug
+[33mb8cfc829[m fix:优化useweb
+[33m01887050[m 保存
+[33mc126a873[m Merge remote-tracking branch 'origin/main' into main
+[33m17d75e9f[m[33m ([m[1;33mtag: [m[1;33m3.26.042404[m[33m)[m 更新UpdateLog.md
+[33m0cd7487b[m feat：内置本地智能输入订阅源
+[33me90e2d05[m fix
+[33mc6dbe6fa[m fix
+[33m59d7b3b2[m fix
+[33madd2eb42[m fix：增加注释
+[33m735810ca[m[33m ([m[1;33mtag: [m[1;33m3.26.042403[m[33m)[m fix：下拉刷新默认不开启 feat：md文件链接默认用内置浏览器打开
+[33m1a303ce8[m feat：网络导入打开内置浏览器
+[33m5416c749[m refactor：useweb逻辑重构
+[33m7478190b[m fix：payload 协议统一成常量
+[33mc1fd6e68[m fix：注释
+[33md0e44bbc[m fix：发现useweb优化 fix：修改应用名称
+[33m67cf4a20[m fix：书源改名发现页不跟着改
+[33m26f2e7ab[m Merge branch 'main' of github.com:GEd520/legados
+[33mc7b0924c[m Merge branch 'youfengknight:main' into main
+[33m1a5a0169[m 修名称
+[33mc69047c5[m 修改app名
+[33m3bac392e[m 修改仓库
+[33md8a77d97[m 修改文档
+[33m7e97dffb[m 修改文档说明
+[33m5f58ceba[m Merge pull request #6 from GEd520/main
+[33m2e795c4b[m gitee更新
+[33m7963921e[m 保存
+[33m3b90eb92[m 改名和加开发人员
+[33me6d96587[m Merge branch 'youfengknight:main' into main
+[33m416aa3cc[m[33m ([m[1;33mtag: [m[1;33mbeta[m[33m)[m fix：架构图展示.html正常可看
+[33m061a45d0[m feat：把项目的整个运行架构、运行时都用memaid和html展示出来
+[33ma528373e[m 修改
+[33m2a3cfa02[m fix：修改正则测试的夜间模式
+[33m22e88e28[m feat：替换规则右上角增加正则测试功能
+[33m7c99d1ef[m Merge branch 'main' of github.com:GEd520/legados
+[33m26a12e9e[m 修改固定bata
+[33m053f0bb3[m Merge pull request #5 from GEd520/main
+[33ma1b7ca68[m Merge branch 'youfengknight:main' into main
+[33md71672ed[m[33m ([m[1;33mtag: [m[1;33m3.26.042223[m[33m)[m fix：发现页useweb高度计算逻辑正常，不再有空白区域
+[33m2c381647[m fix:x修改包名和时间
+[33m6e9b917a[m fix：字典规则调试的显示结果界面变大
+[33mea24643b[m Merge pull request #4 from GEd520/main
+[33md623d2c7[m fix：修改打包流程
+[33m673dac47[m   feat：自动打包
+[33m2dbb79d0[m fix：修复弹跳感问题
+[33m7ba1f6e4[m fix：优化WebView内联内容高度测量逻辑
+[33m9c287103[m feat：增加代码方案综合评估技能
+[33m5dda8ec9[m fix：夜间模式下 useWeb 区域背景色不匹配，改为透明
+[33m6fadcd51[m fix：发现useweb平滑过渡
+[33m564f6c6c[m feat：创建了「代码修改自动合规校验」Skill
+[33mc8949b66[m Merge pull request #3 from GEd520/main
+[33m238c713c[m 保存
+[33m22368c9a[m fix:优化useweb不同高度
+[33ma72a0afa[m fix:优化useweb点击发现不触发上移问题
+[33ma5af1a9f[m fix:优化发现useweb首次访问偏移
+[33me4fdcaaa[m fix：html封面在书架正常显示，WebView 固定用 600x900 渲染
+[33m23370646[m feat：把一些魔法数字弄到一个新的类里 fix：修改部分bug
+[33maf02654f[m fix：默认关闭web服务Token，html封面文字溢出容器修改
+[33m795d796d[m 暂存，有大量bug，html封面和web服务
+[33mcb158192[m fix：继续修复html封面
+[33m13f69bdf[m 暂存，依旧有bug
+[33m536df6c6[m 暂存
+[33me7287a2d[m fix：修了一些html生成封面的bug
+[33mbea0423c[m html生成封面有一堆bug，暂存
+[33m27bdc050[m fix：等html封面打开时原始默认封面图不再使用
+[33mcd089760[m fix：自动生成封面代码功能正常预览
+[33m638de239[m fix：修改字典调试的结果textview大小
+[33m654fc286[m feat：增加html生成封面代码
+[33mc13762e7[m 保存
+[33m77a70fa6[m fix：修改统计备份信息逻辑
+[33m1abb7f09[m fix：补上注释
+[33m1c702523[m fix：页面切换时 WebView 保持不变，发现页的html无闪烁
+[33m43df8b69[m fix：发现页的html页面切换时 WebView 只暂停不释放，HTML 内容保持
+[33m697b1459[m fix：修复备份路径查找备份文件信息功能
+[33m3e07349b[m feat：添加备份信息对话框
+[33m1b606517[m feat：在备份页面增加完全备份功能
+[33md58071ae[m 修复
+[33mda7cbdfa[m 更新日志修改
+[33m8a700ac6[m fix：发现页面的<useweb>逻辑改进
+[33m5d72ab44[m Merge pull request #2 from GEd520/main
+[33m49f78c3d[m 保存
+[33ma3b96eaa[m fix:优化详细页抖动
+[33m567e1895[m Merge branch 'youfengknight:main' into main
+[33m38a1fb34[m fix:优化内部useseb问题
+[33m5e2209d7[m 保存
+[33m5a83c110[m fix:修旧版内置useweb高度返回问题
+[33m87895069[m fix:优化发现useweb
+[33m37b3dc2e[m fix:修复压缩文件大小问题
+[33m8fd04762[m fix：网页背景颜色修改
+[33md6803a38[m feat：Web服务网页下载备份显示图片和每个选项
+[33m1e8fe73e[m web服务网页可以下载备份压缩包
+[33mf2895b6e[m 临时保存
+[33mdb194f7a[m feat：web服务网页增加下载用户全部数据功能
+[33m2289919a[m fix：添加注释
+[33md4959871[m fix：修改发现页面排序代码
+[33m046bc8ab[m fix：调整其他设置页面结构
+[33m83e3c5dc[m fix：发现页排序
+[33meb216adc[m feat：HTTP调试页面增加UA切换
+[33mda42a35b[m Merge branch 'main' of https://github.com/GEd520/legados
+[33me60e7004[m 暂存
+[33mf61ccad9[m Merge pull request #1 from GEd520/main
+[33mc4175930[m fiix:修复ajax重定向问题 feat:发现添加useweb功能
+[33mf58bb997[m fix：http请求调试里右上角请求体源码可以打开编辑器详细查看
+[33md78c4b80[m fix:请求体源码和响应体源码调换位置
+[33mfed6dbad[m fix：其他设置里增加调试模式开关
+[33m79b64ab5[m feat：http调试加上右上角
+[33m2f8b47e8[m fix：修复调试工具bug
+[33me322a423[m feat：在我的页面中增加调试工具功能页面
+[33m9e1ab0bd[m 增加注释
+[33m4c0ccae8[m feat：书源编辑页面右上角增加查看cookie功能
+[33m298ffc15[m feat：订阅源增加查看cookie功能
+[33mbaddce56[m fix：扩大字典调试界面
+[33me4f3cd99[m feat：增加字典规则调试源码查看
+[33ma416a5e7[m fix：修改字典调试报错
+[33m51a12bc8[m fix：修整字典规则调试界面
+[33m0369bb7c[m Update README.md
+[33m5435598c[m 暂存
+[33m4b74d847[m 暂存
+[33mcfb69b44[m 暂存
+[33m8d309bc7[m fix
+[33m972d3ec9[m fix
+[33m770b4cb8[m feat：增加发现分类搜索
+[33mbbdbab9e[m feat：目录流式渐进加载逻辑完善
+[33me1fc4cd3[m feat：修改其他设置界面，增加新按钮
+[33m0c03493a[m 修改字典调试
+[33m7a4dfefc[m feat：增加字典调试界面
+[33mbeb63c08[m 暂存
+[33m8f97ffea[m feat：订阅源增加按域名分类功能并添加部分注释
+[33mb7843d34[m 增加刚刚功能的的注释
+[33mc45dad3d[m 增加最初阅读时间功能
+[33m8b7b6342[m 准备新增功能
+[33m82394d09[m 初始化
