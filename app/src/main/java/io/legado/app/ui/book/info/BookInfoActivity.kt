@@ -293,6 +293,8 @@ class BookInfoActivity :
             LocalConfig.bookInfoDeleteAlert
         menu.findItem(R.id.menu_show_read_record)?.isChecked =
             AppConfig.bookInfoShowReadRecord
+        menu.findItem(R.id.menu_top)?.isVisible =
+            AppConfig.bookshelfSort == 3 && viewModel.inBookshelf
         return super.onMenuOpened(featureId, menu)
     }
 

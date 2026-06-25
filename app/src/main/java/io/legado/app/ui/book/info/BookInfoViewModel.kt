@@ -529,11 +529,11 @@ class BookInfoViewModel(application: Application) : BaseViewModel(application) {
     }
 
     fun topBook() {
+        if (AppConfig.bookshelfSort != 3) return
         execute {
             bookData.value?.let { book ->
                 val minOrder = appDb.bookDao.minOrder
                 book.order = minOrder - 1
-                book.durChapterTime = System.currentTimeMillis()
                 appDb.bookDao.update(book)
             }
         }
