@@ -2,12 +2,15 @@ package io.legado.app.ui.book.search
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.widget.SeekBar
 import android.widget.TextView
+import android.widget.LinearLayout
 import androidx.activity.viewModels
 import androidx.appcompat.widget.SearchView
 import androidx.core.os.bundleOf
@@ -45,9 +48,11 @@ import io.legado.app.utils.applyNavigationBarMargin
 import io.legado.app.utils.applyNavigationBarPadding
 import io.legado.app.utils.applyTint
 import io.legado.app.utils.getPrefBoolean
+import io.legado.app.utils.getPrefInt
 import io.legado.app.utils.gone
 import io.legado.app.utils.invisible
 import io.legado.app.utils.putPrefBoolean
+import io.legado.app.utils.putPrefInt
 import io.legado.app.utils.setEdgeEffectColor
 import io.legado.app.utils.showDialogFragment
 import io.legado.app.utils.startActivity
@@ -94,6 +99,7 @@ class SearchActivity : VMBaseActivity<ActivityBookSearchBinding, SearchViewModel
     private var booksFlowJob: Job? = null
     private var precisionSearchMenuItem: MenuItem? = null
     private var showSearchProgressMenuItem: MenuItem? = null
+    private var searchProgressFontSizeMenuItem: MenuItem? = null
     private var isManualStopSearch = false
     /** 原始未过滤的搜索结果，用于屏蔽规则变化时重新过滤 */
     private var rawSearchBooks: List<SearchBook> = emptyList()
@@ -121,6 +127,8 @@ class SearchActivity : VMBaseActivity<ActivityBookSearchBinding, SearchViewModel
         precisionSearchMenuItem?.isChecked = getPrefBoolean(PreferKey.precisionSearch)
         showSearchProgressMenuItem = menu.findItem(R.id.menu_show_search_progress)
         showSearchProgressMenuItem?.isChecked = getPrefBoolean(PreferKey.showSearchProgress)
+        searchProgressFontSizeMenuItem = menu.findItem(R.id.menu_search_progress_font_size)
+        searchProgressFontSizeMenuItem?.isVisible = getPrefBoolean(PreferKey.showSearchProgress)
         return super.onCompatCreateOptionsMenu(menu)
     }
 
@@ -177,6 +185,9 @@ class SearchActivity : VMBaseActivity<ActivityBookSearchBinding, SearchViewModel
             menu.setGroupCheckable(R.id.menu_group_1, true, false)
             menu.setGroupCheckable(R.id.menu_group_2, true, true)
         }
+        // 动态联动：字号调节选项仅在搜索进度开关开启时可见
+        searchProgressFontSizeMenuItem?.isVisible =
+            getPrefBoolean(PreferKey.showSearchProgress)
         return super.onMenuOpened(featureId, menu)
     }
 
@@ -199,7 +210,11 @@ class SearchActivity : VMBaseActivity<ActivityBookSearchBinding, SearchViewModel
                 )
                 showSearchProgressMenuItem?.isChecked =
                     getPrefBoolean(PreferKey.showSearchProgress)
+                // 联动更新字号调节选项可见性
+                searchProgressFontSizeMenuItem?.isVisible =
+                    getPrefBoolean(PreferKey.showSearchProgress)
             }
+            R.id.menu_search_progress_font_size -> showSearchProgressFontSizeDialog()
             R.id.menu_block_rule -> showBlockRuleConfig()
             R.id.menu_search_scope -> alertSearchScope()
             R.id.menu_source_manage -> startActivity<BookSourceActivity>()
@@ -318,6 +333,11 @@ class SearchActivity : VMBaseActivity<ActivityBookSearchBinding, SearchViewModel
         }
         binding.fbStartStop.applyNavigationBarMargin(true)
         binding.tvClearHistory.setOnClickListener { alertClearHistory() }
+        
+        // 初始化搜索进度字号
+        binding.tvSearchProgress.textSize =
+            getPrefInt(PreferKey.searchProgressFontSize, 10).toFloat()
+        
         binding.tvSearchProgress.setOnClickListener { showSearchSourceStatusDialog() }
     }
 
@@ -373,6 +393,7 @@ class SearchActivity : VMBaseActivity<ActivityBookSearchBinding, SearchViewModel
     private fun updateSearchProgressChip(records: List<io.legado.app.model.webBook.SourceSearchRecord>) {
         if (!getPrefBoolean(PreferKey.showSearchProgress)) {
             binding.tvSearchProgress.gone()
+            binding.vSearchProgressDivider.gone()
             return
         }
 
@@ -393,7 +414,7 @@ class SearchActivity : VMBaseActivity<ActivityBookSearchBinding, SearchViewModel
                     || it.status == io.legado.app.model.webBook.SourceSearchRecord.Status.FAILED
         }
         val total = records.size
-        builder.append("~进度${completed}/${total}")
+        builder.append(" · 进度${completed}/${total}")
 
         if (isSearching) {
             val slowRecords = records.filter {
@@ -401,7 +422,7 @@ class SearchActivity : VMBaseActivity<ActivityBookSearchBinding, SearchViewModel
                         && it.duration > 10000
             }
             if (slowRecords.isNotEmpty()) {
-                builder.append("~慢")
+                builder.append(" · 慢")
                 slowRecords.take(2).forEachIndexed { index, record ->
                     if (index > 0) builder.append(",")
                     builder.append(record.sourceName)
@@ -415,7 +436,7 @@ class SearchActivity : VMBaseActivity<ActivityBookSearchBinding, SearchViewModel
                 it.status == io.legado.app.model.webBook.SourceSearchRecord.Status.FAILED
             }
             if (failedRecords.isNotEmpty()) {
-                builder.append("~未返回${failedRecords.size}")
+                builder.append(" · 未返回${failedRecords.size}")
                 failedRecords.take(2).forEachIndexed { index, record ->
                     if (index > 0) builder.append(",")
                     builder.append(record.sourceName)
@@ -427,7 +448,7 @@ class SearchActivity : VMBaseActivity<ActivityBookSearchBinding, SearchViewModel
         }
 
         if (blockedCount > 0) {
-            builder.append("~屏蔽${blockedCount}")
+            builder.append(" · 屏蔽${blockedCount}")
         }
 
         val text = builder.toString()
@@ -435,8 +456,10 @@ class SearchActivity : VMBaseActivity<ActivityBookSearchBinding, SearchViewModel
             binding.tvSearchProgress.setTextColor(accentColor)
             binding.tvSearchProgress.text = text
             binding.tvSearchProgress.visible()
+            binding.vSearchProgressDivider.visible()
         } else {
             binding.tvSearchProgress.gone()
+            binding.vSearchProgressDivider.gone()
         }
     }
 
@@ -673,6 +696,58 @@ class SearchActivity : VMBaseActivity<ActivityBookSearchBinding, SearchViewModel
 
     private fun showSearchSourceStatusDialog() {
         SearchSourceStatusDialog().show(supportFragmentManager, "searchSourceStatus")
+    }
+
+    /**
+     * 搜索进度字号调节对话框
+     * 提供 SeekBar 调节字号（10sp ~ 14sp），支持实时预览和恢复默认（11sp）
+     */
+    private fun showSearchProgressFontSizeDialog() {
+        val currentFontSize = getPrefInt(PreferKey.searchProgressFontSize, 11)
+        val minFontSize = 10
+        val maxFontSize = 14
+        val defaultFontSize = 11
+        val seekMax = maxFontSize - minFontSize
+
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(32, 16, 32, 8)
+        }
+
+        val valueLabel = TextView(this).apply {
+            text = getString(R.string.current_value, currentFontSize)
+            textSize = 14f
+            setPadding(0, 0, 0, 12)
+            setTextColor(if (ColorUtils.isColorLight(backgroundColor)) Color.BLACK else Color.WHITE)
+        }
+
+        val seekBar = SeekBar(this).apply {
+            max = seekMax
+            progress = currentFontSize - minFontSize
+            applyTint(accentColor)
+            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                    val fontSize = progress + minFontSize
+                    valueLabel.text = getString(R.string.current_value, fontSize)
+                    putPrefInt(PreferKey.searchProgressFontSize, fontSize)
+                    binding.tvSearchProgress.textSize = fontSize.toFloat()
+                }
+                override fun onStartTrackingTouch(seekBar: SeekBar) {}
+                override fun onStopTrackingTouch(seekBar: SeekBar) {}
+            })
+        }
+
+        container.addView(valueLabel)
+        container.addView(seekBar)
+
+        alert(titleResource = R.string.invisible_char) {
+            setCustomView(container)
+            neutralButton(getString(R.string.reset_default)) {
+                putPrefInt(PreferKey.searchProgressFontSize, defaultFontSize)
+                binding.tvSearchProgress.textSize = defaultFontSize.toFloat()
+            }
+            positiveButton(android.R.string.ok)
+        }.applyTint()
     }
 
     override fun finish() {

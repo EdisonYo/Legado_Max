@@ -188,7 +188,7 @@ data class BlockRule(
 
     /** 复制规则并生成新的ID，用于导入时避免ID冲突 */
     fun copyWithNewId(): BlockRule {
-        return copy(id = "${System.currentTimeMillis()}_${name.hashCode()}")
+        return copy(id = System.currentTimeMillis().toString())
     }
 
     companion object {

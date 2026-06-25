@@ -139,7 +139,7 @@ object BlockRuleStore {
         val pattern = runCatching { rule.pattern }.getOrNull().orEmpty()
         val group = runCatching { rule.group }.getOrNull().orEmpty().ifBlank { fallbackGroup }
         val id = runCatching { rule.id }.getOrNull().orEmpty().ifBlank {
-            "${System.currentTimeMillis()}_${name.hashCode().toUInt().toString(16)}"
+            System.currentTimeMillis().toString()
         }
         val scope = runCatching { rule.scope }.getOrNull()?.takeIf { it.isNotBlank() }
         val rssScope = runCatching { rule.rssScope }.getOrNull()?.takeIf { it.isNotBlank() }

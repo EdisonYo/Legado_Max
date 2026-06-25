@@ -117,81 +117,98 @@ object DefaultData {
      */
     val coverHtmlTemplate: String by lazy {
         """
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>
-                * {
-                    margin: 0;
-                    padding: 0;
-                    box-sizing: border-box;
-                }
-                html, body {
-                    width: 100%;
-                    height: 100%;
-                }
-                body {
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    align-items: center;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                    color: white;
-                    overflow: hidden;
-                }
-                .container {
-                    padding: 24px;
-                    text-align: center;
-                    width: 100%;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    align-items: center;
-                }
-                .title {
-                    font-size: 36px;
-                    font-weight: bold;
-                    line-height: 1.3;
-                    margin-bottom: 16px;
-                    word-break: break-word;
-                    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-                    max-width: 100%;
-                }
-                .author {
-                    font-size: 18px;
-                    opacity: 0.9;
-                    font-weight: 300;
-                    max-width: 100%;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="title" id="title">{{bookName}}</div>
-                <div class="author" id="author">{{author}}</div>
-            </div>
-            <script>
-                function fitText(el, maxSize, minSize) {
-                    var size = maxSize;
-                    el.style.fontSize = size + 'px';
-                    while (size > minSize) {
-                        if (el.scrollWidth <= el.clientWidth && el.scrollHeight <= el.clientHeight * 1.5) {
-                            break;
-                        }
-                        size--;
-                        el.style.fontSize = size + 'px';
-                    }
-                }
-                var title = document.getElementById('title');
-                var author = document.getElementById('author');
-                fitText(title, 36, 14);
-                fitText(author, 18, 10);
-            </script>
-        </body>
-        </html>
+		<!DOCTYPE html>
+		<html>
+		<head>
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=300, initial-scale=1.0">
+			<style>
+				* {
+					margin:0;
+					padding:0;
+					box-sizing:border-box;
+				}
+				html,body {
+					width:300px;
+					height:410px;
+					overflow:hidden;
+				}
+				body {
+					display:flex;
+					flex-direction:column;
+					justify-content:center;
+					align-items:center;
+					background:linear-gradient(135deg,#667eea 10%,#764ba2 100%);
+					color:#fff8f0;
+					text-align:center;
+					padding:28px 24px;
+					gap:16px;
+				}
+				#title {
+					font-size:72px;
+					font-weight:800;
+					line-height:1.15;
+					word-break:break-word;
+					max-width:252px;
+					margin-top:60px;
+				}
+				#author-wrap {
+					background:rgba(0,255,0,0.4);
+					border-radius:12px;
+					padding:8px 18px;
+				}
+				#author {
+					font-size:26px;
+					font-weight:700;
+					max-width:252px;
+					line-height:1.3;
+					color:#e8f5e9;
+				}
+				#deco-line {
+					width:80px;
+					height:4px;
+					background:rgba(255,248,240,0.25);
+					flex-shrink:0;
+				}
+			</style>
+		</head>
+		<body>
+			<div id="title">{{bookName}}</div>
+			<div id="deco-line"></div>
+			<div id="author-wrap">
+				<div id="author">{{author}}</div>
+			</div>
+			<script>
+				function fitText(el,maxSize,minSize,maxW,maxH){
+					var size=maxSize;
+					el.style.fontSize=size+'px';
+					while (size>minSize){
+						var rect=el.getBoundingClientRect();
+						if (rect.width<=maxW&&rect.height<=maxH) break;
+						size-=2;
+						el.style.fontSize=size+'px'
+					}
+					return size
+				}
+				var title=document.getElementById('title');
+				var authorEl=document.getElementById('author');
+				var authorWrap=document.getElementById('author-wrap');
+				var deco=document.getElementById('deco-line');
+				var titleSize=fitText(title,72,14,252,210);
+				var authorText=authorEl.textContent||'';
+				if (authorText.trim()===''){
+					authorWrap.style.display='none';
+					deco.style.display='none'
+				}else{
+					authorWrap.style.display='';
+					deco.style.display='';
+					var authorMax=Math.min(32,Math.floor(titleSize*0.55));
+					var authorMin=Math.max(15,Math.floor(titleSize*0.38));
+					fitText(authorEl,authorMax,authorMin,252,55)
+				}
+			</script>
+		</body>
+		</html>
         """.trimIndent()
     }
 

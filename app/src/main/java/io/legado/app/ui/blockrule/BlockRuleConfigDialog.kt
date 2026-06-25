@@ -554,7 +554,6 @@ private fun CompactSwitchRow(
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange
-            // 删除 Modifier.size(20.dp)，使用默认尺寸
         )
     }
 }
@@ -610,7 +609,6 @@ private fun CompactBlockRuleItem(
             Switch(
                 checked = rule.enabled,
                 onCheckedChange = { onToggleEnabled() }
-                // 删除 Modifier.size(20.dp)
             )
             IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
                 Icon(Icons.Filled.Edit, contentDescription = "编辑", modifier = Modifier.size(18.dp))
@@ -1465,15 +1463,19 @@ private fun importFromClipboard(context: android.content.Context, onRefresh: () 
         return
     }
     val existing = BlockRuleStore.load(context)
-    val newRules = imported.map { rule ->
-        var normalized = BlockRuleStore.sanitizeRule(rule)
-        if (existing.any { it.id == normalized.id }) {
-            normalized = normalized.copyWithNewId()
-        }
-        normalized
+    val existingIds = existing.map { it.id }.toSet()
+
+    val newRules = imported
+        .map { BlockRuleStore.sanitizeRule(it) }
+        .filter { it.id !in existingIds }
+
+    if (newRules.isEmpty()) {
+        context.toastOnUi("导入的规则已存在，无新规则")
+        return
     }
+
     BlockRuleStore.save(context, existing + newRules)
-    context.toastOnUi(R.string.explore_block_rule_import_success)
+    context.toastOnUi("成功导入 ${newRules.size} 条规则")
     onRefresh()
 }
 
