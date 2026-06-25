@@ -4,6 +4,21 @@
 
 ## 更新日志
   
+**2026/06/25**
+* [优化]：更新html封面默认模板
+  
+**2026/06/24**
+* [优化]：切换帮助文档时重置位置到顶部
+
+**2026/06/23**
+* [修复]：封面图集缺失“手动添加图片链接”的HTTP下载逻辑而导致崩溃的bug
+
+**2026/06/22**
+* [优化]：完善屏蔽规则
+  
+**2026/06/21**
+* [功能]：搜索进度条支持调整字号，调整样式以适配多行文本
+
 **2026/06/20**
 * [屏蔽规则]：
   * [优化]：缓存已编译的正则，提升大样本场景下的性能
@@ -78,7 +93,7 @@
 * 禁止ProGuard混淆，保留行号
 * 禁止引入GMS和Firebase
 * 仅编译简中语言，同时删除应用内切换语言功能
-* 封面规则增加官方渠道和兜底html封面
+* 封面规则增加官方渠道和兜底封面
 * 文本菜单管理界面改用tab，异步加载其它应用
 * 回退原字重切换界面
 * 回退原关于界面
@@ -775,12 +790,16 @@
 
 ## 项目继承历史
 ### 原版
-* [Github](https://github.com/gedoor/legado)
+* ~~ [Github](https://github.com/gedoor/legado)（删库） ~~
 ### Sigma版
 * [Github](https://github.com/Luoyacheng/legado)
 * [Gitee](https://gitee.com/lyc486/legado/releases)
 * [详细日志](https://gitee.com/lyc486/legado/commits/main)
 ### Max版
 * [Github](https://github.com/youfengknight/Legado_Max)
-* [Github_GEd520](https://github.com/GEd520/legados)
+* ~~ [Github_GEd520](https://github.com/GEd520/legados)（删库） ~~
 * [Github_Suml-1](https://github.com/Suml-1/Legado_Max)
+
+### 其它分支
+* [https://legado.ccccocccc.cc/index.php?i=2](https://legado.ccccocccc.cc/index.php?i=2)
+* [https://legado.gyks.cf](https://legado.gyks.cf)
