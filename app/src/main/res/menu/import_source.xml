@@ -44,6 +44,12 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/menu_add_serial_number"
+        android:title="@string/add_serial_number"
+        android:checkable="true"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/menu_enable_locate"
         android:title="@string/enable_locate"
         android:checkable="true"

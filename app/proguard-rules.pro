@@ -1,10 +1,3 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
-
 # ================================================
 # ProGuard按照顺序执行，不可更改：压缩代码(Shrinking)→优化字节码(Optimization)→混淆(Obfuscation)
 # 规则排序：全局控制→属性保留→代码设定→警告抑制
@@ -61,11 +54,21 @@
 # ---------- Jsoup ----------
 -keep class org.jsoup.** { *; }
 
+# JsoupXpath
+-keep class * implements org.seimicrawler.xpath.core.AxisSelector{*;}
+-keep class * implements org.seimicrawler.xpath.core.NodeTest{*;}
+-keep class * implements org.seimicrawler.xpath.core.Function{*;}
+
 # ---------- Sora Editor ----------
 # TM4E（语法高亮）
 -keep class org.eclipse.tm4e.** { *; }
 # Joni（正则引擎）
 -keep class org.joni.** { *; }
+
+# ExoPlayer
+-keepclassmembers class androidx.media3.datasource.cache.CacheDataSource$Factory {
+    *** upstreamDataSourceFactory;
+}
 
 # GSYVideoPlayer
 -keep class com.shuyu.gsyvideoplayer.** { *; }
@@ -92,6 +95,7 @@
 -keep class **.help.http.CookieStore { *; }
 -keep class **.help.CacheManager { *; }
 -keep class **.help.http.StrResponse { *; }
+
 # 视图
 -keep class androidx.appcompat.view.menu.MenuBuilder {
     *** setOptionalIconsVisible(...);
@@ -108,6 +112,7 @@
     public <init>(android.content.Context, android.util.AttributeSet);
     public <init>(android.content.Context, android.util.AttributeSet, int);
 }
+
 # 文件提供器
 -keep class androidx.documentfile.provider.TreeDocumentFile {
     <init>(...);
@@ -122,6 +127,10 @@
     *** size();
     *** putIfAbsent(...);
 }
+
+# Throwable
+-keepnames class * extends java.lang.Throwable
+-keepclassmembernames class * extends java.lang.Throwable{*;}
 
 # ================================================
 # 忽略警告（避免因可选依赖导致构建中断）

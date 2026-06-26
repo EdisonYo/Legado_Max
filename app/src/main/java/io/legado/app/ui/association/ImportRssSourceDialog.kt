@@ -160,6 +160,8 @@ class ImportRssSourceDialog() : BaseDialogFragment(R.layout.dialog_recycler_view
                 ?.isChecked = AppConfig.importKeepEnable
             findItem(R.id.menu_show_comment)
                 ?.isChecked = AppConfig.importShowComment
+            findItem(R.id.menu_add_serial_number)
+                ?.isChecked = AppConfig.importAddSerialNumber
             findItem(R.id.menu_enable_locate)
                 ?.apply {
                     isVisible = canShowLocate
@@ -193,6 +195,11 @@ class ImportRssSourceDialog() : BaseDialogFragment(R.layout.dialog_recycler_view
                 item.isChecked = !item.isChecked
                 AppConfig.importShowComment = item.isChecked
                 adapter.notifyDataSetChanged()
+            }
+
+            R.id.menu_add_serial_number -> {
+                item.isChecked = !item.isChecked
+                AppConfig.importAddSerialNumber = item.isChecked
             }
 
             R.id.menu_enable_locate -> {

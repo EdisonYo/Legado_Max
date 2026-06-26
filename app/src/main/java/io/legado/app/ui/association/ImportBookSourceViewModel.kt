@@ -90,6 +90,7 @@ class ImportBookSourceViewModel(app: Application) : BaseViewModel(app) {
             val keepName = AppConfig.importKeepName
             val keepGroup = AppConfig.importKeepGroup
             val keepEnable = AppConfig.importKeepEnable
+            val addSerialNumber = AppConfig.importAddSerialNumber
             val selectSource = arrayListOf<BookSource>()
             selectStatus.forEachIndexed { index, b ->
                 if (b) {
@@ -120,6 +121,24 @@ class ImportBookSourceViewModel(app: Application) : BaseViewModel(app) {
                         }
                     }
                     selectSource.add(source)
+                }
+            }
+            if (addSerialNumber) {
+                val usedUrls = hashSetOf<String>()
+                checkSources.filterNotNull().mapTo(usedUrls) { it.bookSourceUrl }
+                selectSource.filter { it.bookSourceUrl in usedUrls }.forEach { source ->
+                    val originalUrl = source.bookSourceUrl
+                    var maxSerial = 0
+                    while (appDb.bookSourceDao.getBookSourcePart("${originalUrl}#${maxSerial + 1}") != null) {
+                        maxSerial++
+                    }
+                    val newSerial = maxSerial + 1
+                    source.bookSourceUrl = "${originalUrl}#$newSerial"
+                    source.bookSourceName = "${source.bookSourceName}#$newSerial"
+                    val baseOrder = appDb.bookSourceDao.getBookSourcePart(originalUrl)?.customOrder
+                        ?: appDb.bookSourceDao.getBookSourcePart("${originalUrl}#1")?.customOrder
+                        ?: source.customOrder
+                    source.customOrder = baseOrder + newSerial
                 }
             }
             SourceHelp.insertBookSource(*selectSource.toTypedArray())
@@ -223,5 +242,4 @@ class ImportBookSourceViewModel(app: Application) : BaseViewModel(app) {
             successLiveData.postValue(allSources.size)
         }
     }
-
 }

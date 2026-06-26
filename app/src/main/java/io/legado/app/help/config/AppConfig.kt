@@ -653,6 +653,11 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
         set(value) {
             appCtx.putPrefBoolean(PreferKey.importShowComment, value)
         }
+	var importAddSerialNumber: Boolean
+	    get() = appCtx.getPrefBoolean(PreferKey.importAddSerialNumber, false)
+	    set(value) {
+	        appCtx.putPrefBoolean(PreferKey.importAddSerialNumber, value)
+	    }
     //点击图片方式
     val clickImgWay: String?
         get() = appCtx.getPrefString(PreferKey.clickImgWay)
