@@ -159,6 +159,8 @@ class ImportBookSourceDialog() : BaseDialogFragment(R.layout.dialog_recycler_vie
                 ?.isChecked = AppConfig.importKeepEnable
             findItem(R.id.menu_show_comment)
                 ?.isChecked = AppConfig.importShowComment
+            findItem(R.id.menu_add_serial_number)
+                ?.isChecked = AppConfig.importAddSerialNumber
             findItem(R.id.menu_enable_locate)
                 ?.apply {
                     isVisible = canShowLocate
@@ -212,6 +214,11 @@ class ImportBookSourceDialog() : BaseDialogFragment(R.layout.dialog_recycler_vie
                 item.isChecked = !item.isChecked
                 AppConfig.importShowComment = item.isChecked
                 adapter.notifyDataSetChanged()
+            }
+
+            R.id.menu_add_serial_number -> {
+                item.isChecked = !item.isChecked
+                AppConfig.importAddSerialNumber = item.isChecked
             }
 
             R.id.menu_enable_locate -> {

@@ -197,6 +197,7 @@ object PreferKey {
     const val showBookshelfFastScroller = "showBookshelfFastScroller"
     const val importKeepEnable = "importKeepEnable"
     const val importShowComment = "importShowComment"
+	const val importAddSerialNumber = "importAddSerialNumber"
     const val clickImgWay = "clickImgWay"
     const val keyPageOnLongPress = "keyPageOnLongPress"
     const val volumeKeyPage = "volumeKeyPage"

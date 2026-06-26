@@ -67,6 +67,7 @@ class ImportRssSourceViewModel(app: Application) : BaseViewModel(app) {
             val keepName = AppConfig.importKeepName
             val keepGroup = AppConfig.importKeepGroup
             val keepEnable = AppConfig.importKeepEnable
+            val addSerialNumber = AppConfig.importAddSerialNumber
             val selectSource = arrayListOf<RssSource>()
             selectStatus.forEachIndexed { index, b ->
                 if (b) {
@@ -98,6 +99,24 @@ class ImportRssSourceViewModel(app: Application) : BaseViewModel(app) {
                     selectSource.add(source)
                 }
             }
+			if (addSerialNumber) {
+			    val usedUrls = hashSetOf<String>()
+			    checkSources.filterNotNull().mapTo(usedUrls) { it.sourceUrl }
+			    selectSource.filter { it.sourceUrl in usedUrls }.forEach { source ->
+			        val originalUrl = source.sourceUrl
+			        var maxSerial = 0
+			        while (appDb.rssSourceDao.getByKey("${originalUrl}#${maxSerial + 1}") != null) {
+			            maxSerial++
+			        }
+			        val newSerial = maxSerial + 1
+			        source.sourceUrl = "${originalUrl}#$newSerial"
+			        source.sourceName = "${source.sourceName}#$newSerial"
+			        val baseOrder = appDb.rssSourceDao.getByKey(originalUrl)?.customOrder
+			            ?: appDb.rssSourceDao.getByKey("${originalUrl}#1")?.customOrder
+			            ?: source.customOrder
+			        source.customOrder = baseOrder + newSerial
+			    }
+			}
             SourceHelp.insertRssSource(*selectSource.toTypedArray())
         }.onFinally {
             finally.invoke()
