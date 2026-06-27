@@ -40,6 +40,7 @@ import io.legado.app.ui.widget.ReadAloudMiniBarHost
 import io.legado.app.utils.ColorUtils
 import io.legado.app.utils.fullScreen
 import io.legado.app.utils.observeEvent
+import io.legado.app.utils.setLightStatusBar
 import io.legado.app.utils.setNavigationBarColorAuto
 import io.legado.app.utils.setStatusBarColorAuto
 import io.legado.app.utils.startActivity
@@ -59,10 +60,14 @@ fun ComponentActivity.initLegadoComposeTheme() {
 }
 
 fun ComponentActivity.setupLegadoComposeSystemBar() {
-    fullScreen()
     val isTransparentStatusBar = AppConfig.isTransparentStatusBar
     val statusBarColor = ThemeStore.statusBarColor(this, isTransparentStatusBar)
-    setStatusBarColorAuto(statusBarColor, isTransparentStatusBar, true)
+    window.statusBarColor = if (isTransparentStatusBar) {
+        android.graphics.Color.TRANSPARENT
+    } else {
+        statusBarColor
+    }
+    setLightStatusBar(ColorUtils.isColorLight(primaryColor))
     if (AppConfig.immNavigationBar) {
         setNavigationBarColorAuto(ThemeStore.navigationBarColor(this))
     } else {
@@ -141,9 +146,9 @@ fun ComponentActivity.setLegadoContent(
     overlayAlpha: Float? = null,
     content: @Composable () -> Unit
 ) {
+    enableEdgeToEdge()
     setupLegadoComposeSystemBar()
     val backgroundDrawable = loadLegadoBackgroundDrawable()
-    enableEdgeToEdge()
     setContent {
         LegadoThemeWithBackground(
             backgroundDrawable = backgroundDrawable,

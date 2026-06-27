@@ -4,6 +4,7 @@ import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -27,16 +28,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.ripple
@@ -53,7 +50,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -69,13 +65,6 @@ import java.io.File
 
 /**
  * 文件管理主界面 (Compose 版本)
- * 
- * 功能：
- * - 显示文件和文件夹列表
- * - 支持进入子目录、返回上级目录
- * - 路径导航条可点击跳转
- * - 搜索过滤文件
- * - 点击文件可打开，长按可删除
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,27 +73,24 @@ fun FileManageScreen(
     initialPath: String? = null,
     onBackClick: () -> Unit
 ) {
-    // 从 ViewModel 收集状态
     val files by viewModel.filesLiveData.collectAsState(initial = emptyList())
     val subDocs by viewModel.subDocsFlow.collectAsState(initial = emptyList())
     val searchQuery by viewModel.searchQuery.collectAsState(initial = "")
-    
-    // 删除确认对话框状态
+    val currentStorage by viewModel.currentStorage.collectAsState()
+
     var showDeleteDialog by remember { mutableStateOf<File?>(null) }
-    
+
     val topBarColor = pageTopBarContainerColor()
 
     LaunchedEffect(initialPath) {
         initialPath?.let { viewModel.openPath(it) }
     }
-    
-    // 使用原来的 PNG 图标，保持视觉风格一致
+
     val upIcon = remember { bitmapFromBytes(FilePickerIcon.getUpDir()) }
     val folderIcon = remember { bitmapFromBytes(FilePickerIcon.getFolder()) }
     val fileIcon = remember { bitmapFromBytes(FilePickerIcon.getFile()) }
     val arrowIcon = remember { bitmapFromBytes(FilePickerIcon.getArrow()) }
-    
-    // 删除确认对话框
+
     showDeleteDialog?.let { file ->
         DeleteConfirmDialog(
             fileName = file.name,
@@ -115,12 +101,11 @@ fun FileManageScreen(
             onDismiss = { showDeleteDialog = null }
         )
     }
-    
+
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
             Column(modifier = Modifier.background(topBarColor)) {
-                // 标题栏
                 TopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent,
@@ -139,12 +124,17 @@ fun FileManageScreen(
                         )
                     },
                     navigationIcon = {
-                        IconButton(onClick = onBackClick) {
+                        IconButton(onClick = {
+                            when {
+                                subDocs.isNotEmpty() -> viewModel.gotoLastDir()
+                                currentStorage != FileManageViewModel.StorageType.NONE -> viewModel.goToRoot()
+                                else -> onBackClick()
+                            }
+                        }) {
                             Icon(Icons.Default.ArrowBack, contentDescription = "返回")
                         }
                     }
                 )
-                // 搜索栏
                 SearchBar(
                     query = searchQuery,
                     onQueryChange = { viewModel.updateSearchQuery(it) },
@@ -158,53 +148,60 @@ fun FileManageScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // 路径导航条
-            PathBreadcrumb(
-                subDocs = subDocs,
-                arrowIcon = arrowIcon,
-                onRootClick = { viewModel.goToRoot() },
-                onPathClick = { index -> viewModel.goToPath(index) }
-            )
-            
-            // 文件列表或空提示
-            if (files.isEmpty()) {
-                EmptyMessage()
-            } else {
-                FileList(
-                    files = files,
-                    lastDir = viewModel.lastDir,
-                    upIcon = upIcon,
-                    folderIcon = folderIcon,
-                    fileIcon = fileIcon,
-                    onFileClick = { file ->
-                        when {
-                            file == viewModel.lastDir -> viewModel.gotoLastDir()  // 点击 ".." 返回上级
-                            file.isDirectory -> viewModel.enterDir(file)         // 进入文件夹
-                            else -> viewModel.openFile(file)                     // 打开文件
-                        }
-                    },
-                    onFileLongClick = { file ->
-                        if (file != viewModel.lastDir) {
-                            showDeleteDialog = file
-                        }
-                    }
+            if (currentStorage != FileManageViewModel.StorageType.NONE) {
+                PathBreadcrumb(
+                    subDocs = subDocs,
+                    arrowIcon = arrowIcon,
+                    onRootClick = { viewModel.goToRoot() },
+                    onPathClick = { index -> viewModel.goToPath(index) }
                 )
+            }
+
+            when (currentStorage) {
+                FileManageViewModel.StorageType.NONE -> {
+                    StorageSelectionPanel(
+                        onExternalClick = { viewModel.selectExternalStorage() },
+                        onInternalClick = { viewModel.selectInternalStorage() }
+                    )
+                }
+                else -> {
+                    if (currentStorage == FileManageViewModel.StorageType.INTERNAL && subDocs.isEmpty()) {
+                        InternalStorageWarning()
+                    }
+
+                    if (files.isEmpty()) {
+                        EmptyMessage()
+                    } else {
+                        FileList(
+                            files = files,
+                            lastDir = viewModel.lastDir,
+                            upIcon = upIcon,
+                            folderIcon = folderIcon,
+                            fileIcon = fileIcon,
+                            onFileClick = { file ->
+                                when {
+                                    file == viewModel.lastDir -> viewModel.gotoLastDir()
+                                    file.isDirectory -> viewModel.enterDir(file)
+                                    else -> viewModel.openFile(file)
+                                }
+                            },
+                            onFileLongClick = { file ->
+                                if (file != viewModel.lastDir) {
+                                    showDeleteDialog = file
+                                }
+                            }
+                        )
+                    }
+                }
             }
         }
     }
 }
 
-/**
- * 将 PNG 字节数组转换为 ImageBitmap
- */
 private fun bitmapFromBytes(bytes: ByteArray): ImageBitmap {
     return BitmapFactory.decodeByteArray(bytes, 0, bytes.size).asImageBitmap()
 }
 
-/**
- * 搜索栏组件
- * 样式：圆角背景，左侧搜索图标，右侧输入框
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SearchBar(
@@ -213,7 +210,7 @@ private fun SearchBar(
     hint: String
 ) {
     val containerColor = pageCardContainerColor()
-    
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -228,7 +225,6 @@ private fun SearchBar(
                 .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 搜索图标
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = null,
@@ -236,12 +232,10 @@ private fun SearchBar(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            // 输入框
             Box(
                 modifier = Modifier.weight(1f),
                 contentAlignment = Alignment.CenterStart
             ) {
-                // 占位提示文字
                 if (query.isEmpty()) {
                     Text(
                         text = hint,
@@ -249,7 +243,6 @@ private fun SearchBar(
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                     )
                 }
-                // 实际输入框
                 androidx.compose.foundation.text.BasicTextField(
                     value = query,
                     onValueChange = onQueryChange,
@@ -266,11 +259,6 @@ private fun SearchBar(
     }
 }
 
-/**
- * 路径导航条
- * 显示当前路径，支持点击跳转
- * 格式：root > folder1 > folder2 > ...
- */
 @Composable
 private fun PathBreadcrumb(
     subDocs: List<File>,
@@ -280,7 +268,7 @@ private fun PathBreadcrumb(
 ) {
     val scrollState = rememberScrollState()
     val containerColor = pageCardContainerColor()
-    
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -290,14 +278,11 @@ private fun PathBreadcrumb(
             .padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 根目录项
         PathItem(
             text = "root",
             arrowIcon = arrowIcon,
             onClick = onRootClick
         )
-        
-        // 子目录项
         subDocs.forEachIndexed { index, file ->
             PathItem(
                 text = file.name,
@@ -308,10 +293,6 @@ private fun PathBreadcrumb(
     }
 }
 
-/**
- * 单个路径项
- * 格式：文本 + 箭头图标
- */
 @Composable
 private fun PathItem(
     text: String,
@@ -341,10 +322,89 @@ private fun PathItem(
     }
 }
 
-/**
- * 文件列表
- * 使用 LazyColumn 实现滚动列表
- */
+@Composable
+private fun StorageSelectionPanel(
+    onExternalClick: () -> Unit,
+    onInternalClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(0.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            StorageEntry(
+                modifier = Modifier.weight(1f),
+                title = "外存储",
+                subtitle = "Android/data",
+                onClick = onExternalClick
+            )
+            StorageEntry(
+                modifier = Modifier.weight(1f),
+                title = "内存储",
+                subtitle = "data/data",
+                warning = true,
+                onClick = onInternalClick
+            )
+        }
+    }
+}
+
+@Composable
+private fun StorageEntry(
+    modifier: Modifier = Modifier,
+    title: String,
+    subtitle: String,
+    warning: Boolean = false,
+    onClick: () -> Unit
+) {
+    val containerColor = pageCardContainerColor()
+    Column(
+        modifier = modifier
+            .height(80.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(containerColor)
+            .clickable(onClick = onClick)
+            .padding(12.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            color = if (warning) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = subtitle,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun InternalStorageWarning() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f))
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = "⚠️ 删除内部存储文件极大可能影响应用正常运行，请谨慎操作",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.error
+        )
+    }
+}
+
 @Composable
 private fun FileList(
     files: List<File>,
@@ -373,11 +433,7 @@ private fun FileList(
     }
 }
 
-/**
- * 单个文件项
- * 显示图标 + 文件名
- * 图标类型：上级目录(..)、文件夹、普通文件
- */
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 private fun FileItem(
     file: File,
@@ -391,25 +447,27 @@ private fun FileItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
             .padding(horizontal = 5.dp, vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 根据类型选择图标
         val icon = when {
-            isParentDir -> upIcon      // 返回上级图标
-            file.isDirectory -> folderIcon  // 文件夹图标
-            else -> fileIcon          // 普通文件图标
+            isParentDir -> upIcon
+            file.isDirectory -> folderIcon
+            else -> fileIcon
         }
-        
+
         Image(
             bitmap = icon,
             contentDescription = null,
             modifier = Modifier.size(24.dp)
         )
-        
+
         Spacer(modifier = Modifier.width(4.dp))
-        
+
         Text(
             text = if (isParentDir) ".." else file.name,
             style = MaterialTheme.typography.bodyLarge,
@@ -418,10 +476,6 @@ private fun FileItem(
     }
 }
 
-/**
- * 空提示
- * 当文件列表为空时显示
- */
 @Composable
 private fun EmptyMessage() {
     Box(
@@ -436,9 +490,6 @@ private fun EmptyMessage() {
     }
 }
 
-/**
- * 删除确认对话框
- */
 @Composable
 private fun DeleteConfirmDialog(
     fileName: String,
