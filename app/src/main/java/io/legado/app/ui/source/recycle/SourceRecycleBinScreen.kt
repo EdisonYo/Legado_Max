@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.RestoreFromTrash
@@ -331,12 +330,6 @@ fun SourceRecycleBinScreen(
                                 )
                                 SourceRecycleDropdownMenuItem(
                                     text = stringResource(R.string.clear),
-                                    leadingIcon = {
-                                        Icon(
-                                            Icons.Default.DeleteSweep,
-                                            contentDescription = null
-                                        )
-                                    },
                                     destructive = true,
                                     enabled = items.isNotEmpty(),
                                     onClick = {
