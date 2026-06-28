@@ -1486,6 +1486,7 @@
     <string name="edit_theme_monokai">莫奈亮光</string>
     <string name="edit_theme_monokai_dimmed">莫奈柔光</string>
     <string name="change_theme">选择主题</string>
+    <string name="grammar_select">切换语法</string>
     <string name="edit_theme_modern_dark">现代深色</string>
     <string name="edit_theme_modern_light">现代浅色</string>
     <string name="edit_theme_solarized_dark">日光深色</string>
