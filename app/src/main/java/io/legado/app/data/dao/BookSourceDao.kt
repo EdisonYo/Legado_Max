@@ -10,6 +10,7 @@ import androidx.room.Update
 import io.legado.app.constant.AppPattern
 import io.legado.app.data.entities.BookSource
 import io.legado.app.data.entities.BookSourcePart
+import io.legado.app.data.entities.SourceBasic
 import io.legado.app.help.config.SourceConfig
 import io.legado.app.utils.cnCompare
 import io.legado.app.utils.splitNotBlank
@@ -262,6 +263,10 @@ interface BookSourceDao {
 
     @Query("select * from book_sources_part where bookSourceUrl = :key")
     fun getBookSourcePart(key: String): BookSourcePart?
+
+	/** 轻量投影：仅取 URL 和名称 */
+	@Query("select bookSourceUrl as sourceUrl, bookSourceName as sourceName from book_sources order by customOrder asc")
+	fun getAllSourceBasics(): List<SourceBasic>
 
     @Query("select count(*) from book_sources")
     fun allCount(): Int

@@ -130,6 +130,8 @@ class ReadWebSearchPanel @JvmOverloads constructor(
         get() = pooledWebView!!.realWebView
     private var engines = loadEngines(context)
     private var selectedEngineIndex = 0
+	private var isSwitchingEngine = false
+	private var lastLoadedEngineUrl: String? = null
     private var startRawY = 0f
     private var startHeight = 0
     private val collapsedRatio = 0.58f
@@ -153,9 +155,10 @@ class ReadWebSearchPanel @JvmOverloads constructor(
             return
         }
         ensureWebView()
-        webView.resumeTimers()//恢复定时器
-        webView.onResume()//恢复WebView状态
-        selectedEngineIndex = defaultEngineIndex(context, engines)
+        webView.resumeTimers()
+        webView.onResume()
+        selectedEngineIndex = resolveSelectedEngineIndex(context, engines)
+        refreshEngineButtons()
         visible()
         bringToFront()
         setSheetHeight((resources.displayMetrics.heightPixels * collapsedRatio).roundToInt())
@@ -253,6 +256,13 @@ class ReadWebSearchPanel @JvmOverloads constructor(
         pooledWebView = WebViewPool.acquire(context)
         webView.apply {
             webViewClient = object : WebViewClient() {
+				override fun onPageFinished(view: WebView?, url: String?) {
+				    super.onPageFinished(view, url)
+				    if (isSwitchingEngine) {
+				        webView.clearHistory()
+				        isSwitchingEngine = false
+				    }
+				}
                 override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                     return shouldOverrideUrlLoading(request?.url)
                 }
@@ -321,6 +331,7 @@ class ReadWebSearchPanel @JvmOverloads constructor(
             setOnClickListener {
                 selectedEngineIndex = index
                 updateEngineButtons()
+                saveLastSelectedEngineUrl(context, engine.url)
                 loadSearch(searchEdit.text.toString())
             }
             layoutParams = LinearLayout.LayoutParams(
@@ -342,16 +353,21 @@ class ReadWebSearchPanel @JvmOverloads constructor(
         }
     }
 
-    private fun loadSearch(query: String) {
-        val normalizedQuery = query.trim()
-        if (normalizedQuery.isEmpty()) {
-            return
-        }
-        searchEdit.setText(normalizedQuery)
-        searchEdit.setSelection(searchEdit.text.length)
-        val engine = engines.getOrNull(selectedEngineIndex) ?: return
-        webView.loadUrl(engine.buildUrl(normalizedQuery))
-    }
+	private fun loadSearch(query: String) {
+	    val normalizedQuery = query.trim()
+	    if (normalizedQuery.isEmpty()) {
+	        return
+	    }
+	    searchEdit.setText(normalizedQuery)
+	    searchEdit.setSelection(searchEdit.text.length)
+	    val engine = engines.getOrNull(selectedEngineIndex) ?: return
+	    val targetUrl = engine.buildUrl(normalizedQuery)
+	    if (lastLoadedEngineUrl != engine.url) {
+	        isSwitchingEngine = true
+	        lastLoadedEngineUrl = engine.url
+	    }
+	    webView.loadUrl(targetUrl)
+	}
 
     private fun showEngineListDialog() {
         val dialog = BottomSheetDialog(context)
@@ -505,8 +521,10 @@ class ReadWebSearchPanel @JvmOverloads constructor(
                     selectedEngineIndex = lastIndex
                 }
             }
-            if (index >= 0 && getDefaultEngineUrl(context).isNullOrBlank()) {
-                saveDefaultEngineUrl(context, newEngine.url)
+            if (index < 0) {
+                saveLastSelectedEngineUrl(context, newEngine.url)
+            } else if (selectedEngineIndex == index) {
+                saveLastSelectedEngineUrl(context, newEngine.url)
             }
             saveEngines(context, engines)
             refreshEngineButtons()
@@ -529,8 +547,8 @@ class ReadWebSearchPanel @JvmOverloads constructor(
                         }
                     }
                     selectedEngineIndex = selectedEngineIndex.coerceIn(0, (engines.size - 1).coerceAtLeast(0))
+                    saveLastSelectedEngineUrl(context, engines.getOrNull(selectedEngineIndex)?.url)
                     saveEngines(context, engines)
-                    saveDefaultEngineUrl(context, engines.getOrNull(selectedEngineIndex)?.url)
                     refreshEngineButtons()
                     onChanged?.invoke()
                     dialog.dismiss()
@@ -601,13 +619,13 @@ class ReadWebSearchPanel @JvmOverloads constructor(
 
         override fun onBindViewHolder(holder: EngineViewHolder, position: Int) {
             val engine = items[position]
-            val isDefault = isDefaultEngine(position, engine)
+            val isDefault = isDefaultEngine(engine)
             holder.titleView.text = engine.title
             holder.urlView.text = engine.url
             holder.defaultTag.visibility = if (isDefault) VISIBLE else GONE
-            holder.defaultButton.text = if (isDefault) "默认" else "设默认"
+            holder.defaultButton.text = if (isDefault) "默认" else "设为默认"
             holder.defaultButton.setOnClickListener {
-                saveDefaultEngineUrl(context, engine.url)
+                saveLastSelectedEngineUrl(context, engine.url)
                 selectedEngineIndex = engines.indexOfFirst { it.url == engine.url }.takeIf { it >= 0 } ?: position
                 refreshEngineButtons()
                 notifyDataSetChanged()
@@ -629,15 +647,13 @@ class ReadWebSearchPanel @JvmOverloads constructor(
         }
 
         private fun persistItems() {
-            val selectedUrl = engines.getOrNull(selectedEngineIndex)?.url
+            val lastUrl = getLastSelectedEngineUrl(context)
             engines = items.toList()
-            selectedEngineIndex = engines.indexOfFirst { it.url == selectedUrl }
+            selectedEngineIndex = engines.indexOfFirst { it.url == lastUrl }
                 .takeIf { it >= 0 }
-                ?: defaultEngineIndex(context, engines)
-            ensureValidDefaultEngine()
+                ?: 0
             saveEngines(context, engines)
             refreshEngineButtons()
-            loadSearch(searchEdit.text.toString())
         }
 
         private fun confirmDelete(position: Int, engine: SearchEngine) {
@@ -649,10 +665,17 @@ class ReadWebSearchPanel @JvmOverloads constructor(
                         return@setPositiveButton
                     }
                     SourceRecycleBinHelp.recycleSearchEngines(listOf(engine))
+                    val removedUrl = engine.url
                     items.removeAt(position)
                     engines = items.toList()
-                    selectedEngineIndex = selectedEngineIndex.coerceIn(0, (engines.size - 1).coerceAtLeast(0))
-                    ensureValidDefaultEngine()
+
+                    if (removedUrl == getLastSelectedEngineUrl(context)) {
+                        selectedEngineIndex = 0.coerceAtMost(engines.size - 1)
+                        saveLastSelectedEngineUrl(context, engines.getOrNull(selectedEngineIndex)?.url)
+                    } else {
+                        selectedEngineIndex = resolveSelectedEngineIndex(context, engines)
+                    }
+
                     saveEngines(context, engines)
                     notifyItemRemoved(position)
                     notifyItemRangeChanged(position, items.size - position)
@@ -662,13 +685,8 @@ class ReadWebSearchPanel @JvmOverloads constructor(
                 .show()
         }
 
-        private fun isDefaultEngine(position: Int, engine: SearchEngine): Boolean {
-            val defaultUrl = getDefaultEngineUrl(context)
-            return if (defaultUrl.isNullOrBlank()) {
-                position == 0
-            } else {
-                engine.url == defaultUrl
-            }
+        private fun isDefaultEngine(engine: SearchEngine): Boolean {
+            return engine.url == getLastSelectedEngineUrl(context)
         }
 
         inner class EngineViewHolder(root: LinearLayout) : RecyclerView.ViewHolder(root) {
@@ -729,13 +747,6 @@ class ReadWebSearchPanel @JvmOverloads constructor(
         }
     }
 
-    private fun ensureValidDefaultEngine() {
-        val defaultUrl = getDefaultEngineUrl(context)
-        if (defaultUrl.isNullOrBlank() || engines.none { it.url == defaultUrl }) {
-            saveDefaultEngineUrl(context, engines.firstOrNull()?.url)
-        }
-    }
-
     private fun onDragTouch(view: View, event: MotionEvent): Boolean {
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
@@ -783,12 +794,11 @@ class ReadWebSearchPanel @JvmOverloads constructor(
 
     companion object {
         private const val ENGINE_PREF_KEY = "readWebSearchEngines"
-        private const val DEFAULT_ENGINE_PREF_KEY = "readWebSearchDefaultEngine"
+        private const val LAST_SELECTED_ENGINE_PREF_KEY = "readWebSearchLastSelectedEngine"
         private const val QUERY_PLACEHOLDER = "{query}"
         private val BING_TEMPLATE = SearchEngine("必应", "https://www.bing.com/search?q={query}")
         private val BAIDU_TEMPLATE = SearchEngine("百度", "https://www.baidu.com/s?wd={query}")
 
-        // 自定义反序列化器：确保 JSON null 被替换为默认值
         private val searchEngineDeserializer = object : com.google.gson.JsonDeserializer<SearchEngine> {
             override fun deserialize(
                 json: com.google.gson.JsonElement,
@@ -803,7 +813,6 @@ class ReadWebSearchPanel @JvmOverloads constructor(
             }
         }
 
-        // 使用自定义反序列化器的 GSON 实例
         private val engineGson: com.google.gson.Gson = com.google.gson.GsonBuilder()
             .registerTypeAdapter(SearchEngine::class.java, searchEngineDeserializer)
             .create()
@@ -838,18 +847,21 @@ class ReadWebSearchPanel @JvmOverloads constructor(
             saveSearchEngines(context, engines)
         }
 
-        private fun defaultEngineIndex(context: Context, engines: List<SearchEngine>): Int {
-            val defaultUrl = getDefaultEngineUrl(context)
-            val index = engines.indexOfFirst { it.url == defaultUrl }
-            return if (index >= 0) index else 0
+        private fun resolveSelectedEngineIndex(context: Context, engines: List<SearchEngine>): Int {
+            val lastUrl = getLastSelectedEngineUrl(context)
+            if (!lastUrl.isNullOrBlank()) {
+                val index = engines.indexOfFirst { it.url == lastUrl }
+                if (index >= 0) return index
+            }
+            return 0
         }
 
-        private fun getDefaultEngineUrl(context: Context): String? {
-            return context.getPrefString(DEFAULT_ENGINE_PREF_KEY)
+        private fun getLastSelectedEngineUrl(context: Context): String? {
+            return context.getPrefString(LAST_SELECTED_ENGINE_PREF_KEY)
         }
 
-        private fun saveDefaultEngineUrl(context: Context, url: String?) {
-            context.putPrefString(DEFAULT_ENGINE_PREF_KEY, url.orEmpty())
+        private fun saveLastSelectedEngineUrl(context: Context, url: String?) {
+            context.putPrefString(LAST_SELECTED_ENGINE_PREF_KEY, url.orEmpty())
         }
 
         private fun SearchEngine.buildUrl(query: String): String {

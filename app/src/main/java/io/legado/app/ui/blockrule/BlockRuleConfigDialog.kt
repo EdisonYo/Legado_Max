@@ -77,10 +77,9 @@ import androidx.fragment.app.DialogFragment
 import io.legado.app.R
 import io.legado.app.constant.PreferKey
 import io.legado.app.data.appDb
-import io.legado.app.data.entities.BookSource
-import io.legado.app.data.entities.RssSource
 import io.legado.app.data.entities.RssArticle
 import io.legado.app.data.entities.SearchBook
+import io.legado.app.data.entities.SourceBasic
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.pageCardContainerColor
 import io.legado.app.ui.theme.pageSecondaryTextColor
@@ -101,7 +100,6 @@ import kotlinx.coroutines.withContext
 
 /**
  * 屏蔽规则配置弹窗
- * 简约样式、紧凑布局、直角（0dp圆角）
  */
 class BlockRuleConfigDialog : DialogFragment() {
 
@@ -157,15 +155,6 @@ private fun BlockRuleConfigContent(
     var showProgress by remember { mutableStateOf(context.getPrefBoolean(PreferKey.blockRuleShowProgress, false)) }
     var masterEnabled by remember { mutableStateOf(context.getPrefBoolean(PreferKey.blockRuleEnabled, true)) }
     var showActiveRules by remember { mutableStateOf(false) }
-    var allSources by remember { mutableStateOf<List<BookSource>>(emptyList()) }
-    var allRssSources by remember { mutableStateOf<List<RssSource>>(emptyList()) }
-
-    LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
-            allSources = appDb.bookSourceDao.getAllSources()
-            allRssSources = appDb.rssSourceDao.all
-        }
-    }
 
     fun refresh() {
         BlockRuleStore.invalidateCache()
@@ -192,7 +181,7 @@ private fun BlockRuleConfigContent(
     }
     val groups = BlockRuleGroupStore.load(context)
 
-    // 删除确认 - 小尺寸、无标题、左对齐、横排
+    // 删除确认
     deletingRule?.let { rule ->
         AlertDialog(
             onDismissRequest = { deletingRule = null },
@@ -285,7 +274,6 @@ private fun BlockRuleConfigContent(
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 12.dp)
         ) {
-            // 顶部栏
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -389,7 +377,7 @@ private fun BlockRuleConfigContent(
                 }
             )
 
-            // 起效的屏蔽 - 默认同级色，有匹配时强调色
+            // 起效的屏蔽
             val activeColor = if (currentMatchedRules.isNotEmpty()) MaterialTheme.colorScheme.primary else pageSecondaryTextColor()
             Row(
                 modifier = Modifier
@@ -440,8 +428,6 @@ private fun BlockRuleConfigContent(
                     items(filteredRules, key = { it.id }) { rule ->
                         CompactBlockRuleItem(
                             rule = rule,
-                            allSources = allSources,
-                            allRssSources = allRssSources,
                             onToggleEnabled = {
                                 val newRules = rules.map {
                                     if (it.id == rule.id) it.copy(enabled = !it.enabled) else it
@@ -503,7 +489,6 @@ private fun BlockRuleConfigContent(
     }
 }
 
-// 紧凑的 FilterChip：选中时文字加粗+强调色，背景不变，保留边框
 @Composable
 private fun CompactFilterChip(
     selected: Boolean,
@@ -533,7 +518,6 @@ private fun CompactFilterChip(
     )
 }
 
-// 紧凑的 Switch 行
 @Composable
 private fun CompactSwitchRow(
     text: String,
@@ -558,12 +542,9 @@ private fun CompactSwitchRow(
     }
 }
 
-// 紧凑的规则列表项
 @Composable
 private fun CompactBlockRuleItem(
     rule: BlockRule,
-    allSources: List<BookSource>,
-    allRssSources: List<RssSource>,
     onToggleEnabled: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit
@@ -620,7 +601,6 @@ private fun CompactBlockRuleItem(
     }
 }
 
-// 起效规则项 - 紧凑版
 @Composable
 private fun CompactActiveRuleItem(rule: BlockRule, matchedBooks: List<SearchBook>) {
     var expanded by remember { mutableStateOf(false) }
@@ -771,8 +751,8 @@ private fun BlockRuleEditContent(
 
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
-            totalSourceCount = appDb.bookSourceDao.getAllSources().size
-            totalRssSourceCount = appDb.rssSourceDao.all.size
+            totalSourceCount = appDb.bookSourceDao.allCount()
+            totalRssSourceCount = appDb.rssSourceDao.size
         }
     }
 
@@ -934,7 +914,7 @@ private fun BlockRuleEditContent(
                     }
                 }
 
-                // 作用的书源选择器 - 方案D
+                // 作用的书源选择器
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -996,7 +976,7 @@ private fun BlockRuleEditContent(
                     }
                 }
 
-                // 作用的订阅源选择器 - 方案D
+                // 作用的订阅源选择器
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1239,7 +1219,7 @@ private fun BlockRuleGroupManageContent(
     )
 }
 
-/** 统一的书源/订阅源选择器 */
+/** 书源/订阅源选择器 */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CompactSourceSelectorDialog(
@@ -1250,8 +1230,8 @@ private fun CompactSourceSelectorDialog(
     onConfirm: (Set<String>) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var allSources by remember { mutableStateOf<List<BookSource>>(emptyList()) }
-    var allRssSources by remember { mutableStateOf<List<RssSource>>(emptyList()) }
+    var allSources by remember { mutableStateOf<List<SourceBasic>>(emptyList()) }
+    var allRssSources by remember { mutableStateOf<List<SourceBasic>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var searchQuery by remember { mutableStateOf("") }
     var selectedUrls by remember { mutableStateOf(initialSelectedUrls) }
@@ -1260,7 +1240,7 @@ private fun CompactSourceSelectorDialog(
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
             if (isRss) {
-                val sources = appDb.rssSourceDao.all
+                val sources = appDb.rssSourceDao.getAllSourceBasics()
                 withContext(Dispatchers.Main) {
                     allRssSources = sources
                     if (defaultSelectAllPending) {
@@ -1270,11 +1250,11 @@ private fun CompactSourceSelectorDialog(
                     isLoading = false
                 }
             } else {
-                val sources = appDb.bookSourceDao.getAllSources()
+                val sources = appDb.bookSourceDao.getAllSourceBasics()
                 withContext(Dispatchers.Main) {
                     allSources = sources
                     if (defaultSelectAllPending) {
-                        selectedUrls = sources.map { it.bookSourceUrl }.toSet()
+                        selectedUrls = sources.map { it.sourceUrl }.toSet()
                         defaultSelectAllPending = false
                     }
                     isLoading = false
@@ -1284,18 +1264,11 @@ private fun CompactSourceSelectorDialog(
     }
 
     val filteredSources = remember(allSources, allRssSources, searchQuery) {
-        if (isRss) {
-            if (searchQuery.isBlank()) allRssSources
-            else allRssSources.filter {
-                it.sourceName.contains(searchQuery, ignoreCase = true) ||
-                        it.sourceUrl.contains(searchQuery, ignoreCase = true)
-            }
-        } else {
-            if (searchQuery.isBlank()) allSources
-            else allSources.filter {
-                it.bookSourceName.contains(searchQuery, ignoreCase = true) ||
-                        it.bookSourceUrl.contains(searchQuery, ignoreCase = true)
-            }
+        val targetList = if (isRss) allRssSources else allSources
+        if (searchQuery.isBlank()) targetList
+        else targetList.filter {
+            it.sourceName.contains(searchQuery, ignoreCase = true) ||
+            it.sourceUrl.contains(searchQuery, ignoreCase = true)
         }
     }
 
@@ -1336,20 +1309,12 @@ private fun CompactSourceSelectorDialog(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         TextButton(onClick = {
-                            selectedUrls = if (isRss) {
-                                filteredSources.map { (it as RssSource).sourceUrl }.toSet()
-                            } else {
-                                filteredSources.map { (it as BookSource).bookSourceUrl }.toSet()
-                            }
+                            selectedUrls = filteredSources.map { it.sourceUrl }.toSet()
                         }) {
                             Text("全选", fontSize = 12.sp)
                         }
                         TextButton(onClick = {
-                            val filteredUrls = if (isRss) {
-                                filteredSources.map { (it as RssSource).sourceUrl }.toSet()
-                            } else {
-                                filteredSources.map { (it as BookSource).bookSourceUrl }.toSet()
-                            }
+                            val filteredUrls = filteredSources.map { it.sourceUrl }.toSet()
                             val newSelected = selectedUrls.toMutableSet()
                             filteredUrls.forEach { url ->
                                 if (url in newSelected) newSelected.remove(url) else newSelected.add(url)
@@ -1375,12 +1340,9 @@ private fun CompactSourceSelectorDialog(
                             state = listState,
                             modifier = Modifier.fillMaxWidth().align(Alignment.CenterStart)
                         ) {
-                            items(filteredSources, key = { 
-                                if (isRss) (it as RssSource).sourceUrl else (it as BookSource).bookSourceUrl 
-                            }) { source ->
-                                val url = if (isRss) (source as RssSource).sourceUrl else (source as BookSource).bookSourceUrl
-                                val name = if (isRss) (source as RssSource).sourceName.ifBlank { url } else (source as BookSource).bookSourceName.ifBlank { url }
-                                val displayUrl = if (isRss) (source as RssSource).sourceUrl else (source as BookSource).bookSourceUrl
+                            items(filteredSources, key = { it.sourceUrl }) { source ->
+                                val url = source.sourceUrl
+                                val name = source.sourceName.ifBlank { url }
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -1403,7 +1365,9 @@ private fun CompactSourceSelectorDialog(
                                                 selectedUrls - url
                                             }
                                         },
-                                        modifier = Modifier.size(20.dp)
+                                        modifier = Modifier
+                                            .size(20.dp)
+                                            .padding(end = 8.dp)
                                     )
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
@@ -1413,9 +1377,9 @@ private fun CompactSourceSelectorDialog(
                                             style = MaterialTheme.typography.bodyMedium,
                                             fontSize = 12.sp
                                         )
-                                        if (name != displayUrl) {
+                                        if (name != url) {
                                             Text(
-                                                text = displayUrl,
+                                                text = url,
                                                 maxLines = 1,
                                                 overflow = TextOverflow.Ellipsis,
                                                 style = MaterialTheme.typography.bodySmall,

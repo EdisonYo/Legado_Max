@@ -8,6 +8,7 @@ import androidx.room.Query
 import androidx.room.Update
 import io.legado.app.constant.AppPattern
 import io.legado.app.data.entities.RssSource
+import io.legado.app.data.entities.SourceBasic
 import io.legado.app.utils.cnCompare
 import io.legado.app.utils.splitNotBlank
 import kotlinx.coroutines.Dispatchers.IO
@@ -29,6 +30,10 @@ interface RssSourceDao {
 
     @get:Query("select count(sourceUrl) from rssSources")
     val size: Int
+
+	/** 轻量投影：仅取 URL 和名称 */
+	@Query("select sourceUrl, sourceName from rssSources order by customOrder")
+	fun getAllSourceBasics(): List<SourceBasic>
 
     @Query("SELECT * FROM rssSources order by customOrder")
     fun flowAll(): Flow<List<RssSource>>
