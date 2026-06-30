@@ -19,18 +19,17 @@ object BackupSelectorConfig {
     )
 
     val allItems = listOf(
-        BackupItem("coverGallery", CoverGalleryRepository.backupDirName, "封面图集", "配置"),
         BackupItem("bookshelf", "bookshelf.json", "书架", "数据库"),
         BackupItem("bookChapter", "bookChapter.json", "章节目录", "数据库"),
         BackupItem("bookmark", "bookmark.json", "书签", "数据库"),
+        BackupItem("readRecord", "readRecord.json", "阅读记录", "数据库"),
+        BackupItem("readRecordDetail", "readRecordDetail.json", "阅读记录详情", "数据库"),
         BackupItem("bookGroup", "bookGroup.json", "书籍分组", "数据库"),
         BackupItem("bookSource", "bookSource.json", "书源", "数据库"),
         BackupItem("rssSources", "rssSources.json", "订阅源", "数据库"),
         BackupItem("rssStar", "rssStar.json", "订阅收藏", "数据库"),
+        BackupItem("sourceSub", "sourceSub.json", "源订阅链接", "数据库"),
         BackupItem("replaceRule", "replaceRule.json", "替换规则", "数据库"),
-        BackupItem("highlightRule", "highlightRule.json", "高亮规则", "配置"),
-        BackupItem("readRecord", "readRecord.json", "阅读记录", "数据库"),
-        BackupItem("readRecordDetail", "readRecordDetail.json", "阅读记录详情", "数据库"),
         BackupItem("searchHistory", "searchHistory.json", "搜索历史", "数据库"),
         BackupItem("txtTocRule", "txtTocRule.json", "TXT目录规则", "数据库"),
         BackupItem("httpTTS", "httpTTS.json", "TTS配置", "数据库"),
@@ -41,10 +40,12 @@ object BackupSelectorConfig {
         BackupItem("readConfig", "readConfig.json", "阅读样式配置", "配置"),
         BackupItem("readShareConfig", "readShareConfig.json", "阅读分享配置", "配置"),
         BackupItem("themeConfig", "themeConfig.json", "主题配置", "配置"),
+        BackupItem("highlightRule", "highlightRule.json", "高亮规则", "配置"),
         BackupItem("coverRule", "coverRule.json", "封面规则", "配置"),
         BackupItem("directLinkRule", "directLinkRule.json", "直链规则", "配置"),
         BackupItem("appConfig", "config.xml", "应用配置", "配置"),
         BackupItem("videoConfig", "videoConfig.xml", "视频配置", "配置"),
+        BackupItem("coverGallery", CoverGalleryRepository.backupDirName, "封面图集", "配置"),
         BackupItem("backgroundImages", "bg", "背景图片", "其他"),
         BackupItem("bookCache", "book_cache", "书籍缓存", "其他")
     )

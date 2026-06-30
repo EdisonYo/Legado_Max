@@ -33,6 +33,7 @@ import io.legado.app.data.repository.ReadRecordRepository
 import io.legado.app.data.entities.ReplaceRule
 import io.legado.app.data.entities.RssSource
 import io.legado.app.data.entities.RssStar
+import io.legado.app.data.entities.RuleSub
 import io.legado.app.data.entities.SearchKeyword
 import io.legado.app.data.entities.Server
 import io.legado.app.data.entities.TxtTocRule
@@ -294,6 +295,15 @@ object Restore {
             }
         }
 
+        // 恢复源订阅链接
+        if ("sourceSub.json" in selectedSet) {
+            progress("sourceSub.json")
+            appDb.ruleSubDao.deleteAll()
+            fileToListT<RuleSub>(path, "sourceSub.json")?.let {
+                appDb.ruleSubDao.insert(*it.toTypedArray())
+            }
+        }
+
         // 恢复替换规则
         if ("replaceRule.json" in selectedSet) {
             progress("replaceRule.json")
@@ -303,7 +313,6 @@ object Restore {
             }
         }
 
-        // 恢复搜索历史
         if (HighlightRuleStore.backupFileName in selectedSet) {
             progress(HighlightRuleStore.backupFileName)
             File(path, HighlightRuleStore.backupFileName).takeIf { it.exists() }?.runCatching {
@@ -311,9 +320,11 @@ object Restore {
                     HighlightRuleStore.restoreBackupData(appCtx, it, path)
                 }
             }?.onFailure {
-                AppLog.put("鎭㈠楂樹寒瑙勫垯鍑洪敊\n${it.localizedMessage}", it)
+                AppLog.put("恢复高亮规则出错\n${it.localizedMessage}", it)
             }
         }
+
+        // 恢复搜索历史
         if ("searchHistory.json" in selectedSet) {
             progress("searchHistory.json")
             appDb.searchKeywordDao.deleteAll()
@@ -633,6 +644,13 @@ object Restore {
         appDb.rssStarDao.deleteAll()
         fileToListT<RssStar>(path, "rssStar.json")?.let {
             appDb.rssStarDao.insert(*it.toTypedArray())
+        }
+
+        // 恢复源订阅
+        progress("sourceSub.json")
+        appDb.ruleSubDao.deleteAll()
+        fileToListT<RuleSub>(path, "sourceSub.json")?.let {
+            appDb.ruleSubDao.insert(*it.toTypedArray())
         }
 
         // 恢复替换规则

@@ -89,6 +89,13 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.delay
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Storage
+import androidx.compose.runtime.remember
+import androidx.compose.ui.text.style.TextOverflow
+import io.legado.app.data.repository.CoverGalleryRepository
 
 
 class BackupConfigFragment : PreferenceFragment(),
@@ -371,6 +378,9 @@ class BackupConfigFragment : PreferenceFragment(),
         onConfirm: () -> Unit,
         onDismiss: () -> Unit
     ) {
+        val grouped = remember(items) { items.groupBy { it.group } }
+        val overview = remember { BackupInfoHelper.getBackupOverview() }
+
         Dialog(
             onDismissRequest = onDismiss,
             properties = DialogProperties(
@@ -404,32 +414,32 @@ class BackupConfigFragment : PreferenceFragment(),
                             .fillMaxWidth()
                             .weight(1f, fill = false)
                     ) {
-                        items(items) { item ->
-                            val isChecked = tempSelected[item.key] ?: true
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(40.dp)
-                                    .clickable {
-                                        tempSelected[item.key] = !isChecked
-                                    }
-                                    .padding(horizontal = 16.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Checkbox(
-                                    checked = isChecked,
-                                    onCheckedChange = { checked ->
-                                        tempSelected[item.key] = checked
-                                    }
-                                )
-                                Text(
-                                    text = "[${item.group}] ${item.title}",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    modifier = Modifier.padding(start = 8.dp)
-                                )
+                        grouped.forEach { (group, groupItems) ->
+                            item {
+                                GroupHeader(title = group)
+                            }
+                            groupItems.forEachIndexed { index, item ->
+                                item {
+                                    val isChecked = tempSelected[item.key] ?: true
+                                    val showInnerDivider = index < groupItems.size - 1
+                                    BackupItemRow(
+                                        item = item,
+                                        overview = overview,
+                                        isChecked = isChecked,
+                                        showDivider = showInnerDivider,
+                                        onCheckedChange = { checked ->
+                                            tempSelected[item.key] = checked
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
+
+                    Divider(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
 
                     Row(
                         modifier = Modifier
@@ -473,6 +483,143 @@ class BackupConfigFragment : PreferenceFragment(),
                     }
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun GroupHeader(title: String) {
+        val icon = when (title) {
+            "数据库" -> Icons.Default.Storage
+            "配置" -> Icons.Default.Settings
+            "其他" -> Icons.Default.FolderOpen
+            else -> null
+        }
+
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                icon?.let {
+                    Icon(
+                        imageVector = it,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                )
+            }
+            Divider(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+            )
+        }
+    }
+
+    @Composable
+    private fun BackupItemRow(
+        item: BackupSelectorConfig.BackupItem,
+        overview: BackupInfoHelper.BackupOverview,
+        isChecked: Boolean,
+        showDivider: Boolean,
+        onCheckedChange: (Boolean) -> Unit
+    ) {
+        val subtitle = remember(item, overview) {
+            buildItemSubtitle(item, overview)
+        }
+
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(if (subtitle.isEmpty()) 44.dp else 52.dp)
+                    .clickable { onCheckedChange(!isChecked) }
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = isChecked,
+                    onCheckedChange = onCheckedChange
+                )
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 8.dp)
+                ) {
+                    Text(
+                        text = item.title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    if (subtitle.isNotEmpty()) {
+                        Text(
+                            text = subtitle,
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            ),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
+            if (showDivider) {
+                Divider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 56.dp),
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                )
+            }
+        }
+    }
+
+    private fun buildItemSubtitle(
+        item: BackupSelectorConfig.BackupItem,
+        overview: BackupInfoHelper.BackupOverview
+    ): String {
+        if (isSubtitleRedundant(item)) {
+            val targetFileName = when (item.title) {
+                "背景图片" -> "backgroundImages"
+                else -> item.fileName
+            }
+            val size = overview.items.find { it.fileName == targetFileName }?.size ?: 0L
+            return if (size > 0) BackupInfoHelper.formatSize(size) else ""
+        }
+
+        return if (item.group == "数据库") {
+            val count = BackupInfoHelper.getItemCount(item.key)
+            if (count > 0) {
+                "${item.fileName} · ${count}个"
+            } else {
+                item.fileName
+            }
+        } else {
+            item.fileName
+        }
+    }
+
+    /**
+     * 隐藏副标题
+     */
+    private fun isSubtitleRedundant(item: BackupSelectorConfig.BackupItem): Boolean {
+        return when {
+            item.title == "背景图片" && item.fileName == "bg" -> true
+            item.title == "书籍缓存" && item.fileName == "book_cache" -> true
+            item.title == "封面图集" && item.fileName == CoverGalleryRepository.backupDirName -> true
+            else -> false
         }
     }
 

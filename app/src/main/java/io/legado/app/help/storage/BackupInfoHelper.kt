@@ -12,30 +12,26 @@ import io.legado.app.utils.GSON
 import splitties.init.appCtx
 import java.io.File
 
-/**
- * 备份/恢复信息工具类.
- * 这里统计的是当前本机数据和当前配置规则，不解析某一个 ZIP 备份文件。
- */
 object BackupInfoHelper {
 
     data class BackupFileInfo(
         val fileName: String,
         val displayName: String,
-        val size: Long,
+        val size: Long = 0L,
         val selected: Boolean = true
     )
 
     data class BackupOverview(
         val items: List<BackupFileInfo>,
-        val totalSize: Long,
-        val selectedSize: Long
+        val totalSize: Long = 0L,
+        val selectedSize: Long = 0L
     )
 
     data class CategoryInfo(
         val name: String,
         val icon: String,
         val items: List<BackupFileInfo>,
-        val totalSize: Long
+        val totalSize: Long = 0L
     )
 
     private data class CategoryDef(
@@ -78,12 +74,13 @@ object BackupInfoHelper {
         "applyRestoreConfig" to "应用恢复配置",
         "themeBackgroundImages" to "主题背景图片",
         CoverGalleryRepository.backupDirName to "封面图集",
-        "bookshelf.json" to "书架书籍",
+        "bookshelf.json" to "书架",
         "bookmark.json" to "书签",
         "bookGroup.json" to "书籍分组",
         "bookSource.json" to "书源",
         "rssSources.json" to "订阅源",
         "rssStar.json" to "订阅收藏",
+        "sourceSub.json" to "源订阅",
         "replaceRule.json" to "替换规则",
         HighlightRuleStore.backupFileName to "高亮规则",
         "readRecord.json" to "阅读记录",
@@ -134,7 +131,7 @@ object BackupInfoHelper {
         var totalSize = 0L
         var selectedSize = 0L
 
-        fun addItem(fileName: String, size: Long) {
+        fun addItem(fileName: String, size: Long = 0L) {
             val selected = isSelected(fileName)
             totalSize += size
             if (selected) selectedSize += size
@@ -149,33 +146,28 @@ object BackupInfoHelper {
         }
 
         val dbItems = listOf(
-            "bookshelf.json" to { appDb.bookDao.all.size },
-            "bookmark.json" to { appDb.bookmarkDao.all.size },
-            "bookGroup.json" to { appDb.bookGroupDao.all.size },
-            "bookSource.json" to { appDb.bookSourceDao.all.size },
-            "rssSources.json" to { appDb.rssSourceDao.all.size },
-            "rssStar.json" to { appDb.rssStarDao.all.size },
-            "replaceRule.json" to { appDb.replaceRuleDao.all.size },
-            "readRecord.json" to { appDb.readRecordDao.all.size },
-            "readRecordDetail.json" to { appDb.readRecordDao.getDetailsCount() },
-            "readRecordSession.json" to { appDb.readRecordDao.getSessionsCount() },
-            "searchHistory.json" to { appDb.searchKeywordDao.all.size },
-            "txtTocRule.json" to { appDb.txtTocRuleDao.all.size },
-            "httpTTS.json" to { appDb.httpTTSDao.all.size },
-            "keyboardAssists.json" to { appDb.keyboardAssistsDao.all.size },
-            "dictRule.json" to { appDb.dictRuleDao.all.size },
-            "servers.json" to { appDb.serverDao.all.size }
+            "bookshelf.json",
+            "bookmark.json",
+            "bookGroup.json",
+            "bookSource.json",
+            "rssSources.json",
+            "rssStar.json",
+            "sourceSub.json",
+            "replaceRule.json",
+            "readRecord.json",
+            "readRecordDetail.json",
+            "readRecordSession.json",
+            "searchHistory.json",
+            "txtTocRule.json",
+            "httpTTS.json",
+            "keyboardAssists.json",
+            "dictRule.json",
+            "servers.json"
         )
-        dbItems.forEach { (fileName, countProvider) ->
-            addItem(fileName, countProvider() * 200L)
-        }
+        dbItems.forEach { addItem(it) }
 
-        val runtimeCacheCount = appDb.cacheDao.getRuntimeSourceCaches(System.currentTimeMillis()).size
-        addItem("runtimeSourceCache.json", runtimeCacheCount * 500L)
-
-        val highlightRuleSize = GSON.toJson(HighlightRuleStore.createBackupData(appCtx)).length.toLong()
-        addItem(HighlightRuleStore.backupFileName, highlightRuleSize)
-
+        addItem("runtimeSourceCache.json")
+        addItem(HighlightRuleStore.backupFileName)
         addBookCacheItems(::addItem)
         addConfigItems(::addItem)
         addBackgroundItems(::addItem)
@@ -188,20 +180,15 @@ object BackupInfoHelper {
         val selectedBooks = BookCacheSelectorConfig.getSelectedBooks()
         val cacheDir = File(BookHelp.cachePath)
         var bookCacheSize = 0L
-        var chapterCount = 0
         if (cacheDir.exists()) {
             selectedBooks.forEach { book ->
                 val bookFolder = File(cacheDir, book.getFolderName())
                 if (bookFolder.exists()) {
                     bookCacheSize += bookFolder.walkTopDown().filter { it.isFile }.sumOf { it.length() }
-                    chapterCount += appDb.bookChapterDao.getChapterList(book.bookUrl).size
                 }
             }
         }
         addItem("book_cache", bookCacheSize)
-        addItem("bookChapterCache.json", chapterCount * 200L)
-        addItem("bookCacheIndex.json", selectedBooks.size * 300L)
-        addItem("bookCacheBooks.json", selectedBooks.size * 500L)
     }
 
     private fun addConfigItems(addItem: (String, Long) -> Unit) {
@@ -245,7 +232,6 @@ object BackupInfoHelper {
             "bookChapterCache.json",
             "bookCacheBooks.json",
             "bookCacheIndex.json" -> BackupSelectorConfig.isSelected("bookCache")
-
             "backgroundImages" -> BackupSelectorConfig.isSelected("backgroundImages")
             else -> {
                 val key = BackupSelectorConfig.allItems.find {
@@ -261,12 +247,10 @@ object BackupInfoHelper {
             ReadBookConfig.configFileName,
             ReadBookConfig.shareConfigFileName,
             "backgroundImages" -> !BackupConfig.ignoreReadConfig
-
             "book_cache",
             "bookChapterCache.json",
             "bookCacheBooks.json",
             "bookCacheIndex.json" -> !BackupConfig.ignoreBookCache
-
             else -> true
         }
     }
@@ -331,6 +315,29 @@ object BackupInfoHelper {
             size < 1024 -> "$size B"
             size < 1024 * 1024 -> String.format("%.1f KB", size / 1024.0)
             else -> String.format("%.2f MB", size / (1024.0 * 1024))
+        }
+    }
+
+    fun getItemCount(key: String): Int {
+        return when (key) {
+            "bookshelf" -> appDb.bookDao.all.size
+            "bookmark" -> appDb.bookmarkDao.all.size
+            "bookGroup" -> appDb.bookGroupDao.all.size
+            "bookSource" -> appDb.bookSourceDao.all.size
+            "rssSources" -> appDb.rssSourceDao.all.size
+            "rssStar" -> appDb.rssStarDao.all.size
+            "sourceSub" -> appDb.ruleSubDao.all.size
+            "replaceRule" -> appDb.replaceRuleDao.all.size
+            "readRecord" -> appDb.readRecordDao.all.size
+            "readRecordDetail" -> appDb.readRecordDao.getDetailsCount()
+            "searchHistory" -> appDb.searchKeywordDao.all.size
+            "txtTocRule" -> appDb.txtTocRuleDao.all.size
+            "httpTTS" -> appDb.httpTTSDao.all.size
+            "keyboardAssists" -> appDb.keyboardAssistsDao.all.size
+            "dictRule" -> appDb.dictRuleDao.all.size
+            "servers" -> appDb.serverDao.all.size
+            "runtimeSourceCache" -> appDb.cacheDao.getRuntimeSourceCaches(System.currentTimeMillis()).size
+            else -> 0
         }
     }
 }

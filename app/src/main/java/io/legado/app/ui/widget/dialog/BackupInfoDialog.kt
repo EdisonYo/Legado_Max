@@ -86,8 +86,7 @@ class BackupInfoDialog : BaseDialogFragment(R.layout.dialog_recycler_view) {
                     "将恢复 $selectedCount/${overview.items.size} 项"
                 } else {
                     "已选择 $selectedCount/${overview.items.size} 项"
-                },
-                totalSize = BackupInfoHelper.formatSize(overview.selectedSize)
+                }
             )
         )
 
@@ -97,7 +96,7 @@ class BackupInfoDialog : BaseDialogFragment(R.layout.dialog_recycler_view) {
                     name = cat.name,
                     icon = cat.icon,
                     count = cat.items.size,
-                    totalSize = BackupInfoHelper.formatSize(cat.totalSize)
+                    selectedCount = cat.items.count { it.selected }
                 )
             )
             cat.items.forEach { item ->
@@ -105,7 +104,7 @@ class BackupInfoDialog : BaseDialogFragment(R.layout.dialog_recycler_view) {
                     BackupInfoItem.File(
                         fileName = item.fileName,
                         displayName = item.displayName,
-                        size = BackupInfoHelper.formatSize(item.size),
+                        size = item.size,
                         selected = item.selected
                     )
                 )
@@ -130,21 +129,20 @@ class BackupInfoDialog : BaseDialogFragment(R.layout.dialog_recycler_view) {
     sealed class BackupInfoItem {
         data class Header(
             val title: String,
-            val subtitle: String,
-            val totalSize: String
+            val subtitle: String
         ) : BackupInfoItem()
 
         data class Category(
             val name: String,
             val icon: String,
             val count: Int,
-            val totalSize: String
+            val selectedCount: Int
         ) : BackupInfoItem()
 
         data class File(
             val fileName: String,
             val displayName: String,
-            val size: String,
+            val size: Long,
             val selected: Boolean
         ) : BackupInfoItem()
     }
@@ -186,8 +184,7 @@ class BackupInfoDialog : BaseDialogFragment(R.layout.dialog_recycler_view) {
                 tvTitle.text = item.title
                 tvSubtitle.text = item.subtitle
                 tvSubtitle.visibility = View.VISIBLE
-                tvCount.text = item.totalSize
-                tvCount.visibility = View.VISIBLE
+                tvCount.visibility = View.GONE
                 tvSize.visibility = View.GONE
             }
         }
@@ -198,10 +195,9 @@ class BackupInfoDialog : BaseDialogFragment(R.layout.dialog_recycler_view) {
                 tvIcon.text = item.icon
                 tvTitle.text = item.name
                 tvSubtitle.visibility = View.GONE
-                tvCount.text = "${item.count} 项"
+                tvCount.text = "${item.selectedCount}/${item.count} 项"
                 tvCount.visibility = View.VISIBLE
-                tvSize.text = item.totalSize
-                tvSize.visibility = View.VISIBLE
+                tvSize.visibility = View.GONE
             }
         }
 
@@ -214,8 +210,9 @@ class BackupInfoDialog : BaseDialogFragment(R.layout.dialog_recycler_view) {
                 tvSubtitle.visibility = View.VISIBLE
                 tvCount.text = if (mode == Mode.Restore && !item.selected) "忽略" else ""
                 tvCount.visibility = if (mode == Mode.Restore && !item.selected) View.VISIBLE else View.GONE
-                tvSize.text = item.size
-                tvSize.visibility = View.VISIBLE
+                val sizeStr = BackupInfoHelper.formatSize(item.size)
+                tvSize.text = sizeStr
+                tvSize.visibility = if (item.size > 0L) View.VISIBLE else View.GONE
             }
         }
 
