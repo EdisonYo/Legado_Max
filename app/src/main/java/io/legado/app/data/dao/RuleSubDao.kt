@@ -22,6 +22,9 @@ interface RuleSubDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(vararg ruleSub: RuleSub)
 
+    @Query("delete from ruleSubs")
+    fun deleteAll()
+
     @Delete
     fun delete(vararg ruleSub: RuleSub)
 

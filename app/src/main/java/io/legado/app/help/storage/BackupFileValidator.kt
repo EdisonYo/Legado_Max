@@ -156,9 +156,9 @@ object BackupFileValidator {
         return try {
             val jsonText = file.readText()
 
-            if (fileName == HighlightRuleStore.backupFileName) {
-                return validateJsonObjectFile(fileName, jsonText)
-            }
+			if (fileName == HighlightRuleStore.backupFileName || fileName == "coverRule.json") {
+			    return validateJsonObjectFile(fileName, jsonText)
+			}
 
             // servers.json 可能被加密存储，需要先尝试解密
             var actualJsonText = jsonText
@@ -197,32 +197,24 @@ object BackupFileValidator {
         }
     }
 
-    private fun validateJsonObjectFile(fileName: String, jsonText: String): ValidationResult {
-        return try {
-            val jsonObject = JSONObject(jsonText)
-            if (!jsonObject.has("rules")) {
-                return ValidationResult(
-                    fileName = fileName,
-                    state = ValidationState.WARNING,
-                    message = "缺少必需字段",
-                    details = "$fileName 缺少 rules 字段"
-                )
-            }
-            ValidationResult(
-                fileName = fileName,
-                state = ValidationState.VALID,
-                message = "格式正确"
-            )
-        } catch (e: Exception) {
-            ValidationResult(
-                fileName = fileName,
-                state = ValidationState.ERROR,
-                message = "JSON 解析失败",
-                details = "解析 $fileName 时出错: ${e.message}",
-                exception = e
-            )
-        }
-    }
+	private fun validateJsonObjectFile(fileName: String, jsonText: String): ValidationResult {
+	    return try {
+	        JSONObject(jsonText)
+	        ValidationResult(
+	            fileName = fileName,
+	            state = ValidationState.VALID,
+	            message = "格式正确"
+	        )
+	    } catch (e: Exception) {
+	        ValidationResult(
+	            fileName = fileName,
+	            state = ValidationState.ERROR,
+	            message = "JSON 解析失败",
+	            details = "解析 $fileName 时出错: ${e.message}",
+	            exception = e
+	        )
+	    }
+	}
 
     private fun validateXmlFile(file: File, fileName: String): ValidationResult {
         return try {
