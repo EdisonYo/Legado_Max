@@ -1,5 +1,7 @@
 package io.legado.app.ui.rss.source.edit
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableString
@@ -7,15 +9,15 @@ import android.text.style.BackgroundColorSpan
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
-import com.google.gson.Gson
-import com.google.gson.JsonParser
 import io.legado.app.R
 import io.legado.app.base.BaseDialogFragment
 import io.legado.app.databinding.DialogContentEditBinding
 import io.legado.app.lib.dialogs.alert
 import io.legado.app.lib.theme.primaryColor
+import io.legado.app.ui.code.CodeEditActivity
 import io.legado.app.utils.applyTint
 import io.legado.app.utils.setLayout
 import io.legado.app.utils.viewbindingdelegate.viewBinding
@@ -33,6 +35,17 @@ class RssSourceJsonEditDialog(
     private var originalContent: SpannableString? = null
     private var formattedJson: String = ""
 
+    private val editCodeLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.getStringExtra("text")?.let {
+                binding.contentView.setText(it)
+                originalContent = SpannableString(it)
+            }
+        }
+    }
+
     override fun onStart() {
         super.onStart()
         setLayout(1f, ViewGroup.LayoutParams.MATCH_PARENT)
@@ -47,12 +60,7 @@ class RssSourceJsonEditDialog(
     }
 
     private fun loadJson() {
-        formattedJson = try {
-            val jsonElement = JsonParser.parseString(sourceJson)
-            Gson().toJson(jsonElement)
-        } catch (e: Exception) {
-            sourceJson
-        }
+        formattedJson = sourceJson
         binding.contentView.setText(formattedJson)
         originalContent = SpannableString(formattedJson)
     }
@@ -63,11 +71,12 @@ class RssSourceJsonEditDialog(
         binding.toolBar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.menu_search -> toggleSearchPanel()
+                R.id.menu_fullscreen_edit -> openCodeEditor()
                 R.id.menu_save -> {
                     val content = binding.contentView.text?.toString()
                         ?: return@setOnMenuItemClickListener true
                     try {
-                        JsonParser.parseString(content)
+                        com.google.gson.JsonParser.parseString(content)
                         onSave(content)
                         dismiss()
                     } catch (e: Exception) {
@@ -93,6 +102,15 @@ class RssSourceJsonEditDialog(
             }
             return@setOnMenuItemClickListener true
         }
+    }
+
+    private fun openCodeEditor() {
+        val text = binding.contentView.text?.toString() ?: return
+        val intent = Intent(requireContext(), CodeEditActivity::class.java).apply {
+            putExtra("text", text)
+            putExtra("title", binding.toolBar.title?.toString() ?: "JSON")
+        }
+        editCodeLauncher.launch(intent)
     }
 
     private fun toggleSearchPanel() {
