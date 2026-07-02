@@ -32,25 +32,6 @@
         android:title="@string/dict_rule"
         app:iconSpaceReserved="false" />
 
-    <io.legado.app.lib.prefs.Preference
-        android:icon="@drawable/ic_code"
-        android:key="debugTools"
-        android:summary="@string/debug_tools_desc"
-        android:title="@string/debug_tools"
-        app:iconSpaceReserved="false" />
-
-    
-
-    <io.legado.app.lib.prefs.NameListPreference
-        android:defaultValue="0"
-        android:entries="@array/theme_mode"
-        android:entryValues="@array/theme_mode_v"
-        android:icon="@drawable/ic_cfg_theme"
-        android:key="themeMode"
-        android:summary="@string/theme_mode_desc"
-        android:title="@string/theme_mode"
-        app:iconSpaceReserved="false" />
-
     <io.legado.app.lib.prefs.SwitchPreference
         android:defaultValue="false"
         android:icon="@drawable/ic_cfg_web"
@@ -73,6 +54,16 @@
             android:title="@string/backup_restore"
             app:iconSpaceReserved="false" />
 
+        <io.legado.app.lib.prefs.NameListPreference
+            android:defaultValue="0"
+            android:entries="@array/theme_mode"
+            android:entryValues="@array/theme_mode_v"
+            android:icon="@drawable/ic_brightness"
+            android:key="themeMode"
+            android:summary="@string/theme_mode_desc"
+            android:title="@string/theme_mode"
+            app:iconSpaceReserved="false" />
+
         <io.legado.app.lib.prefs.Preference
             android:icon="@drawable/ic_cfg_theme"
             android:key="theme_setting"
@@ -83,7 +74,6 @@
         <io.legado.app.lib.prefs.Preference
             android:icon="@drawable/ic_cfg_other"
             android:key="setting"
-            android:summary="@string/other_setting_s"
             android:title="@string/other_setting"
             app:allowDividerBelow="false"
             app:iconSpaceReserved="false" />
@@ -108,16 +98,20 @@
         <io.legado.app.lib.prefs.Preference
             android:icon="@drawable/ic_history"
             android:key="readRecord"
-            android:summary="@string/read_record_summary"
             android:title="@string/read_record"
             app:iconSpaceReserved="false" />
 
         <io.legado.app.lib.prefs.Preference
             android:icon="@drawable/ic_storage_black_24dp"
             android:key="preciseManage"
-            android:summary="@string/precise_manage_summary"
             android:title="@string/precise_manage"
             app:allowDividerBelow="false"
+            app:iconSpaceReserved="false" />
+
+        <io.legado.app.lib.prefs.Preference
+            android:icon="@drawable/ic_code"
+            android:key="debugTools"
+            android:title="@string/debug_tools"
             app:iconSpaceReserved="false" />
 
     </io.legado.app.lib.prefs.PreferenceCategory>

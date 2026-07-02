@@ -868,7 +868,6 @@ abstract class BaseReadAloudService : BaseService(),
                 R.string.read_aloud_timer,
                 timeMinute
             )
-
             else -> getString(R.string.read_aloud_t)
         }
         nTitle += ": ${activeBookName ?: getString(R.string.read_aloud)}"
@@ -948,7 +947,6 @@ abstract class BaseReadAloudService : BaseService(),
                 R.string.read_aloud_timer,
                 timeMinute
             )
-
             else -> getString(R.string.read_aloud_t)
         }
         nTitle += ": ${activeBookName ?: getString(R.string.read_aloud)}"

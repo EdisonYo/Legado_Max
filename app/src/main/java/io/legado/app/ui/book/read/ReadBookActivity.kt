@@ -1588,7 +1588,7 @@ class ReadBookActivity : BaseReadBookActivity(),
 
     override fun defaultReadAloudMiniBarColor(): Int = backgroundColor
 
-    override fun lockReadAloudMiniBarPosition(): Boolean = isCurrentBookReadAloudBook()
+    override fun lockReadAloudMiniBarPosition(): Boolean = false
 
     override fun onReadAloudMiniBarClick() {
         if (isCurrentBookReadAloudBook()) {

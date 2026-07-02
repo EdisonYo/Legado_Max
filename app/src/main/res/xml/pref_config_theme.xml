@@ -70,7 +70,6 @@
         <io.legado.app.lib.prefs.ColorPreference
             android:defaultValue="@color/default_primary"
             android:key="colorPrimary"
-            android:summary="@string/day_color_primary"
             android:title="@string/primary"
             app:cpv_dialogType="preset"
             app:iconSpaceReserved="false" />
@@ -78,7 +77,6 @@
         <io.legado.app.lib.prefs.ColorPreference
             android:defaultValue="@color/default_accent"
             android:key="colorAccent"
-            android:summary="@string/day_color_accent"
             android:title="@string/accent"
             app:cpv_dialogType="preset"
             app:iconSpaceReserved="false" />
@@ -86,7 +84,6 @@
         <io.legado.app.lib.prefs.ColorPreference
             android:defaultValue="@color/default_background"
             android:key="colorBackground"
-            android:summary="@string/day_background_color"
             android:title="@string/background_color"
             app:cpv_dialogType="preset"
             app:iconSpaceReserved="false" />
@@ -94,7 +91,6 @@
         <io.legado.app.lib.prefs.ColorPreference
             android:defaultValue="@color/default_bottom_background"
             android:key="colorBottomBackground"
-            android:summary="@string/day_navbar_color"
             android:title="@string/navbar_color"
             app:allowDividerAbove="false"
             app:allowDividerBelow="false"
@@ -108,13 +104,11 @@
         <io.legado.app.lib.prefs.SwitchPreference
             android:defaultValue="false"
             android:key="transparentNavBar"
-            android:summary="@string/day_nav_bar_immersion"
             android:title="@string/immersion_nav_bar"
             app:iconSpaceReserved="false" />
 
         <io.legado.app.lib.prefs.Preference
             android:key="saveDayTheme"
-            android:summary="@string/save_day_theme_summary"
             android:title="@string/save_theme_config"
             app:allowDividerAbove="false"
             app:allowDividerBelow="false"
@@ -133,7 +127,6 @@
         <io.legado.app.lib.prefs.ColorPreference
             android:defaultValue="@color/default_night_primary"
             android:key="colorPrimaryNight"
-            android:summary="@string/night_primary"
             android:title="@string/primary"
             app:cpv_dialogType="preset"
             app:iconSpaceReserved="false" />
@@ -141,7 +134,6 @@
         <io.legado.app.lib.prefs.ColorPreference
             android:defaultValue="@color/default_night_accent"
             android:key="colorAccentNight"
-            android:summary="@string/night_accent"
             android:title="@string/accent"
             app:cpv_dialogType="preset"
             app:iconSpaceReserved="false" />
@@ -149,7 +141,6 @@
         <io.legado.app.lib.prefs.ColorPreference
             android:defaultValue="@color/default_night_background"
             android:key="colorBackgroundNight"
-            android:summary="@string/night_background_color"
             android:title="@string/background_color"
             app:cpv_dialogType="preset"
             app:iconSpaceReserved="false" />
@@ -157,7 +148,6 @@
         <io.legado.app.lib.prefs.ColorPreference
             android:defaultValue="@color/default_night_bottom_background"
             android:key="colorBottomBackgroundNight"
-            android:summary="@string/night_navbar_color"
             android:title="@string/navbar_color"
             app:cpv_dialogType="preset"
             app:iconSpaceReserved="false" />
@@ -169,13 +159,11 @@
         <io.legado.app.lib.prefs.SwitchPreference
             android:defaultValue="false"
             android:key="transparentNavBarNight"
-            android:summary="@string/night_nav_bar_immersion"
             android:title="@string/immersion_nav_bar"
             app:iconSpaceReserved="false" />
 
         <io.legado.app.lib.prefs.Preference
             android:key="saveNightTheme"
-            android:summary="@string/save_night_theme_summary"
             android:title="@string/save_theme_config"
             app:allowDividerAbove="false"
             app:allowDividerBelow="false"

@@ -6,6 +6,9 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import io.legado.app.data.entities.Cache
 
+/**
+ * 缓存数据访问接口
+ */
 @Dao
 interface CacheDao {
 
@@ -31,6 +34,17 @@ interface CacheDao {
         and (deadline = 0 or deadline > :now)"""
     )
     fun getRuntimeSourceCaches(now: Long): List<Cache>
+
+    @Query(
+        """select count(*) from caches
+        where (`key` like 'v_%'
+        or `key` like 'userInfo_%'
+        or `key` like 'loginHeader_%'
+        or `key` like 'sourceVariable_%'
+        or `key` like 'infoMap_%')
+        and (deadline = 0 or deadline > :now)"""
+    )
+    fun getRuntimeSourceCacheCount(now: Long): Int
 
     @Query(
         """select * from caches
