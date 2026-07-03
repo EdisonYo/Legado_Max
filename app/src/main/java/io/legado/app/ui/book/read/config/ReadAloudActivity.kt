@@ -283,7 +283,7 @@ class ReadAloudActivity : BaseActivity<ActivityReadAloudBinding>(imageBg = false
 
     private fun showTimerDialog() {
         val times = intArrayOf(0, 5, 10, 15, 30, 60, 90, 180)
-        selector(getString(R.string.set_timer), times.map { "$it min" }) { _, index ->
+        selector(getString(R.string.set_timer), times.map { "$it 分钟" }) { _, index ->
             ReadAloud.setTimer(this@ReadAloudActivity, times[index])
         }
     }
