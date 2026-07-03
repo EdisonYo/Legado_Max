@@ -11,6 +11,9 @@ import io.legado.app.constant.BookType
 import io.legado.app.data.entities.BookGroup
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * 书组数据访问接口
+ */
 @Dao
 interface BookGroupDao {
 
@@ -69,6 +72,9 @@ interface BookGroupDao {
 
     @get:Query("SELECT * FROM book_groups ORDER BY `order`")
     val all: List<BookGroup>
+
+    @get:Query("select count(*) from book_groups")
+    val count: Int
 
     @get:Query("select count(*) < 64 from book_groups where groupId >= 0 or groupId == ${Long.MIN_VALUE}")
     val canAddGroup: Boolean

@@ -228,67 +228,21 @@ class TextActionMenu(private val context: Context, private val callBack: CallBac
         endBottomY: Int
     ) {
         upMenu()
-        if (expandTextMenu) {
-            // 展开模式：菜单显示在屏幕底部
-            when {
-                startTopY > 500 -> {
-                    // 起始点上方空间充足，在起始点上方显示
-                    showAtLocation(
-                        view,
-                        Gravity.BOTTOM or Gravity.START,
-                        startX,
-                        windowHeight - startTopY
-                    )
-                }
-
-                endBottomY - startBottomY > 500 -> {
-                    // 起始点下方空间充足，在起始点下方显示
-                    showAtLocation(view, Gravity.TOP or Gravity.START, startX, startBottomY)
-                }
-
-                else -> {
-                    // 空间不足，在结束点下方显示
-                    showAtLocation(view, Gravity.TOP or Gravity.START, endX, endBottomY)
-                }
-            }
-        } else {
-            // 折叠模式：需要考虑菜单高度
-            contentView.measure(
-                View.MeasureSpec.UNSPECIFIED,
-                View.MeasureSpec.UNSPECIFIED,
+        if (startTopY > 300) {
+            // 上方空间充裕：菜单底部对齐选中文字顶部
+            showAtLocation(
+                view,
+                Gravity.BOTTOM or Gravity.START,
+                startX,
+                windowHeight - startTopY
             )
-            val popupHeight = contentView.measuredHeight
-            when {
-                startBottomY > 500 -> {
-                    // 起始点上方空间充足，在起始点上方显示（需要减去菜单高度）
-                    showAtLocation(
-                        view,
-                        Gravity.TOP or Gravity.START,
-                        startX,
-                        startTopY - popupHeight
-                    )
-                }
-
-                endBottomY - startBottomY > 500 -> {
-                    // 起始点下方空间充足，在起始点下方显示
-                    showAtLocation(
-                        view,
-                        Gravity.TOP or Gravity.START,
-                        startX,
-                        startBottomY
-                    )
-                }
-
-                else -> {
-                    // 空间不足，在结束点下方显示
-                    showAtLocation(
-                        view,
-                        Gravity.TOP or Gravity.START,
-                        endX,
-                        endBottomY
-                    )
-                }
-            }
+        } else {
+            showAtLocation(
+                view,
+                Gravity.TOP or Gravity.START,
+                startX,
+                startBottomY
+            )
         }
     }
 

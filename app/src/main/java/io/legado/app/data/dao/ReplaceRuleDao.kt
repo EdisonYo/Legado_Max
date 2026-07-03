@@ -15,7 +15,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
-
+/**
+ * 替换规则数据访问接口
+ */
 @Dao
 interface ReplaceRuleDao {
 
@@ -48,6 +50,9 @@ interface ReplaceRuleDao {
 
     @get:Query("SELECT * FROM replace_rules ORDER BY sortOrder ASC")
     val all: List<ReplaceRule>
+
+    @get:Query("select count(*) from replace_rules")
+    val count: Int
 
     @get:Query("select distinct `group` from replace_rules where trim(`group`) <> ''")
     val allGroupsUnProcessed: List<String>
