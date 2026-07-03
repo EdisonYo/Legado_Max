@@ -4,7 +4,9 @@ import androidx.room.*
 import io.legado.app.data.entities.Bookmark
 import kotlinx.coroutines.flow.Flow
 
-
+/**
+ * 书签数据访问接口
+ */
 @Dao
 interface BookmarkDao {
 
@@ -14,6 +16,9 @@ interface BookmarkDao {
     """
     )
     val all: List<Bookmark>
+
+    @get:Query("select count(*) from bookmarks")
+    val count: Int
 
     @Query("select * from bookmarks order by bookName collate localized, bookAuthor collate localized, chapterIndex, chapterPos")
     fun flowAll(): Flow<List<Bookmark>>

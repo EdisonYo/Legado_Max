@@ -264,7 +264,7 @@ java.getThemeConfigMap(): Map<String, Any?>
 - 获取用户主题模式
 
 ```js
-* @return 0 跟随系统，1 亮色主题，2 暗色主题，3 墨水屏
+* @return 0 跟随系统，1 浅色主题，2 深色主题，3 墨水屏
 fun getThemeMode(): String
 ```
 

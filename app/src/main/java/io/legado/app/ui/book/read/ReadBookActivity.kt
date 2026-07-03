@@ -915,7 +915,7 @@ class ReadBookActivity : BaseReadBookActivity(),
             binding.root.height + navigationBarHeight,
             binding.textMenuPosition.x.toInt(),
             binding.textMenuPosition.y.toInt(),
-            binding.cursorLeft.y.toInt() + binding.cursorLeft.height,
+            binding.cursorLeft.y.toInt(),
             binding.cursorRight.x.toInt(),
             binding.cursorRight.y.toInt() + binding.cursorRight.height
         )
@@ -1588,7 +1588,7 @@ class ReadBookActivity : BaseReadBookActivity(),
 
     override fun defaultReadAloudMiniBarColor(): Int = backgroundColor
 
-    override fun lockReadAloudMiniBarPosition(): Boolean = isCurrentBookReadAloudBook()
+    override fun lockReadAloudMiniBarPosition(): Boolean = false
 
     override fun onReadAloudMiniBarClick() {
         if (isCurrentBookReadAloudBook()) {

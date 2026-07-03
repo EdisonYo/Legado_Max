@@ -320,23 +320,23 @@ object BackupInfoHelper {
 
     fun getItemCount(key: String): Int {
         return when (key) {
-            "bookshelf" -> appDb.bookDao.all.size
-            "bookmark" -> appDb.bookmarkDao.all.size
-            "bookGroup" -> appDb.bookGroupDao.all.size
-            "bookSource" -> appDb.bookSourceDao.all.size
-            "rssSources" -> appDb.rssSourceDao.all.size
-            "rssStar" -> appDb.rssStarDao.all.size
-            "sourceSub" -> appDb.ruleSubDao.all.size
-            "replaceRule" -> appDb.replaceRuleDao.all.size
-            "readRecord" -> appDb.readRecordDao.all.size
+            "bookshelf" -> appDb.bookDao.allBookCount
+            "bookmark" -> appDb.bookmarkDao.count
+            "bookGroup" -> appDb.bookGroupDao.count
+            "bookSource" -> appDb.bookSourceDao.allCount()
+            "rssSources" -> appDb.rssSourceDao.size
+            "rssStar" -> appDb.rssStarDao.count
+            "sourceSub" -> appDb.ruleSubDao.count
+            "replaceRule" -> appDb.replaceRuleDao.count
+            "readRecord" -> appDb.readRecordDao.count
             "readRecordDetail" -> appDb.readRecordDao.getDetailsCount()
-            "searchHistory" -> appDb.searchKeywordDao.all.size
-            "txtTocRule" -> appDb.txtTocRuleDao.all.size
-            "httpTTS" -> appDb.httpTTSDao.all.size
-            "keyboardAssists" -> appDb.keyboardAssistsDao.all.size
-            "dictRule" -> appDb.dictRuleDao.all.size
-            "servers" -> appDb.serverDao.all.size
-            "runtimeSourceCache" -> appDb.cacheDao.getRuntimeSourceCaches(System.currentTimeMillis()).size
+            "searchHistory" -> appDb.searchKeywordDao.count
+            "txtTocRule" -> appDb.txtTocRuleDao.count
+            "httpTTS" -> appDb.httpTTSDao.count
+            "keyboardAssists" -> appDb.keyboardAssistsDao.count
+            "dictRule" -> appDb.dictRuleDao.count
+            "servers" -> appDb.serverDao.count
+            "runtimeSourceCache" -> appDb.cacheDao.getRuntimeSourceCacheCount(System.currentTimeMillis())
             else -> 0
         }
     }

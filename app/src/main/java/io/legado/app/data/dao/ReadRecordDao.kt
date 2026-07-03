@@ -6,6 +6,9 @@ import io.legado.app.data.entities.readRecord.ReadRecordDetail
 import io.legado.app.data.entities.readRecord.ReadRecordSession
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * 阅读记录数据访问接口
+ */
 @Dao
 interface ReadRecordDao {
 
@@ -68,6 +71,9 @@ interface ReadRecordDao {
 
     @get:Query("SELECT * FROM readRecord")
     val all: List<ReadRecord>
+
+    @get:Query("SELECT COUNT(*) FROM readRecord")
+    val count: Int
 
     @Query("SELECT * FROM readRecord WHERE bookName LIKE '%' || :query || '%' OR bookAuthor LIKE '%' || :query || '%' ORDER BY lastRead DESC")
     fun searchReadRecordsByLastRead(query: String): Flow<List<ReadRecord>>

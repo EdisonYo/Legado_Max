@@ -2,12 +2,12 @@
 
     //**************************************************************Theme******************************************************************************//
 
-    <!-- 亮色主题 -->
+    <!-- 浅色主题 -->
     <style name="AppTheme.Light" parent="Base.AppTheme">
         <item name="actionBarStyle">@style/AppTheme.AppBarOverlay.Light</item>
     </style>
 
-    <!-- 暗色主题 -->
+    <!-- 深色主题 -->
     <style name="AppTheme.Dark" parent="Base.AppTheme">
         <item name="actionBarStyle">@style/AppTheme.AppBarOverlay.Dark</item>
     </style>

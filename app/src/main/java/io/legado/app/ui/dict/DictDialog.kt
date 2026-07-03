@@ -20,7 +20,9 @@ import io.legado.app.help.TextViewTagHandler
 import io.legado.app.lib.theme.accentColor
 import io.legado.app.lib.theme.backgroundColor
 import io.legado.app.ui.widget.dialog.PhotoDialog
+import io.legado.app.utils.GSON
 import io.legado.app.utils.dpToPx
+import io.legado.app.utils.fromJsonObject
 import io.legado.app.utils.setHtml
 import io.legado.app.utils.setLayout
 import io.legado.app.utils.setMarkdown
@@ -51,7 +53,7 @@ class DictDialog() : BaseDialogFragment(R.layout.dialog_dict) {
     constructor(word: String, dictRule: DictRule) : this() {
         arguments = Bundle().apply {
             putString("word", word)
-            putParcelable("dictRule", dictRule)
+            putString("dictRule", GSON.toJson(dictRule))
         }
     }
 
@@ -86,7 +88,6 @@ class DictDialog() : BaseDialogFragment(R.layout.dialog_dict) {
             dismiss()
             return
         }
-        val singleDictRule = arguments?.getParcelable<DictRule>("dictRule")
         binding.tabLayout.setBackgroundColor(backgroundColor)
         binding.tabLayout.setSelectedTabIndicatorColor(accentColor)
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
@@ -166,25 +167,24 @@ class DictDialog() : BaseDialogFragment(R.layout.dialog_dict) {
                 }
             }
         })
-        // 如果传入单个字典规则，只显示这一个
-        if (singleDictRule != null) {
-            binding.tabLayout.addTab(binding.tabLayout.newTab().apply {
-                text = singleDictRule.name
-                tag = singleDictRule
-            })
-            binding.tabLayout.tabMode = TabLayout.MODE_FIXED
-            binding.tabLayout.tabGravity = TabLayout.GRAVITY_FILL
+        val previewRule = GSON.fromJsonObject<DictRule>(arguments?.getString("dictRule")).getOrNull()
+        if (previewRule != null) {
+            addDictTabs(listOf(previewRule))
         } else {
             viewModel.initData {
-                it.forEach { d  ->
-                    binding.tabLayout.addTab(binding.tabLayout.newTab().apply {
-                        text = d.name
-                        tag = d
-                    })
-                }
-                setupTabLayoutMode(it.size)
+                addDictTabs(it)
             }
         }
+    }
+
+    private fun addDictTabs(dictRules: List<DictRule>) {
+        dictRules.forEach { d ->
+            binding.tabLayout.addTab(binding.tabLayout.newTab().apply {
+                text = d.name
+                tag = d
+            })
+        }
+        setupTabLayoutMode(dictRules.size)
     }
 
     //根据已启用词典数动态选取布局

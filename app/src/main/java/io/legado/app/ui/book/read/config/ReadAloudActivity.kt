@@ -19,9 +19,11 @@ import io.legado.app.R
 import io.legado.app.base.BaseActivity
 import io.legado.app.constant.EventBus
 import io.legado.app.constant.Status
+import io.legado.app.data.appDb
 import io.legado.app.databinding.ActivityReadAloudBinding
 import io.legado.app.help.config.AppConfig
 import io.legado.app.help.glide.ImageLoader
+import io.legado.app.lib.dialogs.SelectItem
 import io.legado.app.lib.dialogs.selector
 import io.legado.app.model.BookCover
 import io.legado.app.model.ReadAloud
@@ -29,9 +31,12 @@ import io.legado.app.model.ReadBook
 import io.legado.app.service.BaseReadAloudService
 import io.legado.app.ui.book.toc.TocActivityResult
 import io.legado.app.ui.widget.seekbar.SeekBarChangeListener
+import io.legado.app.utils.GSON
+import io.legado.app.utils.StringUtils
 import io.legado.app.utils.applyNavigationBarPadding
 import io.legado.app.utils.applyStatusBarPadding
 import io.legado.app.utils.dpToPx
+import io.legado.app.utils.fromJsonObject
 import io.legado.app.utils.getPrefBoolean
 import io.legado.app.utils.observeEvent
 import io.legado.app.utils.postEvent
@@ -42,7 +47,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.abs
 
-class ReadAloudActivity : BaseActivity<ActivityReadAloudBinding>(imageBg = false) {
+class ReadAloudActivity : BaseActivity<ActivityReadAloudBinding>(imageBg = false),
+    SpeakEngineDialog.CallBack {
 
     override val binding by viewBinding(ActivityReadAloudBinding::inflate)
     private val tocActivity = registerForActivityResult(TocActivityResult()) {
@@ -56,6 +62,17 @@ class ReadAloudActivity : BaseActivity<ActivityReadAloudBinding>(imageBg = false
     private var downX = 0f
     private var collapseHandled = false
     private var lastCover: String? = null
+    private val speakEngineSummary: String
+        get() {
+            val ttsEngine = ReadAloud.ttsEngine
+                ?: return getString(R.string.system_tts)
+            if (StringUtils.isNumeric(ttsEngine)) {
+                return appDb.httpTTSDao.getName(ttsEngine.toLong())
+                    ?: getString(R.string.system_tts)
+            }
+            return GSON.fromJsonObject<SelectItem<String>>(ttsEngine).getOrNull()?.title
+                ?: getString(R.string.system_tts)
+        }
 
     override fun showReadAloudMiniBar(): Boolean = false
 
@@ -69,6 +86,7 @@ class ReadAloudActivity : BaseActivity<ActivityReadAloudBinding>(imageBg = false
     override fun onResume() {
         super.onResume()
         updateBookInfo()
+        upSpeakEngineSummary()
         updatePreviewText()
         updatePlayState()
         updateSkipActionState()
@@ -78,6 +96,7 @@ class ReadAloudActivity : BaseActivity<ActivityReadAloudBinding>(imageBg = false
         readAloudContent.applyStatusBarPadding(withInitialPadding = true)
         readAloudContent.applyNavigationBarPadding(withInitialPadding = true)
         updateBookInfo()
+        upSpeakEngineSummary()
         updatePreviewText()
         seekTimer.max = 180
         seekTimer.progress = if (BaseReadAloudService.timeMinute > 0) BaseReadAloudService.timeMinute else AppConfig.ttsTimer
@@ -104,6 +123,7 @@ class ReadAloudActivity : BaseActivity<ActivityReadAloudBinding>(imageBg = false
         ivMore.setOnClickListener { showDialogFragment<ReadAloudConfigDialog>() }
         llMoreSetting.setOnClickListener { showDialogFragment<ReadAloudConfigDialog>() }
         ivMoreSetting.setOnClickListener { showDialogFragment<ReadAloudConfigDialog>() }
+        llSpeakEngine.setOnClickListener { showDialogFragment(SpeakEngineDialog()) }
         ivPlayPause.setOnClickListener {
             if (BaseReadAloudService.pause) ReadAloud.resume(this@ReadAloudActivity)
             else ReadAloud.pause(this@ReadAloudActivity)
@@ -184,6 +204,10 @@ class ReadAloudActivity : BaseActivity<ActivityReadAloudBinding>(imageBg = false
             }?.text?.replace("\n", "")?.trim()
         tvPreview.text = paragraph?.takeIf { it.isNotEmpty() }
             ?: (BaseReadAloudService.activeChapterTitle ?: ReadBook.book?.durChapterTitle ?: "")
+    }
+
+    override fun upSpeakEngineSummary() {
+        binding.tvSpeakEngine.text = speakEngineSummary
     }
 
     private fun adjustSpeed(delta: Int) {
@@ -384,6 +408,7 @@ class ReadAloudActivity : BaseActivity<ActivityReadAloudBinding>(imageBg = false
         }
         timerBadge.background = createRoundDrawable(AndroidXColorUtils.setAlphaComponent(0xFFFFFFFF.toInt(), 22), 18f)
         tvSpeedValue.background = createRoundDrawable(AndroidXColorUtils.setAlphaComponent(0xFFFFFFFF.toInt(), 18), 18f)
+        llSpeakEngine.background = createRoundDrawable(AndroidXColorUtils.setAlphaComponent(0xFFFFFFFF.toInt(), 18), 24f)
         ivPlayPrev.background = null
         ivPlayNext.background = null
         ivStop.background = null
@@ -393,13 +418,15 @@ class ReadAloudActivity : BaseActivity<ActivityReadAloudBinding>(imageBg = false
         ivChapterQuick.background = null
         ivTimerQuick.background = null
 
-        listOf(tvPageTitle, tvChapterName, tvPreview, tvTimer, tvSpeedValue, tvTimerLabelLeft, tvTimerLabelRight).forEach { it.setTextColor(textColor) }
+        listOf(tvPageTitle, tvChapterName, tvPreview, tvTimer, tvSpeedValue, tvTimerLabelLeft, tvTimerLabelRight, tvSpeakEngine).forEach { it.setTextColor(textColor) }
         listOf(tvBookName, tvSpeedLabel, tvStop, tvMoreSetting, tvBackRead, tvChapterQuick, tvTimerQuick).forEach {
             it.setTextColor(secondary)
         }
         ivBack.setColorFilter(textColor)
         ivMore.setColorFilter(textColor)
         ivTimer.setColorFilter(secondary)
+        ivSpeakEngine.setColorFilter(textColor)
+        ivSpeakEngineArrow.setColorFilter(textColor)
         ivStop.setColorFilter(secondary)
         ivSpeedControl.setColorFilter(secondary)
         ivBackRead.setColorFilter(secondary)
