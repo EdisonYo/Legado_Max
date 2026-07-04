@@ -2,11 +2,11 @@ package io.legado.app.constant
 
 // 事件总线机制，用于在不同组件之间传递事件
 /**
- * 事件总线常量。
+ * 事件总线常量
  *
- * 基于 LiveEventBus 的事件标签定义，每个常量对应一个独立的事件通道。
- * 发送端通过 postEvent(tag, data) 发送，接收端通过 observeEvent(tag) 订阅。
- * tag 即下方定义的字符串常量，data 的类型由业务决定（String/Int/Bundle 等）。
+ * 基于 LiveEventBus 的事件标签定义，每个常量对应一个独立的事件通道
+ * 发送端通过 postEvent(tag, data) 发送，接收端通过 observeEvent(tag) 订阅
+ * tag 即下方定义的字符串常量，data 的类型由业务决定（String/Int/Bundle 等）
  *
  * 使用示例：
  *   发送：postEvent(EventBus.BOOKSHELF_REFRESH, "")

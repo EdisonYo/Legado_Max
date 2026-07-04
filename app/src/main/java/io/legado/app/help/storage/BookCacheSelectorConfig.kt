@@ -33,13 +33,14 @@ object BookCacheSelectorConfig {
     }
 
     /**
-     * 获取存在缓存的书籍
+     * 获取所有有缓存的书籍
      */
     fun getBooksWithCache(): List<Book> {
         val folderNames = getCacheFolderNames()
         if (folderNames.isEmpty()) {
             return emptyList()
         }
+
         return appDb.bookDao.all.filter { book ->
             book.getFolderName() in folderNames
         }
