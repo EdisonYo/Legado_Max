@@ -16,7 +16,7 @@ import io.legado.app.databinding.DialogExploreKindQueryBinding
 import io.legado.app.databinding.ItemExploreKindBinding
 import io.legado.app.help.coroutine.Coroutine
 import io.legado.app.help.source.exploreKinds
-import io.legado.app.lib.theme.primaryTextColor
+import io.legado.app.lib.theme.primaryColor
 import io.legado.app.utils.applyTint
 import io.legado.app.utils.gone
 import io.legado.app.utils.setLayout
@@ -72,8 +72,8 @@ class ExploreKindQueryDialog() : BaseDialogFragment(R.layout.dialog_explore_kind
      * 设置标题和搜索框
      */
     private fun initToolBar() {
+        binding.toolBar.setBackgroundColor(primaryColor)
         binding.toolBar.title = sourceName
-        binding.searchView.applyTint(primaryTextColor)
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 return false
