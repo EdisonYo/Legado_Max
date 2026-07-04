@@ -85,7 +85,7 @@ val appDb by lazy {
     entities = [Book::class, BookGroup::class, BookSource::class, BookChapter::class,
         ReplaceRule::class, SearchBook::class, SearchKeyword::class, Cookie::class,
         RssSource::class, Bookmark::class, RssArticle::class, RssReadRecord::class,
-        RssStar::class, TxtTocRule::class, ReadRecord::class, ReadRecordDetail::class, 
+        RssStar::class, TxtTocRule::class, ReadRecord::class, ReadRecordDetail::class,
         ReadRecordSession::class, HttpTTS::class, Cache::class,
         RuleSub::class, DictRule::class, KeyboardAssist::class, Server::class,
         UrlRecord::class, DirectLinkUploadRule::class, UploadHistory::class,
