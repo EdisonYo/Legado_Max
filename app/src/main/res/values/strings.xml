@@ -649,7 +649,7 @@
     <string name="export_no_chapter_name">TXT 不导出章节名</string>
     <string name="export_pics_file">TXT 导出图片</string>
     <string name="export_rules">导出规则</string>
-    <string name="export_selection">导出所选</string>
+    <string name="export_selection">导出/上传所选</string>
     <string name="export_str">导出</string>
     <string name="export_success">导出成功</string>
     <string name="export_to_clipboard">导出JSON到剪贴板</string>
@@ -1487,7 +1487,7 @@
     <string name="share_layout">共用布局</string>
     <string name="share_rss_source">分享 RSS 源</string>
     <string name="share_rules">分享规则</string>
-    <string name="share_selected_source">分享选中源</string>
+    <string name="share_selected_source">分享所选</string>
     <string name="show">显示</string>
     <string name="showLine">显示分隔线</string>
     <string name="showTimeBattery">显示时间和电量</string>
