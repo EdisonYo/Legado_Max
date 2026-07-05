@@ -86,6 +86,8 @@ class ThemeConfigFragment : PreferenceFragment(),
         upPreferenceSummary(PreferKey.bgImageN, getPrefString(PreferKey.bgImageN))
         upPreferenceSummary(PreferKey.barElevation, AppConfig.elevation.toString())
         upPreferenceSummary(PreferKey.fontScale)
+        findPreference<Preference>(PreferKey.tNavBar)?.isVisible = !getPrefString(PreferKey.bgImage).isNullOrBlank()
+        findPreference<Preference>(PreferKey.tNavBarN)?.isVisible = !getPrefString(PreferKey.bgImageN).isNullOrBlank()
         findPreference<ColorPreference>(PreferKey.cBackground)?.let {
             it.onSaveColor = { color ->
                 if (!ColorUtils.isColorLight(color)) {
@@ -166,6 +168,8 @@ class ThemeConfigFragment : PreferenceFragment(),
             PreferKey.bgImage,
             PreferKey.bgImageN -> {
                 upPreferenceSummary(key, getPrefString(key))
+                findPreference<Preference>(PreferKey.tNavBar)?.isVisible = !getPrefString(PreferKey.bgImage).isNullOrBlank()
+                findPreference<Preference>(PreferKey.tNavBarN)?.isVisible = !getPrefString(PreferKey.bgImageN).isNullOrBlank()
             }
         }
 
@@ -248,7 +252,7 @@ class ThemeConfigFragment : PreferenceFragment(),
         val blurringKey = if (isNight) PreferKey.bgImageNBlurring else PreferKey.bgImageBlurring
         val actions = arrayListOf(
             getString(R.string.background_image_blurring),
-            getString(R.string.select_image)
+            getString(R.string.background_image_s)
         )
         if (!getPrefString(bgKey).isNullOrEmpty()) {
             actions.add(getString(R.string.delete))
@@ -276,6 +280,8 @@ class ThemeConfigFragment : PreferenceFragment(),
                 2 -> {
                     removePref(bgKey)
                     upTheme(isNight)
+                    findPreference<Preference>(PreferKey.tNavBar)?.isVisible = !getPrefString(PreferKey.bgImage).isNullOrBlank()
+                    findPreference<Preference>(PreferKey.tNavBarN)?.isVisible = !getPrefString(PreferKey.bgImageN).isNullOrBlank()
                 }
             }
         }
@@ -335,7 +341,7 @@ class ThemeConfigFragment : PreferenceFragment(),
 
             PreferKey.bgImage,
             PreferKey.bgImageN -> preference.summary = if (value.isNullOrBlank()) {
-                getString(R.string.select_image)
+                getString(R.string.background_image_s)
             } else {
                 value
             }

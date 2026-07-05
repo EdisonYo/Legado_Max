@@ -92,9 +92,10 @@
     <string name="background">背景</string>
     <string name="background_color">背景色</string>
     <string name="background_image">背景图片</string>
-    <string name="background_image_blurring">背景图片虚化</string>
+    <string name="background_image_blurring">图片虚化</string>
     <string name="background_image_blurring_radius">虚化半径</string>
     <string name="background_image_hint">0 为停用，启用范围 1~25\n半径数值越大，虚化效果越高\n.9.png背景图时此设置无效</string>
+    <string name="background_image_s">配置背景图片/虚化/沉浸式操作栏</string>
     <string name="backup">备份</string>
     <string name="backup_confirmation">确认备份吗？</string>
     <string name="backup_fail">备份失败\n%s</string>
