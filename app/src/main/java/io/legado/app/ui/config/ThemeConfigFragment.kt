@@ -44,6 +44,7 @@ import io.legado.app.utils.getPrefInt
 import io.legado.app.utils.getPrefString
 import io.legado.app.utils.inputStream
 import io.legado.app.utils.postEvent
+import io.legado.app.utils.putPrefBoolean
 import io.legado.app.utils.putPrefInt
 import io.legado.app.utils.putPrefString
 import io.legado.app.utils.readUri
@@ -86,8 +87,7 @@ class ThemeConfigFragment : PreferenceFragment(),
         upPreferenceSummary(PreferKey.bgImageN, getPrefString(PreferKey.bgImageN))
         upPreferenceSummary(PreferKey.barElevation, AppConfig.elevation.toString())
         upPreferenceSummary(PreferKey.fontScale)
-        findPreference<Preference>(PreferKey.tNavBar)?.isVisible = !getPrefString(PreferKey.bgImage).isNullOrBlank()
-        findPreference<Preference>(PreferKey.tNavBarN)?.isVisible = !getPrefString(PreferKey.bgImageN).isNullOrBlank()
+        updateNavBarVisibility()
         findPreference<ColorPreference>(PreferKey.cBackground)?.let {
             it.onSaveColor = { color ->
                 if (!ColorUtils.isColorLight(color)) {
@@ -168,8 +168,7 @@ class ThemeConfigFragment : PreferenceFragment(),
             PreferKey.bgImage,
             PreferKey.bgImageN -> {
                 upPreferenceSummary(key, getPrefString(key))
-                findPreference<Preference>(PreferKey.tNavBar)?.isVisible = !getPrefString(PreferKey.bgImage).isNullOrBlank()
-                findPreference<Preference>(PreferKey.tNavBarN)?.isVisible = !getPrefString(PreferKey.bgImageN).isNullOrBlank()
+                updateNavBarVisibility()
             }
         }
 
@@ -279,9 +278,12 @@ class ThemeConfigFragment : PreferenceFragment(),
 
                 2 -> {
                     removePref(bgKey)
+                    if (isNight) {
+                        putPrefBoolean(PreferKey.tNavBarN, false)
+                    } else {
+                        putPrefBoolean(PreferKey.tNavBar, false)
+                    }
                     upTheme(isNight)
-                    findPreference<Preference>(PreferKey.tNavBar)?.isVisible = !getPrefString(PreferKey.bgImage).isNullOrBlank()
-                    findPreference<Preference>(PreferKey.tNavBarN)?.isVisible = !getPrefString(PreferKey.bgImageN).isNullOrBlank()
                 }
             }
         }
@@ -348,6 +350,17 @@ class ThemeConfigFragment : PreferenceFragment(),
 
             else -> preference.summary = value
         }
+    }
+
+    /**
+     * 根据背景图是否存在，控制对应主题下沉浸式操作栏选项的可见性，
+     * 并同步关闭无背景图时的沉浸式开关。
+     */
+    private fun updateNavBarVisibility() {
+        val dayBgImage = getPrefString(PreferKey.bgImage)
+        val nightBgImage = getPrefString(PreferKey.bgImageN)
+        findPreference<Preference>(PreferKey.tNavBar)?.isVisible = !dayBgImage.isNullOrBlank()
+        findPreference<Preference>(PreferKey.tNavBarN)?.isVisible = !nightBgImage.isNullOrBlank()
     }
 
     private fun setBgFromUri(uri: Uri, preferenceKey: String, success: () -> Unit) {
