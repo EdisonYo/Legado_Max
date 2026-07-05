@@ -252,7 +252,7 @@ class ThemeConfigFragment : PreferenceFragment(),
         val blurringKey = if (isNight) PreferKey.bgImageNBlurring else PreferKey.bgImageBlurring
         val actions = arrayListOf(
             getString(R.string.background_image_blurring),
-            getString(R.string.background_image_s)
+            getString(R.string.select_image)
         )
         if (!getPrefString(bgKey).isNullOrEmpty()) {
             actions.add(getString(R.string.delete))
