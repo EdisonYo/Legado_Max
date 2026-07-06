@@ -2,7 +2,6 @@ package io.legado.app.help.storage
 
 import io.legado.app.data.appDb
 import io.legado.app.data.repository.CoverGalleryRepository
-import io.legado.app.help.DirectLinkUpload
 import io.legado.app.help.book.BookHelp
 import io.legado.app.help.config.ReadBookConfig
 import io.legado.app.help.config.ThemeConfig
@@ -54,13 +53,13 @@ object BackupInfoHelper {
         CategoryDef(
             "规则相关",
             "🔧",
-            listOf("replaceRule", "txtTocRule", "dictRule", "keyboardAssist", "highlightRule")
+            listOf("replaceRule", "txtTocRule", "dictRule", "keyboardAssist", "highlightRule", "directLinkRule")
         ),
         CategoryDef("语音相关", "🔊", listOf("httpTTS")),
         CategoryDef(
             "配置相关",
             "⚙️",
-            listOf("config", "videoConfig", "readConfig", "shareConfig", "coverRule", "servers", "directLink")
+            listOf("config", "videoConfig", "readConfig", "shareConfig", "coverRule", "servers")
         )
     )
 
@@ -91,6 +90,7 @@ object BackupInfoHelper {
         "httpTTS.json" to "TTS 配置",
         "keyboardAssists.json" to "键盘辅助",
         "dictRule.json" to "词典规则",
+        "directLinkRule.json" to "直链规则",
         "servers.json" to "服务器配置",
         "runtimeSourceCache.json" to "书源运行数据",
         "book_cache" to "书籍缓存",
@@ -101,7 +101,6 @@ object BackupInfoHelper {
         ReadBookConfig.shareConfigFileName to "共享阅读配置",
         ThemeConfig.configFileName to "主题配置",
         BookCover.configFileName to "封面规则",
-        DirectLinkUpload.ruleFileName to "直链上传配置",
         "backgroundImages" to "阅读背景",
         "config.xml" to "应用配置",
         "videoConfig.xml" to "视频配置"
@@ -113,7 +112,6 @@ object BackupInfoHelper {
 
     private val selectorFileAliases = mapOf(
         ReadBookConfig.shareConfigFileName to "readShareConfig.json",
-        DirectLinkUpload.ruleFileName to "directLinkRule.json",
         BookCover.configFileName to "coverRule.json",
         CoverGalleryRepository.backupDirName to CoverGalleryRepository.backupDirName
     )
@@ -162,6 +160,7 @@ object BackupInfoHelper {
             "httpTTS.json",
             "keyboardAssists.json",
             "dictRule.json",
+            "directLinkRule.json",
             "servers.json"
         )
         dbItems.forEach { addItem(it) }
@@ -204,9 +203,7 @@ object BackupInfoHelper {
             addItem(fileName, if (file.exists()) file.length() else 0L)
         }
 
-        val directLinkConfig = DirectLinkUpload.getConfig()
-        val directLinkSize = directLinkConfig?.let { GSON.toJson(it).length.toLong() } ?: 0L
-        addItem(DirectLinkUpload.ruleFileName, directLinkSize)
+
     }
 
     private fun addBackgroundItems(addItem: (String, Long) -> Unit) {
@@ -335,6 +332,7 @@ object BackupInfoHelper {
             "httpTTS" -> appDb.httpTTSDao.count
             "keyboardAssists" -> appDb.keyboardAssistsDao.count
             "dictRule" -> appDb.dictRuleDao.count
+            "directLinkRule" -> appDb.directLinkUploadRuleDao.count
             "servers" -> appDb.serverDao.count
             "runtimeSourceCache" -> appDb.cacheDao.getRuntimeSourceCacheCount(System.currentTimeMillis())
             else -> 0

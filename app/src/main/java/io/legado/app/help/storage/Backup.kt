@@ -9,7 +9,6 @@ import io.legado.app.constant.PreferKey
 import io.legado.app.data.appDb
 import io.legado.app.exception.NoStackTraceException
 import io.legado.app.help.AppWebDav
-import io.legado.app.help.DirectLinkUpload
 import io.legado.app.help.config.AppConfig
 import io.legado.app.help.config.LocalConfig
 import io.legado.app.help.config.ReadBookConfig
@@ -152,7 +151,7 @@ object Backup {
             "keyboardAssists.json",
             "dictRule.json",
             "servers.json",
-            DirectLinkUpload.ruleFileName,
+            "directLinkRule.json",
             ReadBookConfig.configFileName,
             ReadBookConfig.shareConfigFileName,
             ThemeConfig.configFileName,
@@ -547,12 +546,13 @@ object Backup {
             }
         }
 
-        // 导出直链上传配置
-        if (selectedFiles.contains(DirectLinkUpload.ruleFileName)) {
-            onProgress?.invoke(BackupInfoHelper.getDisplayName(DirectLinkUpload.ruleFileName))
-            DirectLinkUpload.getConfig()?.let {
-                FileUtils.createFileIfNotExist(backupPath + File.separator + DirectLinkUpload.ruleFileName)
-                    .writeText(GSON.toJson(it))
+        // 导出直链规则
+        if (selectedFiles.contains("directLinkRule.json")) {
+            onProgress?.invoke(BackupInfoHelper.getDisplayName("directLinkRule.json"))
+            val directLinkRules = appDb.directLinkUploadRuleDao.getAll()
+            if (directLinkRules.isNotEmpty()) {
+                FileUtils.createFileIfNotExist(backupPath + File.separator + "directLinkRule.json")
+                    .writeText(GSON.toJson(directLinkRules))
             }
         }
 

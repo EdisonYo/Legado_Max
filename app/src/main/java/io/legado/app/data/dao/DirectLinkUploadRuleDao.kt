@@ -5,10 +5,10 @@ import io.legado.app.data.entities.DirectLinkUploadRule
 import kotlinx.coroutines.flow.Flow
 
 /**
- * 直链上传规则数据访问对象（DAO）
+ * 直链规则数据访问对象（DAO）
  * 
  * 提供规则数据的增删改查操作
- * 所有方法都是挂起函数，支持协程异步调用
+ * 挂起函数支持协程异步调用
  */
 @Dao
 interface DirectLinkUploadRuleDao {
@@ -64,6 +64,19 @@ interface DirectLinkUploadRuleDao {
      */
     @Query("SELECT COUNT(*) FROM direct_link_upload_rules")
     suspend fun getCount(): Int
+
+    /**
+     * 获取规则总数（非挂起，供统计界面直接调用）
+     */
+    @get:Query("SELECT COUNT(*) FROM direct_link_upload_rules")
+    val count: Int
+
+    /**
+     * 获取所有规则（非挂起，供备份统计等直接调用）
+     * 按默认规则优先、排序顺序、创建时间排序
+     */
+    @get:Query("SELECT * FROM direct_link_upload_rules ORDER BY isDefault DESC, sortOrder ASC, createTime DESC")
+    val all: List<DirectLinkUploadRule>
 
     /**
      * 插入规则（支持批量）
