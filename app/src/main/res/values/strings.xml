@@ -486,9 +486,8 @@
     <string name="dict">字典</string>
     <string name="dict_rule">字典规则</string>
     <string name="dict_rule_search">字典规则-搜索</string>
-    <string name="direct_link_upload_config">直链上传配置</string>
-    <string name="direct_link_upload_rule">直链上传规则</string>
-    <string name="direct_link_upload_rule_summary">用于导出书源书单时生成直链 URL</string>
+    <string name="direct_link_upload_rule">直链规则</string>
+    <string name="direct_link_upload_rule_summary">导出时生成直链 URL</string>
     <string name="disable_book_source">禁用书源</string>
     <string name="disable_explore">禁用发现</string>
     <string name="disable_horizontal_page_snap">禁用水平翻页效果</string>

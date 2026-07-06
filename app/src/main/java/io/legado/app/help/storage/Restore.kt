@@ -24,6 +24,7 @@ import io.legado.app.data.entities.Cache
 import io.legado.app.data.entities.CoverGalleryGroup
 import io.legado.app.data.entities.CoverGalleryImage
 import io.legado.app.data.entities.DictRule
+import io.legado.app.data.entities.DirectLinkUploadRule
 import io.legado.app.data.entities.HttpTTS
 import io.legado.app.data.entities.KeyboardAssist
 import io.legado.app.data.entities.readRecord.ReadRecord
@@ -39,7 +40,6 @@ import io.legado.app.data.entities.Server
 import io.legado.app.data.entities.TxtTocRule
 import io.legado.app.help.AppCacheManager
 import io.legado.app.help.CacheManager
-import io.legado.app.help.DirectLinkUpload
 import io.legado.app.help.LauncherIconHelp
 import io.legado.app.help.book.isLocal
 import io.legado.app.help.book.upType
@@ -403,13 +403,16 @@ object Restore {
             }?.onFailure { AppLog.put("恢复服务器配置出错\n${it.localizedMessage}", it) }
         }
 
-        // 恢复直链上传配置
-        if (DirectLinkUpload.ruleFileName in selectedSet) {
-            progress(DirectLinkUpload.ruleFileName)
-            File(path, DirectLinkUpload.ruleFileName).takeIf { it.exists() }?.runCatching {
+        // 恢复直链规则
+        if ("directLinkRule.json" in selectedSet) {
+            progress("directLinkRule.json")
+            appDb.directLinkUploadRuleDao.deleteAll()
+            File(path, "directLinkRule.json").takeIf { it.exists() }?.runCatching {
                 val json = readText()
-                ACache.get(cacheDir = false).put(DirectLinkUpload.ruleFileName, json)
-            }?.onFailure { AppLog.put("恢复直链上传出错\n${it.localizedMessage}", it) }
+                GSON.fromJsonArray<DirectLinkUploadRule>(json).getOrNull()?.let { rules ->
+                    appDb.directLinkUploadRuleDao.insert(*rules.toTypedArray())
+                }
+            }?.onFailure { AppLog.put("恢复直链规则出错\n${it.localizedMessage}", it) }
         }
 
         // 恢复主题配置
@@ -667,7 +670,7 @@ object Restore {
                 HighlightRuleStore.restoreBackupData(appCtx, it, path)
             }
         }?.onFailure {
-            AppLog.put("鎭㈠楂樹寒瑙勫垯鍑洪敊\n${it.localizedMessage}", it)
+            AppLog.put("恢复搜索历史出错\n${it.localizedMessage}", it)
         }
         progress("searchHistory.json")
         appDb.searchKeywordDao.deleteAll()
@@ -748,16 +751,18 @@ object Restore {
             AppLog.put("恢复服务器配置出错\n${it.localizedMessage}", it)
         }
 
-        // 恢复直链上传配置
-        progress(DirectLinkUpload.ruleFileName)
-        DirectLinkUpload.delConfig()
-        File(path, DirectLinkUpload.ruleFileName).takeIf {
+        // 恢复直链规则
+        progress("directLinkRule.json")
+        appDb.directLinkUploadRuleDao.deleteAll()
+        File(path, "directLinkRule.json").takeIf {
             it.exists()
         }?.runCatching {
             val json = readText()
-            ACache.get(cacheDir = false).put(DirectLinkUpload.ruleFileName, json)
+            GSON.fromJsonArray<DirectLinkUploadRule>(json).getOrNull()?.let { rules ->
+                appDb.directLinkUploadRuleDao.insert(*rules.toTypedArray())
+            }
         }?.onFailure {
-            AppLog.put("恢复直链上传出错\n${it.localizedMessage}", it)
+            AppLog.put("恢复直链规则出错\n${it.localizedMessage}", it)
         }
 
         // 恢复主题配置
@@ -1050,7 +1055,7 @@ object Restore {
             }
             map
         }.onFailure {
-            AppLog.put("$fileName.xml\n璇诲彇閰嶇疆鍑洪敊\n${it.localizedMessage}", it)
+            AppLog.put("$fileName.xml\n读取出错\n${it.localizedMessage}", it)
         }.getOrNull()
     }
 

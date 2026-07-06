@@ -235,7 +235,7 @@ class DirectLinkUploadRepository {
             )
         }.filter { it.uploadUrl !in existingUrls }
 
-        // 批量插入不存在的默认规则
+        // 插入不存在的默认规则
         if (defaultRules.isNotEmpty()) {
             ruleDao.insert(*defaultRules.toTypedArray())
         }

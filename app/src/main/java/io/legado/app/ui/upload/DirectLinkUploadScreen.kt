@@ -1,10 +1,5 @@
 /**
- * 直链上传配置界面
- * 
- * 该文件实现了直链上传功能的配置界面,包括:
- * - 上传规则的管理(添加、编辑、删除、测试)
- * - 上传历史的查看和管理
- * - 规则的导入导出功能
+ * 直链规则界面
  * 
  * 主要组件:
  * - DirectLinkUploadScreen: 主界面,包含规则管理和上传历史两个标签页
@@ -54,14 +49,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 /**
- * 直链上传配置主界面
+ * 直链规则主界面
  * 
- * 该 Composable 是直链上传功能的入口界面,提供:
- * - 顶部应用栏,包含返回按钮、添加规则按钮和更多操作菜单
- * - 标签页布局,切换规则管理和上传历史
- * - 各种对话框(添加/编辑规则、清除历史、导入默认规则、测试结果)
- * 
- * @param viewModel 直链上传的 ViewModel,负责业务逻辑和状态管理
+ * @param viewModel 负责业务逻辑和状态管理
  * @param onBackClick 返回按钮点击回调
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -102,7 +92,7 @@ fun DirectLinkUploadScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "直链上传配置",
+                        text = "直链规则",
                         style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp, fontWeight = FontWeight.Medium)
                     )
                 },
@@ -374,8 +364,6 @@ fun DirectLinkUploadScreen(
 /**
  * 规则列表标签页
  * 
- * 显示所有上传规则的列表,支持编辑、删除、设为默认、测试和拷贝操作
- * 
  * @param rules 上传规则列表
  * @param onEdit 编辑规则回调
  * @param onDelete 删除规则回调
@@ -441,9 +429,6 @@ fun RuleListTab(
 
 /**
  * 规则卡片
- * 
- * 动态高度，最小约 40dp（无统计信息），有统计信息时约 64dp。
- * 上下内边距 8dp，左右 12dp，紧凑但统计信息完整保留。
  * 
  * @param rule 上传规则数据
  * @param onEdit 编辑回调

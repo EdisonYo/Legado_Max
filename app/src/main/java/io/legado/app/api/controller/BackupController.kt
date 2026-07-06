@@ -4,7 +4,6 @@ import fi.iki.elonen.NanoHTTPD
 import io.legado.app.api.ReturnData
 import io.legado.app.constant.PreferKey
 import io.legado.app.data.appDb
-import io.legado.app.help.DirectLinkUpload
 import io.legado.app.help.config.AppConfig
 import io.legado.app.help.config.ReadBookConfig
 import io.legado.app.help.config.ThemeConfig
@@ -216,10 +215,11 @@ object BackupController {
                     .writeText(it)
             }
 
-            // 导出直链上传配置
-            DirectLinkUpload.getConfig()?.let {
-                FileUtils.createFileIfNotExist(webBackupPath + File.separator + DirectLinkUpload.ruleFileName)
-                    .writeText(GSON.toJson(it))
+            // 导出直链规则
+            val directLinkRules = appDb.directLinkUploadRuleDao.getAll()
+            if (directLinkRules.isNotEmpty()) {
+                FileUtils.createFileIfNotExist(webBackupPath + File.separator + "directLinkRule.json")
+                    .writeText(GSON.toJson(directLinkRules))
             }
 
             // 导出封面规则配置
@@ -357,6 +357,9 @@ object BackupController {
             BackupItemDef("servers.json", "服务器配置", "远程服务器配置（加密）") {
                 appDb.serverDao.count
             },
+            BackupItemDef("directLinkRule.json", "直链规则", "用于上传的直链规则") {
+                appDb.directLinkUploadRuleDao.count
+            },
             BackupItemDef("runtimeSourceCache.json", "书源运行数据", "书源登录信息和运行变量") {
                 appDb.cacheDao.getRuntimeSourceCacheCount(System.currentTimeMillis())
             }
@@ -424,7 +427,6 @@ object BackupController {
             ConfigItemDef(ReadBookConfig.shareConfigFileName, "共享阅读配置", "跨设备共享的阅读配置"),
             ConfigItemDef(ThemeConfig.configFileName, "主题配置", "界面主题样式配置"),
             ConfigItemDef(BookCover.configFileName, "封面规则", "自定义封面生成规则"),
-            ConfigItemDef(DirectLinkUpload.ruleFileName, "直链上传配置", "直链上传规则配置"),
             ConfigItemDef("config.xml", "应用设置", "应用程序偏好设置"),
             ConfigItemDef("videoConfig.xml", "视频配置", "视频播放器设置")
         )
@@ -465,8 +467,8 @@ object BackupController {
             items.add(
                 BackupItemInfo(
                     fileName = HighlightRuleStore.backupBgDirName,
-                    displayName = "楂樹寒鑳屾櫙鍥剧墖",
-                    description = "楂樹寒瑙勫垯浣跨敤鐨勮嚜瀹氫箟鑳屾櫙鍥剧墖",
+                    displayName = "高亮规则背景图片",
+                    description = "高亮规则使用的背景图片",
                     count = highlightRuleBgFiles.size,
                     size = highlightRuleBgSize
                 )

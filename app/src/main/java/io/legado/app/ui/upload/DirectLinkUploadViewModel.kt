@@ -232,7 +232,7 @@ class DirectLinkUploadViewModel(application: Application) : BaseViewModel(applic
             // 去重检查：相同 uploadUrl 视为同一规则
             val existingRules = repository.getAllRules()
             if (existingRules.any { it.uploadUrl == rule.uploadUrl }) {
-                throw IllegalStateException("该规则已存在，请勿重复粘贴")
+                throw IllegalStateException("该规则已存在")
             }
 
             // 重置ID和管理字段
