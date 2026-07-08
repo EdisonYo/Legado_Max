@@ -26,3 +26,4 @@ package-lock.json
 *.hprof*.hprof
 .docs
 /gradle/gradle-daemon-jvm.properties
+.learn/
