@@ -32,4 +32,11 @@
         android:title="@string/explore_block_rule"
         app:showAsAction="never" />
 
+    <!-- 显示分类Tab -->
+    <item
+        android:id="@+id/menu_show_category_tab"
+        android:title="@string/show_category_tab"
+        android:checkable="true"
+        app:showAsAction="never" />
+
 </menu>

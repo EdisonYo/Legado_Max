@@ -1498,6 +1498,7 @@
     <string name="show_brightness_view">显示亮度调节控件</string>
     <string name="show_default_book_icon">显示默认书籍图标</string>
     <string name="show_discovery">显示发现</string>
+    <string name="show_category_tab">显示分类标签</string>
     <string name="show_full_chapter_name">长标题换行</string>
     <string name="show_hide">显示/隐藏</string>
     <string name="show_icon">显示图标</string>
