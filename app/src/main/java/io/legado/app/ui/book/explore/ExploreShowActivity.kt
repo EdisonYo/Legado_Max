@@ -1,39 +1,19 @@
 package io.legado.app.ui.book.explore
 
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.StateListDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.activity.viewModels
-import androidx.core.os.bundleOf
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import io.legado.app.R
-import io.legado.app.base.VMBaseActivity
-import io.legado.app.constant.PreferKey
-import io.legado.app.data.entities.SearchBook
-import io.legado.app.databinding.ActivityExploreShowBinding
-import io.legado.app.databinding.ViewLoadMoreBinding
-import io.legado.app.ui.book.info.BookInfoActivity
-import io.legado.app.ui.book.group.GroupSelectDialog
-import io.legado.app.ui.widget.number.NumberPickerDialog
-import io.legado.app.ui.widget.recycler.LoadMoreView
-import io.legado.app.ui.widget.recycler.VerticalDivider
-import io.legado.app.utils.applyNavigationBarPadding
-import io.legado.app.utils.getPrefBoolean
-import io.legado.app.utils.getPrefInt
-import io.legado.app.utils.putPrefBoolean
-import io.legado.app.utils.putPrefInt
-import io.legado.app.utils.showDialogFragment
-import io.legado.app.utils.startActivity
-import io.legado.app.utils.toastOnUi
-import io.legado.app.utils.viewbindingdelegate.viewBinding
-import io.legado.app.ui.blockrule.BlockRuleConfigDialog
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -46,7 +26,38 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.google.android.flexbox.FlexboxLayout
+import io.legado.app.R
+import io.legado.app.base.VMBaseActivity
+import io.legado.app.constant.PreferKey
+import io.legado.app.data.entities.SearchBook
+import io.legado.app.data.entities.rule.ExploreKind
+import io.legado.app.databinding.ActivityExploreShowBinding
+import io.legado.app.databinding.ViewLoadMoreBinding
+import io.legado.app.lib.theme.accentColor
+import io.legado.app.ui.blockrule.BlockRuleConfigDialog
+import io.legado.app.ui.book.info.BookInfoActivity
+import io.legado.app.ui.book.group.GroupSelectDialog
 import io.legado.app.ui.theme.LegadoTheme
+import io.legado.app.ui.widget.number.NumberPickerDialog
+import io.legado.app.ui.widget.recycler.LoadMoreView
+import io.legado.app.ui.widget.recycler.VerticalDivider
+import io.legado.app.utils.applyNavigationBarPadding
+import io.legado.app.utils.dpToPx
+import io.legado.app.utils.getPrefBoolean
+import io.legado.app.utils.getPrefInt
+import io.legado.app.utils.putPrefBoolean
+import io.legado.app.utils.putPrefInt
+import io.legado.app.utils.showDialogFragment
+import io.legado.app.utils.startActivity
+import io.legado.app.utils.toastOnUi
+import io.legado.app.utils.viewbindingdelegate.viewBinding
 
 /**
  * 发现列表
@@ -74,8 +85,13 @@ class ExploreShowActivity : VMBaseActivity<ActivityExploreShowBinding, ExploreSh
     private var menuPage: MenuItem? = null
     private var menuSwitchLayout: MenuItem? = null
     private var menuSelectColumn: MenuItem? = null
+    private var menuShowCategoryTab: MenuItem? = null
     /** 当前书源 URL，用于按书源隔离布局配置 */
     private val sourceUrl: String by lazy { intent.getStringExtra("sourceUrl") ?: "" }
+    /** 是否显示分类Tab，按书源持久化，默认 true */
+    private var showCategoryTab: Boolean
+        get() = getPrefBoolean("${PreferKey.exploreShowCategoryTab}_${sourceUrl}", true)
+        set(value) = putPrefBoolean("${PreferKey.exploreShowCategoryTab}_${sourceUrl}", value)
     /** 是否显示屏蔽进度指示器 */
     private var showBlockProgress: Boolean
         get() = getPrefBoolean(PreferKey.blockRuleShowProgress, false)
@@ -103,6 +119,14 @@ class ExploreShowActivity : VMBaseActivity<ActivityExploreShowBinding, ExploreSh
         get() = getPrefInt("${PreferKey.exploreShowColumnWaterfall}_${sourceUrl}", 2)
         set(value) = putPrefInt("${PreferKey.exploreShowColumnWaterfall}_${sourceUrl}", value)
 
+    /** 分类列表 */
+    private val exploreKinds = mutableListOf<ExploreKind>()
+    /** 当前选中的分类索引 */
+    private var currentCategoryIndex = 0
+    /** 每个分类的滚动位置缓存（分类URL -> 滚动位置和偏移量） */
+    private data class ScrollState(val position: Int, val offset: Int)
+    private val categoryScrollCache = mutableMapOf<String, ScrollState>()
+
     /**
      * 布局模式，由"切换布局"菜单轮换，按书源持久化
      * 0=列表, 1=网格, 2=瀑布流
@@ -120,6 +144,20 @@ class ExploreShowActivity : VMBaseActivity<ActivityExploreShowBinding, ExploreSh
         viewModel.blockedCountData.observe(this) { count ->
             blockedCount = count
             updateBlockProgressChip()
+        }
+        // 分类列表：超过1个且开启显示时才显示Tab
+        viewModel.exploreKindsData.observe(this) { kinds ->
+            exploreKinds.clear()
+            exploreKinds.addAll(kinds)
+            if (showCategoryTab && exploreKinds.size > 1) {
+                setupTabs()
+                binding.tabsContainer.visibility = View.VISIBLE
+                val currentUrl = intent.getStringExtra("exploreUrl") ?: ""
+                currentCategoryIndex = exploreKinds.indexOfFirst { it.url == currentUrl }.coerceAtLeast(0)
+                updateTabSelection(currentCategoryIndex)
+            } else {
+                binding.tabsContainer.visibility = View.GONE
+            }
         }
         viewModel.initData(intent)
         viewModel.errorLiveData.observe(this) {
@@ -148,6 +186,8 @@ class ExploreShowActivity : VMBaseActivity<ActivityExploreShowBinding, ExploreSh
         menuPage = menu.findItem(R.id.menu_page)
         menuSwitchLayout = menu.findItem(R.id.menu_switch_layout)
         menuSelectColumn = menu.findItem(R.id.menu_select_column)
+        menuShowCategoryTab = menu.findItem(R.id.menu_show_category_tab)
+        menuShowCategoryTab?.isChecked = showCategoryTab
         if (layoutMode != LAYOUT_LIST) {
             menuSelectColumn?.isVisible = true
             val count = if (layoutMode == LAYOUT_WATERFALL) columnCountWaterfall else columnCountGrid
@@ -208,6 +248,18 @@ class ExploreShowActivity : VMBaseActivity<ActivityExploreShowBinding, ExploreSh
             }
             R.id.menu_select_column -> {
                 handleSelectColumn()
+            }
+            R.id.menu_show_category_tab -> {
+                showCategoryTab = !showCategoryTab
+                item.isChecked = showCategoryTab
+                if (showCategoryTab && exploreKinds.size > 1) {
+                    if (binding.tabsContainer.childCount == 0 && exploreKinds.isNotEmpty()) {
+                        setupTabs()
+                    }
+                    binding.tabsContainer.visibility = View.VISIBLE
+                } else {
+                    binding.tabsContainer.visibility = View.GONE
+                }
             }
         }
         return super.onCompatOptionsItemSelected(item)
@@ -275,10 +327,177 @@ class ExploreShowActivity : VMBaseActivity<ActivityExploreShowBinding, ExploreSh
     }
 
     /**
-     * 切换布局：列表 → 网格 → 瀑布流 三轮换
-     * 网格模式下显示选择分列菜单图标和简化卡片（仅封面+书名）；
-     * 瀑布流模式下显示分列菜单图标和完整信息卡片（封面+书名+作者+分类+最新章节+简介）；
-     * 列表模式下隐藏菜单图标恢复完整信息
+     * 设置分类Tab布局（FlexboxLayout 自动换行）
+     * 圆角16dp，未选中淡描边，选中实描边加粗，文字始终 primaryText
+     */
+    private fun setupTabs() {
+        val container = binding.tabsContainer
+        container.removeAllViews()
+        if (exploreKinds.isEmpty()) {
+            container.visibility = View.GONE
+            return
+        }
+
+        val accent = accentColor
+        val textColor = ContextCompat.getColor(this, R.color.primaryText)
+
+        exploreKinds.forEachIndexed { index, kind ->
+            val tab = createTabView(kind.title ?: "", index, kind.url ?: "", accent, textColor)
+            container.addView(tab)
+        }
+
+        container.visibility = View.VISIBLE
+        updateTabSelection(currentCategoryIndex)
+    }
+
+    /**
+     * 创建单个Tab视图
+     */
+    private fun createTabView(title: String, position: Int, url: String, accent: Int, textColor: Int): TextView {
+        return TextView(this).apply {
+            text = title
+            gravity = Gravity.CENTER
+            textSize = 14f
+            setPadding(12.dpToPx(), 6.dpToPx(), 12.dpToPx(), 6.dpToPx())
+            val params = FlexboxLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                setMargins(0, 4.dpToPx(), 6.dpToPx(), 4.dpToPx())
+            }
+            layoutParams = params
+            background = createTabBackground(accent)
+            setTextColor(textColor)
+            setOnClickListener {
+                if (position != currentCategoryIndex) {
+                    switchToCategory(position)
+                }
+            }
+        }
+    }
+
+    /**
+     * 创建Tab背景
+     * 未选中：透明底 + accent 40%透明度 1dp 描边
+     * 选中：透明底 + accent 实色 2dp 描边
+     * 圆角 16dp
+     */
+    private fun createTabBackground(accent: Int): android.graphics.drawable.Drawable {
+        val radius = 16f.dpToPx()
+        val strokeWidthNormal = 1.dpToPx()
+        val strokeWidthSelected = 2.dpToPx()
+        val fadedAccent = Color.argb(
+            (255 * 0.4).toInt(),
+            Color.red(accent),
+            Color.green(accent),
+            Color.blue(accent)
+        )
+
+        val defaultDrawable = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = radius
+            setStroke(strokeWidthNormal, fadedAccent)
+            setColor(Color.TRANSPARENT)
+        }
+
+        val selectedDrawable = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = radius
+            setStroke(strokeWidthSelected, accent)
+            setColor(Color.TRANSPARENT)
+        }
+
+        return StateListDrawable().apply {
+            addState(intArrayOf(android.R.attr.state_selected), selectedDrawable)
+            addState(intArrayOf(), defaultDrawable)
+        }
+    }
+
+    /**
+     * 切换到指定分类
+     */
+    private fun switchToCategory(index: Int) {
+        val targetKind = exploreKinds.getOrNull(index) ?: return
+        val targetUrl = targetKind.url ?: return
+        val currentKind = exploreKinds.getOrNull(currentCategoryIndex)
+        val currentUrl = currentKind?.url
+
+        // 1. 保存当前分类状态
+        if (currentUrl != null) {
+            saveCurrentScrollPosition(currentUrl)
+            viewModel.saveCategoryCache(currentUrl)
+        }
+
+        // 2. 更新选中状态
+        currentCategoryIndex = index
+        updateTabSelection(index)
+
+        // 3. 清空当前视图
+        adapter.clearItems()
+        loadMoreView.hasMore()
+        loadMoreView.startLoad()
+        binding.titleBar.title = targetKind.title
+
+        // 4. 检查目标分类是否有缓存
+        if (viewModel.hasCategoryCache(targetUrl)) {
+            // 有缓存：恢复数据，不发起网络请求
+            viewModel.restoreCategory(targetUrl)
+        } else {
+            // 无缓存：正常加载
+            viewModel.switchCategory(targetUrl, targetKind.title)
+        }
+    }
+
+    /**
+     * 更新Tab选中状态
+     */
+    private fun updateTabSelection(position: Int) {
+        val container = binding.tabsContainer
+        for (i in 0 until container.childCount) {
+            val tab = container.getChildAt(i) as? TextView ?: continue
+            tab.isSelected = i == position
+        }
+    }
+
+    /**
+     * 保存当前分类的滚动位置
+     */
+    private fun saveCurrentScrollPosition(url: String) {
+        val lm = binding.recyclerView.layoutManager ?: return
+        val position = when (lm) {
+            is LinearLayoutManager -> lm.findFirstVisibleItemPosition()
+            is StaggeredGridLayoutManager -> {
+                val positions = IntArray(lm.spanCount)
+                lm.findFirstVisibleItemPositions(positions)
+                positions.minOrNull() ?: 0
+            }
+            else -> 0
+        }
+        val firstView = lm.findViewByPosition(position)
+        val offset = firstView?.top?.minus(binding.recyclerView.paddingTop) ?: 0
+        categoryScrollCache[url] = ScrollState(position, offset)
+    }
+
+    /**
+     * 恢复指定分类的滚动位置
+     */
+    private fun restoreCategoryScrollPosition(url: String?) {
+        if (url == null) {
+            binding.recyclerView.scrollToPosition(0)
+            return
+        }
+        val state = categoryScrollCache[url]
+        if (state == null) {
+            binding.recyclerView.scrollToPosition(0)
+            return
+        }
+        val lm = binding.recyclerView.layoutManager
+        when (lm) {
+            is LinearLayoutManager -> lm.scrollToPositionWithOffset(state.position, state.offset)
+            is StaggeredGridLayoutManager -> lm.scrollToPositionWithOffset(state.position, state.offset)
+            else -> binding.recyclerView.scrollToPosition(state.position)
+        }
+    }
+
+    /**
+     * 切换布局：列表 → 网格 → 瀑布流 轮换
      */
     private fun handleSwitchLayout() {
         val savedPosition = findFirstVisibleItemPosition()
@@ -315,8 +534,7 @@ class ExploreShowActivity : VMBaseActivity<ActivityExploreShowBinding, ExploreSh
     }
 
     /**
-     * 弹出 NumberPickerDialog 选择列数（1-10），确认后更新布局和标题栏图标
-     * 当前为网格模式时设置网格列数，瀑布流模式时设置瀑布流列数
+     * 弹出 NumberPickerDialog 选择列数（1-10）
      */
     private fun handleSelectColumn() {
         val currentCount = if (layoutMode == LAYOUT_WATERFALL) columnCountWaterfall else columnCountGrid
@@ -341,7 +559,6 @@ class ExploreShowActivity : VMBaseActivity<ActivityExploreShowBinding, ExploreSh
 
     /**
      * 根据列数和当前布局模式设置 RecyclerView 的 LayoutManager
-     * 列表：LinearLayoutManager；网格：GridLayoutManager；瀑布流：StaggeredGridLayoutManager
      */
     private fun applyLayoutManager(count: Int) {
         binding.recyclerView.layoutManager = when {
@@ -361,7 +578,7 @@ class ExploreShowActivity : VMBaseActivity<ActivityExploreShowBinding, ExploreSh
     }
 
     /**
-     * 获取当前 LayoutManager 中第一个可见项的位置（用于切换布局/列数后恢复）
+     * 获取当前 LayoutManager 中第一个可见项的位置
      */
     private fun findFirstVisibleItemPosition(): Int {
         val layoutManager = binding.recyclerView.layoutManager ?: return 0
@@ -378,7 +595,6 @@ class ExploreShowActivity : VMBaseActivity<ActivityExploreShowBinding, ExploreSh
 
     /**
      * 切换布局/列数后将 RecyclerView 滚动到之前的位置
-     * 只恢复有效位置，避免越界
      */
     private fun restoreScrollPosition(position: Int) {
         if (position < 0) return
@@ -421,6 +637,14 @@ class ExploreShowActivity : VMBaseActivity<ActivityExploreShowBinding, ExploreSh
             }
         }
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    val kind = exploreKinds.getOrNull(currentCategoryIndex)
+                    kind?.url?.let { saveCurrentScrollPosition(it) }
+                }
+            }
+
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (!recyclerView.canScrollVertically(1)) {
@@ -485,6 +709,11 @@ class ExploreShowActivity : VMBaseActivity<ActivityExploreShowBinding, ExploreSh
             val oldCount = adapter.getActualItemCount()
             if (oldCount == 0) {
                 adapter.setItems(books)
+                // 数据加载完成后，恢复当前分类的滚动位置
+                val currentKind = exploreKinds.getOrNull(currentCategoryIndex)
+                binding.recyclerView.post {
+                    restoreCategoryScrollPosition(currentKind?.url)
+                }
             } else {
                 val newItems = books.subList(oldCount, books.size)
                 adapter.addItems(newItems)
@@ -542,5 +771,10 @@ class ExploreShowActivity : VMBaseActivity<ActivityExploreShowBinding, ExploreSh
             toastOnUi(getString(R.string.adding_books, viewModel.booksCount))
             viewModel.addAllToShelf(groupId)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        categoryScrollCache.clear()
     }
 }

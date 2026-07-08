@@ -253,32 +253,32 @@ object PreferKey {
     const val textBoldFineTipShown = "textBoldFineTipShown"
     const val readRecordDisplayMode = "readRecordDisplayMode"
     const val bookInfoShowReadRecord = "bookInfoShowReadRecord"
+    /** 高亮规则 */
     const val highlightRuleDialog = "highlightRuleDialog"
     const val highlightRuleBookTitle = "highlightRuleBookTitle"
     const val highlightRuleBracketNote = "highlightRuleBracketNote"
     const val highlightRuleItems = "highlightRuleItems"
     const val highlightRuleGroups = "highlightRuleGroups"
     const val highlightRuleCurrentGroup = "highlightRuleCurrentGroup"
-
+    /** 屏蔽规则 */
     const val blockRuleItems = "exploreBlockRuleItems"
     const val blockRuleGroups = "exploreBlockRuleGroups"
     const val blockRuleCurrentGroup = "exploreBlockRuleCurrentGroup"
     const val blockRuleShowProgress = "exploreBlockRuleShowProgress"
     const val blockRuleEnabled = "exploreBlockRuleEnabled"
     const val backupBookCache = "backupBookCache"
-
+    /** 规则回收站 */
     const val sourceRecycleBinEnabled = "sourceRecycleBinEnabled"
-
     /** 发现列表网格模式列数配置，默认2列 */
     const val exploreShowColumn = "exploreShowColumn"
     /** 发现列表瀑布流模式列数配置，默认2列 */
     const val exploreShowColumnWaterfall = "exploreShowColumnWaterfall"
     /** 发现列表布局模式，由"切换布局"菜单控制 */
     const val exploreGridMode = "exploreGridMode"
-
     /** 跳转确认记忆，存储 JSON: {"sourceUrl":"allow|deny", ...} */
     const val openUrlConfirmMemory = "openUrlConfirmMemory"
-
     /** 书源排序即时保存 */
     const val bookSourceSortSave = "bookSourceSortSave"
+    /** 发现显示分类标签 */
+    const val exploreShowCategoryTab = "exploreShowCategoryTab"
 }

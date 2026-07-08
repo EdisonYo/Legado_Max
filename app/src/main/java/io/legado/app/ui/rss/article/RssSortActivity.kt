@@ -5,6 +5,7 @@ package io.legado.app.ui.rss.article
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
@@ -21,26 +22,6 @@ import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.appcompat.widget.SearchView
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentStatePagerAdapter
-import androidx.lifecycle.lifecycleScope
-import io.legado.app.R
-import io.legado.app.base.VMBaseActivity
-import io.legado.app.databinding.ActivityRssArtivlesBinding
-import io.legado.app.help.source.sortUrls
-import io.legado.app.lib.theme.accentColor
-import io.legado.app.ui.login.SourceLoginActivity
-import io.legado.app.model.blockrule.BlockRuleStore
-import io.legado.app.ui.blockrule.BlockRuleConfigDialog
-import io.legado.app.ui.rss.source.edit.RssSourceEditActivity
-import io.legado.app.ui.widget.dialog.VariableDialog
-import io.legado.app.utils.*
-import io.legado.app.utils.viewbindingdelegate.viewBinding
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import androidx.viewpager.widget.ViewPager
-import io.legado.app.utils.startActivity
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -53,8 +34,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.lifecycle.lifecycleScope
+import androidx.viewpager.widget.ViewPager
+import io.legado.app.R
+import io.legado.app.base.VMBaseActivity
 import io.legado.app.constant.PreferKey
+import io.legado.app.databinding.ActivityRssArtivlesBinding
+import io.legado.app.help.source.sortUrls
+import io.legado.app.lib.theme.accentColor
+import io.legado.app.model.blockrule.BlockRuleStore
+import io.legado.app.ui.blockrule.BlockRuleConfigDialog
+import io.legado.app.ui.login.SourceLoginActivity
+import io.legado.app.ui.rss.source.edit.RssSourceEditActivity
 import io.legado.app.ui.theme.LegadoTheme
+import io.legado.app.ui.widget.dialog.VariableDialog
+import io.legado.app.utils.*
+import io.legado.app.utils.viewbindingdelegate.viewBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class RssSortActivity : VMBaseActivity<ActivityRssArtivlesBinding, RssSortViewModel>(),
     VariableDialog.Callback {
@@ -145,15 +146,21 @@ class RssSortActivity : VMBaseActivity<ActivityRssArtivlesBinding, RssSortViewMo
         updateTabSelection(binding.viewPager.currentItem)
     }
 
+    /**
+     * 创建单个Tab视图
+     * 圆角16dp，未选中淡描边，选中实描边加粗，文字始终 primaryText
+     */
     private fun createTabView(title: String, position: Int): TextView {
+        val accent = accentColor
+        val textColor = ContextCompat.getColor(this, R.color.primaryText)
         return TextView(this).apply {
             text = title
             gravity = Gravity.CENTER
             textSize = 14f
-            background = createTabBackground(accentColor, context)
+            background = createTabBackground(accent)
             setPadding(12.dpToPx(), 6.dpToPx(), 12.dpToPx(), 6.dpToPx())
             tag = position
-            setTextColor(context.getCompatColor( R.color.primaryText))
+            setTextColor(textColor)
             // 宽度自适应内容
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -162,26 +169,41 @@ class RssSortActivity : VMBaseActivity<ActivityRssArtivlesBinding, RssSortViewMo
                 marginEnd = 6.dpToPx()
             }
             setOnClickListener {
-                setTextColor(context.getCompatColor(R.color.secondaryText)) //点击变色
                 binding.viewPager.currentItem = position
                 updateTabSelection(position)
             }
         }
     }
 
-    private fun createTabBackground(accentColor: Int, context: Context): Drawable {
+    /**
+     * 创建Tab背景
+     * 未选中：透明底 + accent 40%透明度 1dp 描边
+     * 选中：透明底 + accent 实色 2dp 描边
+     * 圆角 16dp
+     */
+    private fun createTabBackground(accentColor: Int): Drawable {
         val radius = 16f.dpToPx()
-        val strokeWidth = 1f.dpToPx()
-
-        val selectedDrawable = GradientDrawable().apply {
-            shape = GradientDrawable.RECTANGLE
-            cornerRadius = radius
-            setStroke(strokeWidth.toInt(), accentColor)
-        }
+        val strokeWidthNormal = 1f.dpToPx()
+        val strokeWidthSelected = 2f.dpToPx()
+        val fadedAccent = Color.argb(
+            (255 * 0.4).toInt(),
+            Color.red(accentColor),
+            Color.green(accentColor),
+            Color.blue(accentColor)
+        )
 
         val defaultDrawable = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             cornerRadius = radius
+            setStroke(strokeWidthNormal.toInt(), fadedAccent)
+            setColor(Color.TRANSPARENT)
+        }
+
+        val selectedDrawable = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = radius
+            setStroke(strokeWidthSelected.toInt(), accentColor)
+            setColor(Color.TRANSPARENT)
         }
 
         return StateListDrawable().apply {
