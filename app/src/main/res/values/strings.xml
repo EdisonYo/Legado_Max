@@ -680,7 +680,7 @@
     <string name="finish">完结</string>
     <string name="finish_book">完结书籍</string>
     <string name="first_read_time_tag">最初阅读时间:</string>
-    <string name="float_permission_rationale">阅读需要悬浮窗权限来显示播放窗口</string>
+    <string name="float_permission_rationale">需要悬浮窗权限</string>
     <string name="float_window">悬浮窗</string>
     <string name="flow_sys">跟随系统</string>
     <string name="focus_lost_on_textbox">在文本框丢失光标焦点</string>
@@ -980,7 +980,7 @@
     <string name="move_to_group">移入分组</string>
     <string name="music">音乐</string>
     <string name="mute_play">默认静音</string>
-    <string name="mute_play_enabled">当前静音，左侧划屏控制音量</string>
+    <string name="mute_play_enabled">当前静音，播放界面右侧划屏控制音量</string>
     <string name="my">我的</string>
     <string name="name">名称</string>
     <string name="navbar_color">底部操作栏颜色</string>
