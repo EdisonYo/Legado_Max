@@ -1504,6 +1504,7 @@
     <string name="sort_save">排序即时保存</string>
     <string name="sort_url">分类 URL（sortUrl）</string>
     <string name="source_auto_changing">正在自动换源</string>
+    <string name="source_content_query">源内容查询</string>
     <string name="source_edit_max_line_summary">%s,设置行数小于屏幕可显示的最大行数可以更方便的滑动到其他的字段进行编辑</string>
     <string name="source_edit_text_max_line">源编辑框最大行数</string>
     <string name="source_group">源分组（sourceGroup）</string>
@@ -1689,7 +1690,7 @@
     <string name="unknown_error">未知错误</string>
     <string name="unknown_state">未知状态</string>
     <string name="unknown_type">未知类型</string>
-    <string name="unsafe_ssl_summary">跳过所有网络请求的SSL证书验证，可能遭受中间人攻击，仅在网站证书异常时开启</string>
+    <string name="unsafe_ssl_summary">开启后存在安全风险，仅在证书异常或网站IP直连时使用</string>
     <string name="unsafe_ssl_title">跳过SSL验证</string>
     <string name="unsupport_archivefile_entry">压缩文件内没有支持的文件</string>
     <string name="up_change_source_last_chapter_s">开启则会在软件打开 1 分钟后开始更新</string>

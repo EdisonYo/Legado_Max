@@ -1,7 +1,9 @@
 package io.legado.app.ui.source
 
 import android.os.Bundle
+import android.text.Editable
 import android.text.SpannableString
+import android.text.TextWatcher
 import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
 import android.view.Gravity
@@ -11,12 +13,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
+import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
+import android.widget.ListView
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,14 +31,23 @@ import io.legado.app.base.BaseDialogFragment
 import io.legado.app.databinding.DialogRuleSearchBinding
 import io.legado.app.databinding.ItemRuleSearchHeaderBinding
 import io.legado.app.databinding.ItemRuleSearchResultBinding
+import io.legado.app.lib.dialogs.SelectItem
+import io.legado.app.lib.dialogs.selector
 import io.legado.app.lib.theme.primaryColor
 import io.legado.app.lib.theme.accentColor
+import io.legado.app.ui.book.read.config.SpeakEngineContentSearchDialog
+import io.legado.app.ui.book.source.manage.SourceContentSearchDialog
+import io.legado.app.ui.book.toc.rule.TxtTocRuleContentSearchDialog
+import io.legado.app.ui.dict.rule.DictRuleContentSearchDialog
+import io.legado.app.ui.replace.ReplaceRuleContentSearchDialog
+import io.legado.app.ui.rss.source.manage.RssSourceContentSearchDialog
 import io.legado.app.utils.applyTint
 import io.legado.app.utils.getPrefString
 import io.legado.app.utils.gone
 import io.legado.app.utils.putPrefString
 import io.legado.app.utils.sendToClip
 import io.legado.app.utils.setLayout
+import io.legado.app.utils.toastOnUi
 import io.legado.app.utils.visible
 import io.legado.app.utils.viewbindingdelegate.viewBinding
 import kotlinx.coroutines.Dispatchers
@@ -56,6 +71,10 @@ abstract class BaseContentSearchDialog : BaseDialogFragment(R.layout.dialog_rule
 
     protected var searchByRuleField = true
     protected var searchAllSources = true
+    private var searchScopeMode = SearchScopeMode.ALL
+    private var selectedSourceUrl: String? = null
+    private var selectedSourceGroup: String? = null
+    private var scopeRow: View? = null
 
     /** 所有可搜索的字段条目，由子类通过 loadSourceItems 填充 */
     protected var allSourceItems: List<SourceFieldItem> = emptyList()
@@ -84,11 +103,13 @@ abstract class BaseContentSearchDialog : BaseDialogFragment(R.layout.dialog_rule
     abstract suspend fun performSearch(query: String, allItems: List<SourceFieldItem>): List<SourceFieldItem>
 
     /** 点击"跳转"后导航到对应的源编辑界面 */
-    abstract fun navigateToEdit(sourceUrl: String)
+    abstract fun navigateToEdit(sourceUrl: String, tabKey: String? = null, fieldKey: String? = null)
 
     abstract fun getTabNames(): Map<String, String>
 
     abstract fun exportSources(sourceUrls: List<String>)
+
+    open fun getContentSearchType(): ContentSearchType? = null
 
     // ========== 生命周期 ==========
 
@@ -101,6 +122,7 @@ abstract class BaseContentSearchDialog : BaseDialogFragment(R.layout.dialog_rule
         binding.toolBar.setBackgroundColor(primaryColor)
         binding.toolBar.title = getDialogTitle()
         binding.toolBar.inflateMenu(R.menu.dialog_help_search)
+        binding.toolBar.menu.findItem(R.id.menu_close)?.setTitle(R.string.switch_rule)
         binding.toolBar.menu.applyTint(requireContext())
         binding.toolBar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
@@ -121,7 +143,7 @@ abstract class BaseContentSearchDialog : BaseDialogFragment(R.layout.dialog_rule
                     true
                 }
                 R.id.menu_close -> {
-                    dismissAllowingStateLoss()
+                    showContentSearchSwitcher()
                     true
                 }
                 else -> false
@@ -139,6 +161,21 @@ abstract class BaseContentSearchDialog : BaseDialogFragment(R.layout.dialog_rule
 
         setupSearchInput()
         loadSources()
+    }
+
+    private fun showContentSearchSwitcher() {
+        val currentType = getContentSearchType()
+        val items = ContentSearchType.entries.map { type ->
+            SelectItem(if (type == currentType) "${type.title} ✓" else type.title, type)
+        }
+        requireContext().selector(R.string.switch_rule, items) { dialog, item, _ ->
+            dialog.dismiss()
+            val targetType = item.value
+            if (targetType == currentType) return@selector
+            val fragmentManager = parentFragmentManager
+            dismissAllowingStateLoss()
+            targetType.createDialog().show(fragmentManager, targetType.tag)
+        }
     }
 
     // ========== Toggle 栏 ==========
@@ -167,14 +204,43 @@ abstract class BaseContentSearchDialog : BaseDialogFragment(R.layout.dialog_rule
         }
         toggleLayout.addView(modeRow)
 
-        val scopeRow = createToggleRow(
-            "范围",
-            listOf("所有源" to true, "仅启用" to false),
-            selectedValue = searchAllSources
-        ) { value ->
-            searchAllSources = value
-            loadSources()
-        }
+        scopeRow = createToggleRow(
+                "范围",
+                listOf(
+                    "所有源" to SearchScopeMode.ALL,
+                    "仅启用" to SearchScopeMode.ENABLED,
+                    "搜索单个源" to SearchScopeMode.SINGLE_SOURCE,
+                    "搜索分组" to SearchScopeMode.GROUP
+                ),
+                selectedValue = searchScopeMode
+            ) { value ->
+                when (value) {
+                    SearchScopeMode.ALL -> {
+                        searchScopeMode = value
+                        searchAllSources = true
+                        selectedSourceUrl = null
+                        selectedSourceGroup = null
+                        loadSources()
+                        updateScopeRowText()
+                    }
+                    SearchScopeMode.ENABLED -> {
+                        searchScopeMode = value
+                        searchAllSources = false
+                        selectedSourceUrl = null
+                        selectedSourceGroup = null
+                        loadSources()
+                        updateScopeRowText()
+                    }
+                    SearchScopeMode.SINGLE_SOURCE -> {
+                        showSingleSourceSelector()
+                        updateScopeRowText()
+                    }
+                    SearchScopeMode.GROUP -> {
+                        showGroupSelector()
+                        updateScopeRowText()
+                    }
+                }
+            }
         toggleLayout.addView(scopeRow)
 
         val toggleLp = ConstraintLayout.LayoutParams(
@@ -666,10 +732,11 @@ abstract class BaseContentSearchDialog : BaseDialogFragment(R.layout.dialog_rule
         binding.recyclerView.visibility = View.GONE
         binding.resultCountText.visibility = View.GONE
 
+        val scopeFilteredItems = filterItemsBySearchScope(allSourceItems)
         val filteredItems = if (selectedTab == "__ALL__") {
-            allSourceItems
+            scopeFilteredItems
         } else {
-            allSourceItems.filter { it.tabKey == selectedTab }
+            scopeFilteredItems.filter { it.tabKey == selectedTab }
         }
 
         searchJob = lifecycleScope.launch(Dispatchers.IO) {
@@ -677,6 +744,167 @@ abstract class BaseContentSearchDialog : BaseDialogFragment(R.layout.dialog_rule
             withContext(Dispatchers.Main) {
                 showResults(results)
             }
+        }
+    }
+
+    private fun showSingleSourceSelector() {
+        val options = allSourceItems
+            .distinctBy { it.sourceUrl }
+            .sortedBy { it.sourceName }
+            .map { SearchScopeOption(it.sourceName, it.sourceUrl) }
+        showSearchScopeSelector("搜索单个源", "没有可搜索源", options) { option ->
+            searchScopeMode = SearchScopeMode.SINGLE_SOURCE
+            selectedSourceUrl = option.value
+            selectedSourceGroup = null
+            lifecycleScope.launch {
+                delay(100)
+                updateScopeRowText()
+            }
+        }
+    }
+
+    private fun showGroupSelector() {
+        val options = allSourceItems
+            .mapNotNull { it.sourceGroup?.takeIf(String::isNotBlank) }
+            .distinct()
+            .sorted()
+            .map { SearchScopeOption(it, it) }
+        showSearchScopeSelector("搜索分组", "没有可搜索分组", options) { option ->
+            searchScopeMode = SearchScopeMode.GROUP
+            selectedSourceUrl = null
+            selectedSourceGroup = option.value
+            lifecycleScope.launch {
+                delay(100)
+                updateScopeRowText()
+            }
+        }
+    }
+
+    private fun updateScopeRowText() {
+        scopeRow?.let { row ->
+            val scrollView = row as HorizontalScrollView
+            val rowLayout = scrollView.getChildAt(0) as ViewGroup
+
+            val displayTexts = listOf(
+                "所有源",
+                "仅启用",
+                selectedSourceUrl?.let { url ->
+                    allSourceItems.distinctBy { it.sourceUrl }.firstOrNull { it.sourceUrl == url }?.sourceName?.let { "搜索单个源($it)" }
+                } ?: "搜索单个源",
+                selectedSourceGroup?.let { "搜索分组($it)" } ?: "搜索分组"
+            )
+
+            // rowLayout 子 View 布局: index 0 是 label（"范围"）, index 1..4 是 4 个按钮
+            for (i in displayTexts.indices) {
+                val btnIndex = i + 1
+                if (btnIndex >= rowLayout.childCount) break
+                val btn = rowLayout.getChildAt(btnIndex) as? TextView ?: continue
+                btn.text = displayTexts[i]
+            }
+        }
+    }
+
+    private fun showSearchScopeSelector(
+        title: String,
+        emptyMessage: String,
+        options: List<SearchScopeOption>,
+        onSelected: (SearchScopeOption) -> Unit
+    ) {
+        if (options.isEmpty()) {
+            requireContext().toastOnUi(emptyMessage)
+            return
+        }
+
+        val context = requireContext()
+        val visibleOptions = options.toMutableList()
+        val adapter = ArrayAdapter(
+            context,
+            android.R.layout.simple_list_item_1,
+            visibleOptions.map { it.label }.toMutableList()
+        )
+        val searchInput = EditText(context).apply {
+            hint = "搜索"
+            isSingleLine = true
+            imeOptions = EditorInfo.IME_ACTION_SEARCH
+        }
+        val emptyView = TextView(context).apply {
+            text = "没有匹配项"
+            gravity = Gravity.CENTER
+            setPadding(0, dpToPx(24), 0, dpToPx(24))
+            setTextColor(ContextCompat.getColor(context, R.color.secondaryText))
+        }
+        val listView = ListView(context).apply {
+            this.adapter = adapter
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                dpToPx(360)
+            )
+        }
+        val container = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dpToPx(20), dpToPx(8), dpToPx(20), 0)
+            addView(searchInput)
+            addView(listView)
+            addView(emptyView)
+        }
+        listView.emptyView = emptyView
+
+        val dialog = AlertDialog.Builder(context)
+            .setTitle(title)
+            .setView(container)
+            .setNegativeButton(android.R.string.cancel, null)
+            .create()
+
+        fun refreshOptions(query: String) {
+            val keyword = query.trim()
+            visibleOptions.clear()
+            visibleOptions.addAll(
+                if (keyword.isEmpty()) {
+                    options
+                } else {
+                    options.filter {
+                        it.label.contains(keyword, ignoreCase = true) ||
+                            it.value.contains(keyword, ignoreCase = true)
+                    }
+                }
+            )
+            adapter.clear()
+            adapter.addAll(visibleOptions.map { it.label })
+            adapter.notifyDataSetChanged()
+        }
+
+        searchInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+            override fun afterTextChanged(s: Editable?) {
+                refreshOptions(s?.toString().orEmpty())
+            }
+        })
+        listView.setOnItemClickListener { _, _, index, _ ->
+            val option = visibleOptions.getOrNull(index) ?: return@setOnItemClickListener
+            onSelected(option)
+            redoSearchIfNeeded()
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
+    private fun redoSearchIfNeeded() {
+        val query = binding.searchEditText.text.toString().trim()
+        if (query.isNotEmpty()) doSearch(query)
+    }
+
+    private fun filterItemsBySearchScope(items: List<SourceFieldItem>): List<SourceFieldItem> {
+        return when (searchScopeMode) {
+            SearchScopeMode.SINGLE_SOURCE -> {
+                val sourceUrl = selectedSourceUrl ?: return items
+                items.filter { it.sourceUrl == sourceUrl }
+            }
+            SearchScopeMode.GROUP -> {
+                val group = selectedSourceGroup ?: return items
+                items.filter { it.sourceGroup == group }
+            }
+            else -> items
         }
     }
 
@@ -766,7 +994,8 @@ abstract class BaseContentSearchDialog : BaseDialogFragment(R.layout.dialog_rule
             setPadding(dpToPx(16), dpToPx(16), dpToPx(16), dpToPx(8))
         }
         val textView = TextView(requireContext()).apply {
-            text = highlightRuleSyntax(item.fullValue)
+            // 高亮规则语法 + 搜索关键词，并设置可滚动
+            text = highlightRuleSyntaxAndSearchTerm(item.fullValue, currentSearchTerm)
             textSize = 14f
             setTextColor(ContextCompat.getColor(requireContext(), R.color.primaryText))
             typeface = android.graphics.Typeface.MONOSPACE
@@ -775,21 +1004,53 @@ abstract class BaseContentSearchDialog : BaseDialogFragment(R.layout.dialog_rule
         scrollView.addView(textView)
 
         androidx.appcompat.app.AlertDialog.Builder(requireContext())
-            .setTitle("${item.tabName} · ${item.fieldName}")
+            .setTitle("${item.sourceName} · ${item.tabName} · ${item.fieldName}")
             .setView(scrollView)
             .setPositiveButton("跳转") { _, _ ->
-                navigateToEdit(item.sourceUrl)
+                navigateToEdit(item.sourceUrl, item.tabKey, item.fieldKey)
             }
             .setNeutralButton("复制") { _, _ ->
                 requireContext().sendToClip(item.fullValue)
             }
             .setNegativeButton("关闭", null)
             .show()
+
+        // 弹窗显示后滚动到第一个搜索关键词位置
+        scrollView.post {
+            scrollToFirstSearchMatch(textView, currentSearchTerm, scrollView)
+        }
     }
 
-    private fun highlightRuleSyntax(text: String): SpannableString {
+    private fun highlightRuleSyntaxAndSearchTerm(text: String, searchTerm: String): SpannableString {
         val spannable = SpannableString(text)
         val accentColor = ContextCompat.getColor(requireContext(), R.color.accent)
+        val searchHighlightColor = ContextCompat.getColor(requireContext(), R.color.accent)
+        
+        // 先高亮搜索关键词
+        if (searchTerm.isNotBlank()) {
+            val termLower = searchTerm.lowercase()
+            val textLower = text.lowercase()
+            var startIndex = 0
+            val highlightBg = android.graphics.Color.argb(
+                60,
+                android.graphics.Color.red(searchHighlightColor),
+                android.graphics.Color.green(searchHighlightColor),
+                android.graphics.Color.blue(searchHighlightColor)
+            )
+            while (true) {
+                val index = textLower.indexOf(termLower, startIndex)
+                if (index == -1) break
+                spannable.setSpan(
+                    BackgroundColorSpan(highlightBg),
+                    index,
+                    index + searchTerm.length,
+                    android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                startIndex = index + searchTerm.length
+            }
+        }
+
+        // 再高亮规则语法
         val rulePrefixes = listOf("@css:", "@get:", "@json:", "@xpath:", "@js:", "@put:", "@xhtml:")
         for (prefix in rulePrefixes) {
             var startIndex = 0
@@ -821,6 +1082,26 @@ abstract class BaseContentSearchDialog : BaseDialogFragment(R.layout.dialog_rule
             }
         }
         return spannable
+    }
+
+    /**
+     * 滚动到第一个搜索关键词位置
+     */
+    private fun scrollToFirstSearchMatch(textView: TextView, searchTerm: String, scrollView: android.widget.ScrollView) {
+        if (searchTerm.isBlank()) return
+        val spannable = textView.text as? SpannableString ?: return
+        val spans = spannable.getSpans(0, spannable.length, android.text.style.BackgroundColorSpan::class.java)
+        if (spans.isNotEmpty()) {
+            val firstSpan = spans[0]
+            val offset = spannable.getSpanStart(firstSpan)
+            textView.post {
+                textView.layout?.let { layout ->
+                    val line = layout.getLineForOffset(offset)
+                    val y = layout.getLineTop(line) - textView.height / 3
+                    scrollView.smoothScrollTo(0, y.coerceAtLeast(0))
+                }
+            }
+        }
     }
 
     private fun copyMatchedSourceUrls() {
@@ -1023,6 +1304,33 @@ abstract class BaseContentSearchDialog : BaseDialogFragment(R.layout.dialog_rule
     }
 }
 
+enum class ContentSearchType(
+    val title: String,
+    val tag: String,
+    private val dialogFactory: () -> BaseContentSearchDialog
+) {
+    BOOK_SOURCE("书源内容查询", "SourceContentSearchDialog", { SourceContentSearchDialog() }),
+    RSS_SOURCE("订阅源内容查询", "RssSourceContentSearchDialog", { RssSourceContentSearchDialog() }),
+    TXT_TOC_RULE("TXT目录规则内容查询", "TxtTocRuleContentSearchDialog", { TxtTocRuleContentSearchDialog() }),
+    REPLACE_RULE("替换净化规则内容查询", "ReplaceRuleContentSearchDialog", { ReplaceRuleContentSearchDialog() }),
+    DICT_RULE("字典规则内容查询", "DictRuleContentSearchDialog", { DictRuleContentSearchDialog() }),
+    SPEAK_ENGINE("朗读引擎规则内容查询", "SpeakEngineContentSearchDialog", { SpeakEngineContentSearchDialog() });
+
+    fun createDialog(): DialogFragment = dialogFactory()
+}
+
+private enum class SearchScopeMode {
+    ALL,
+    ENABLED,
+    SINGLE_SOURCE,
+    GROUP
+}
+
+private data class SearchScopeOption(
+    val label: String,
+    val value: String
+)
+
 /**
  * 可搜索的源字段条目。
  * @param value     显示文本（可含上下文截断），用于列表展示和高亮
@@ -1036,5 +1344,6 @@ data class SourceFieldItem(
     val fieldKey: String,
     val fieldName: String,
     val value: String,
-    val fullValue: String = value
+    val fullValue: String = value,
+    val sourceGroup: String? = null
 )
