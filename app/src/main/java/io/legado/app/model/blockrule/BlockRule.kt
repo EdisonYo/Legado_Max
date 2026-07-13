@@ -2,6 +2,8 @@ package io.legado.app.model.blockrule
 
 import io.legado.app.data.entities.RssArticle
 import io.legado.app.data.entities.SearchBook
+import io.legado.app.utils.RegexCache
+import java.util.UUID
 
 /**
  * 屏蔽规则数据模型
@@ -11,10 +13,15 @@ import io.legado.app.data.entities.SearchBook
  * 支持仅作用于书源、仅作用于订阅源，或同时作用于两者。
  *
  * 存储方式：SharedPreferences + JSON 序列化，由 [BlockRuleStore] 管理
+ *
+ * 性能：
+ * 1. 正则表达式使用全局单例缓存 [RegexCache]，避免重复编译，支持跨规则去重
+ * 2. 作用域字符串解析结果使用实例级瞬态缓存，避免每次匹配重复 split/trim
+ * 3. 缓存通过 @Transient 标记，不参与 JSON 序列化
  */
 data class BlockRule(
-    /** 唯一标识，默认使用时间戳 */
-    var id: String = System.currentTimeMillis().toString(),
+    /** 唯一标识，使用 UUID 确保唯一性 */
+    var id: String = UUID.randomUUID().toString(),
     /** 规则名称 */
     var name: String = "",
     /** 匹配模式：关键词或正则表达式 */
@@ -42,10 +49,6 @@ data class BlockRule(
     /** 瞬态缓存：预解析后的订阅源作用域集合 */
     @Transient
     private var _rssScopeSet: Set<String>? = null
-
-    /** 瞬态缓存：编译后的正则表达式对象 */
-    @Transient
-    private var _regex: Regex? = null
 
     /** 检查书源作用范围是否包含指定的标志 */
     fun hasScope(flag: Int): Boolean = (targetScope and flag) != 0
@@ -77,13 +80,13 @@ data class BlockRule(
         return _rssScopeSet!!
     }
 
-    /** 获取缓存的正则表达式，若编译失败或非正则模式则返回 null */
-    fun regex(): Regex? {
+    /**
+     * 获取全局缓存的正则表达式对象
+     * 使用 [RegexCache] 全局单例缓存，支持跨规则去重
+     */
+    private fun getCompiledRegex(): Regex? {
         if (!isRegex || pattern.isBlank()) return null
-        if (_regex == null) {
-            _regex = runCatching { Regex(pattern) }.getOrNull()
-        }
-        return _regex
+        return RegexCache.getOrCompile(pattern)
     }
 
     /** 更新作用的书源字符串，同时清空预解析缓存 */
@@ -111,9 +114,11 @@ data class BlockRule(
         if (hasScope(SCOPE_INTRO)) searchTargets.add(book.intro.orEmpty())
         if (hasScope(SCOPE_WORD_COUNT)) searchTargets.add(book.wordCount.orEmpty())
         if (searchTargets.isEmpty()) return false
+
+        val regex = getCompiledRegex()
         return searchTargets.any { text ->
-            if (isRegex) {
-                regex()?.containsMatchIn(text) == true
+            if (regex != null) {
+                runCatching { regex.containsMatchIn(text) }.getOrDefault(false)
             } else {
                 text.contains(pattern)
             }
@@ -124,6 +129,7 @@ data class BlockRule(
      * 判断规则是否对指定书源生效
      * - scope 为空时，默认对所有书源生效
      * - scope 非空时，仅对匹配书源URL的书源生效
+     * 使用缓存的 scopeSet 避免重复解析
      */
     fun matchesScope(sourceUrl: String): Boolean {
         val set = scopeSet()
@@ -135,6 +141,7 @@ data class BlockRule(
      * 判断规则是否对指定订阅源生效
      * - rssScope 为空时，默认对所有订阅源生效
      * - rssScope 非空时，仅对匹配订阅源URL的订阅源生效
+     * 使用缓存的 rssScopeSet 避免重复解析
      */
     fun matchesRssScope(sourceUrl: String): Boolean {
         val set = rssScopeSet()
@@ -153,9 +160,11 @@ data class BlockRule(
         if (hasRssScope(SCOPE_RSS_TITLE)) searchTargets.add(article.title)
         if (hasRssScope(SCOPE_RSS_TIME)) searchTargets.add(article.pubDate.orEmpty())
         if (searchTargets.isEmpty()) return false
+
+        val regex = getCompiledRegex()
         return searchTargets.any { text ->
-            if (isRegex) {
-                regex()?.containsMatchIn(text) == true
+            if (regex != null) {
+                runCatching { regex.containsMatchIn(text) }.getOrDefault(false)
             } else {
                 text.contains(pattern)
             }
@@ -188,7 +197,7 @@ data class BlockRule(
 
     /** 复制规则并生成新的ID，用于导入时避免ID冲突 */
     fun copyWithNewId(): BlockRule {
-        return copy(id = System.currentTimeMillis().toString())
+        return copy(id = UUID.randomUUID().toString())
     }
 
     companion object {

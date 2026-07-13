@@ -5,10 +5,12 @@ import io.legado.app.constant.PreferKey
 import io.legado.app.data.entities.RssArticle
 import io.legado.app.data.entities.SearchBook
 import io.legado.app.utils.GSON
+import io.legado.app.utils.RegexCache
 import io.legado.app.utils.fromJsonArray
 import io.legado.app.utils.getPrefBoolean
 import io.legado.app.utils.getPrefString
 import io.legado.app.utils.putPrefString
+import java.util.UUID
 
 /**
  * 屏蔽规则存储管理
@@ -16,6 +18,12 @@ import io.legado.app.utils.putPrefString
  * 使用 SharedPreferences + JSON 序列化存储屏蔽规则列表，
  * 提供规则的加载、保存、过滤和清洗功能。
  * 内置内存缓存避免频繁反序列化。
+ *
+ * 性能：
+ * 1. 过滤前预按作用域筛选规则，减少每本书的匹配次数
+ * 2. 搜索结果按书源分组，避免对每本书重复检查作用域
+ * 3. 清除缓存时同步清理 RegexCache，避免旧规则正则残留
+ * 4. 保存时自动检测并修复重复 ID
  */
 object BlockRuleStore {
 
@@ -52,9 +60,20 @@ object BlockRuleStore {
     /**
      * 保存规则列表
      * 同时更新缓存和 SharedPreferences，并同步分组信息
+     * 自动处理 id 重复的情况，确保每个规则的 id 都是唯一的
      */
     fun save(context: Context, rules: List<BlockRule>) {
-        val normalized = rules.map { sanitizeRule(it) }
+        // 检查并修复 id 重复的情况
+        val usedIds = mutableSetOf<String>()
+        val normalized = rules.map { rule ->
+            var sanitized = sanitizeRule(rule)
+            // 如果 id 已被使用，生成新的唯一 id
+            while (sanitized.id in usedIds) {
+                sanitized = sanitized.copyWithNewId()
+            }
+            usedIds.add(sanitized.id)
+            sanitized
+        }
         cachedRules = normalized
         context.putPrefString(PreferKey.blockRuleItems, GSON.toJson(normalized))
         BlockRuleGroupStore.ensureFromRules(context, normalized)
@@ -63,13 +82,20 @@ object BlockRuleStore {
     /**
      * 核心过滤方法：返回被屏蔽规则过滤后的书籍列表
      * 遍历所有已启用的规则，移除匹配的书籍
+     *
+     * 优化：先按作用域预过滤规则，避免对每本书都检查作用域
      */
     fun filterBooks(context: Context, books: List<SearchBook>, sourceUrl: String): List<SearchBook> {
         if (!context.getPrefBoolean(PreferKey.blockRuleEnabled, true)) return books
         val rules = loadEnabled(context)
         if (rules.isEmpty()) return books
+
+        // 先过滤出对当前书源生效的规则，避免对每本书都检查作用域
+        val applicableRules = rules.filter { it.matchesScope(sourceUrl) }
+        if (applicableRules.isEmpty()) return books
+
         return books.filterNot { book ->
-            rules.any { rule -> rule.matches(book) && rule.matchesScope(sourceUrl) }
+            applicableRules.any { rule -> rule.matches(book) }
         }
     }
 
@@ -80,21 +106,42 @@ object BlockRuleStore {
         if (!context.getPrefBoolean(PreferKey.blockRuleEnabled, true)) return books
         val rules = loadEnabled(context)
         if (rules.isEmpty()) return books
-        return books.filterNot { book ->
-            rules.any { rule -> rule.matches(book) && rule.matchesScope(book.origin) }
+
+        // 按书源URL分组，避免对每本书都检查作用域
+        val booksBySource = books.groupBy { it.origin }
+        val result = mutableListOf<SearchBook>()
+
+        for ((sourceUrl, sourceBooks) in booksBySource) {
+            val applicableRules = rules.filter { it.matchesScope(sourceUrl) }
+            if (applicableRules.isEmpty()) {
+                result.addAll(sourceBooks)
+            } else {
+                result.addAll(sourceBooks.filterNot { book ->
+                    applicableRules.any { rule -> rule.matches(book) }
+                })
+            }
         }
+
+        return result
     }
 
     /**
      * RSS文章过滤：标题匹配 SCOPE_RSS_TITLE，时间匹配 SCOPE_RSS_TIME
      * 使用 rssScope 字段匹配订阅源作用域
+     *
+     * 优化：先过滤出对当前订阅源生效的规则
      */
     fun filterRssArticles(context: Context, articles: List<RssArticle>, sourceUrl: String): List<RssArticle> {
         if (!context.getPrefBoolean(PreferKey.blockRuleEnabled, true)) return articles
         val rules = loadEnabled(context)
         if (rules.isEmpty()) return articles
+
+        // 先过滤出对当前订阅源生效的规则
+        val applicableRules = rules.filter { it.matchesRssScope(sourceUrl) }
+        if (applicableRules.isEmpty()) return articles
+
         return articles.filterNot { article ->
-            rules.any { rule -> rule.matchesRssArticle(article) && rule.matchesRssScope(sourceUrl) }
+            applicableRules.any { rule -> rule.matchesRssArticle(article) }
         }
     }
 
@@ -122,9 +169,13 @@ object BlockRuleStore {
         }
     }
 
-    /** 清除缓存，下次加载时重新从 SharedPreferences 读取 */
+    /**
+     * 清除缓存，下次加载时重新从 SharedPreferences 读取
+     * 同时清除正则表达式缓存，避免旧规则残留
+     */
     fun invalidateCache() {
         cachedRules = null
+        RegexCache.clear()
     }
 
     /**
@@ -139,7 +190,7 @@ object BlockRuleStore {
         val pattern = runCatching { rule.pattern }.getOrNull().orEmpty()
         val group = runCatching { rule.group }.getOrNull().orEmpty().ifBlank { fallbackGroup }
         val id = runCatching { rule.id }.getOrNull().orEmpty().ifBlank {
-            System.currentTimeMillis().toString()
+            UUID.randomUUID().toString()
         }
         val scope = runCatching { rule.scope }.getOrNull()?.takeIf { it.isNotBlank() }
         val rssScope = runCatching { rule.rssScope }.getOrNull()?.takeIf { it.isNotBlank() }

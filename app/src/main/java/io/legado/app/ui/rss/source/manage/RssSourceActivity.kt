@@ -107,15 +107,6 @@ class RssSourceActivity : VMBaseActivity<ActivityRssSourceBinding, RssSourceView
             appCtx.putPrefBoolean(PreferKey.rssSourceSortAscending, value)
         }
 
-
-
-
-
-
-
-
-
-
     private var locateSourceUrl: String? = null
     private var locateSourceName: String? = null
     private val itemTouchCallback by lazy { ItemTouchCallback(adapter) }
@@ -168,7 +159,6 @@ class RssSourceActivity : VMBaseActivity<ActivityRssSourceBinding, RssSourceView
     /**
      * 准备选项菜单，恢复菜单选中状态
      * 从持久化配置中读取排序设置，同步到菜单项
-
      */
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         groupMenu = menu.findItem(R.id.menu_group)?.subMenu
@@ -184,8 +174,6 @@ class RssSourceActivity : VMBaseActivity<ActivityRssSourceBinding, RssSourceView
             RssSourceSort.Update -> sortSubMenu.findItem(R.id.menu_sort_time)?.isChecked = true
             RssSourceSort.Enable -> sortSubMenu.findItem(R.id.menu_sort_enable)?.isChecked = true
         }
-
-
         upGroupMenu()
         return super.onPrepareOptionsMenu(menu)
     }
@@ -238,15 +226,6 @@ class RssSourceActivity : VMBaseActivity<ActivityRssSourceBinding, RssSourceView
                 sort = RssSourceSort.Enable
                 upSourceFlow(searchView.query?.toString())
             }
-
-
-
-
-
-
-
-
-
 
             R.id.menu_enabled_group -> {
                 searchView.setQuery(getString(R.string.enabled), true)
@@ -454,12 +433,6 @@ class RssSourceActivity : VMBaseActivity<ActivityRssSourceBinding, RssSourceView
                     appDb.rssSourceDao.flowSearch(searchKey)
                 }
             }.map { data ->
-
-
-
-
-
-
                 if (sortAscending) {
                     when (sort) {
                         RssSourceSort.Name -> data.sortedWith { o1, o2 ->
@@ -549,12 +522,6 @@ class RssSourceActivity : VMBaseActivity<ActivityRssSourceBinding, RssSourceView
             adapter.itemCount
         )
     }
-
-
-
-
-
-
 
     @SuppressLint("InflateParams")
     private fun showImportDialog() {
