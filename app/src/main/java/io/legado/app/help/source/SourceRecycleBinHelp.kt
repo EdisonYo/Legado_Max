@@ -10,8 +10,6 @@ import io.legado.app.data.entities.SourceRecycleBin
 import io.legado.app.data.entities.TxtTocRule
 import io.legado.app.help.config.AppConfig
 import io.legado.app.ui.book.read.ReadWebSearchPanel
-import io.legado.app.ui.book.read.config.HighlightRule
-import io.legado.app.ui.book.read.config.HighlightRuleStore
 import io.legado.app.utils.GSON
 import io.legado.app.utils.fromJsonObject
 import splitties.init.appCtx
@@ -25,7 +23,6 @@ object SourceRecycleBinHelp {
     const val TYPE_TXT_TOC_RULE = "txt_toc_rule"
     const val TYPE_HTTP_TTS = "http_tts"
     const val TYPE_DICT_RULE = "dict_rule"
-    const val TYPE_HIGHLIGHT_RULE = "highlight_rule"
     const val TYPE_SEARCH_ENGINE = "search_engine"
     private const val RETENTION_DAYS = 7L
 
@@ -98,18 +95,6 @@ object SourceRecycleBinHelp {
         }
     }
 
-    fun recycleHighlightRules(highlightRules: List<HighlightRule>, now: Long = System.currentTimeMillis()) {
-        recycle(highlightRules, now) {
-            SourceRecycleBin(
-                type = TYPE_HIGHLIGHT_RULE,
-                key = it.id,
-                name = it.name.ifBlank { it.pattern },
-                groupName = it.group,
-                payload = GSON.toJson(it)
-            )
-        }
-    }
-
     fun recycleSearchEngines(searchEngines: List<ReadWebSearchPanel.SearchEngine>, now: Long = System.currentTimeMillis()) {
         recycle(searchEngines, now) {
             SourceRecycleBin(
@@ -172,18 +157,6 @@ object SourceRecycleBinHelp {
                 if (!overwrite && appDb.dictRuleDao.getByName(rule.name) != null) return
                 appDb.dictRuleDao.insert(rule)
             }
-            TYPE_HIGHLIGHT_RULE -> {
-                val rule = GSON.fromJsonObject<HighlightRule>(item.payload).getOrNull() ?: return
-                val rules = HighlightRuleStore.load(appCtx)
-                val index = rules.indexOfFirst { it.id == rule.id }
-                if (index >= 0) {
-                    if (!overwrite) return
-                    rules[index] = rule
-                } else {
-                    rules.add(rule)
-                }
-                HighlightRuleStore.save(appCtx, rules)
-            }
             TYPE_SEARCH_ENGINE -> {
                 val engine = GSON.fromJsonObject<ReadWebSearchPanel.SearchEngine>(item.payload).getOrNull() ?: return
                 val engines = ReadWebSearchPanel.loadSearchEngines(appCtx).toMutableList()
@@ -208,7 +181,6 @@ object SourceRecycleBinHelp {
             TYPE_TXT_TOC_RULE -> item.key.toLongOrNull()?.let { appDb.txtTocRuleDao.get(it) != null } == true
             TYPE_HTTP_TTS -> item.key.toLongOrNull()?.let { appDb.httpTTSDao.get(it) != null } == true
             TYPE_DICT_RULE -> appDb.dictRuleDao.getByName(item.key) != null
-            TYPE_HIGHLIGHT_RULE -> HighlightRuleStore.load(appCtx).any { it.id == item.key }
             TYPE_SEARCH_ENGINE -> ReadWebSearchPanel.loadSearchEngines(appCtx).any { it.url == item.key }
             else -> false
         }

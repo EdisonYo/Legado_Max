@@ -120,7 +120,6 @@ class ReplaceEditActivity :
             R.id.menu_paste_rule -> viewModel.pasteRule {
                 upReplaceView(it)
             }
-            R.id.menu_highlight_rule_help -> showHelp("highlightRules")
         }
         return true
     }

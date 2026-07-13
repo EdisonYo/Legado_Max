@@ -12,10 +12,6 @@ interface TextBaseColumn : BaseColumn {
     val underlineColor: Int?
     val underlineWidth: Float
     val underlineOffset: Float
-    val underlineSvgPath: String
-    val bgImage: String
-    val bgImageFit: Int
-    val bgImageScale: Float
     var selected: Boolean
     var isSearchResult: Boolean
     var isCurrentSearchResult: Boolean

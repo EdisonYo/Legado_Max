@@ -253,13 +253,6 @@ object PreferKey {
     const val textBoldFineTipShown = "textBoldFineTipShown"
     const val readRecordDisplayMode = "readRecordDisplayMode"
     const val bookInfoShowReadRecord = "bookInfoShowReadRecord"
-    /** 高亮规则 */
-    const val highlightRuleDialog = "highlightRuleDialog"
-    const val highlightRuleBookTitle = "highlightRuleBookTitle"
-    const val highlightRuleBracketNote = "highlightRuleBracketNote"
-    const val highlightRuleItems = "highlightRuleItems"
-    const val highlightRuleGroups = "highlightRuleGroups"
-    const val highlightRuleCurrentGroup = "highlightRuleCurrentGroup"
     /** 屏蔽规则 */
     const val blockRuleItems = "exploreBlockRuleItems"
     const val blockRuleGroups = "exploreBlockRuleGroups"

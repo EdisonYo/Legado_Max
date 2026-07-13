@@ -115,6 +115,5 @@ enum class SourceRecycleBinFilter(
     TXT_TOC_RULE(R.string.txt_toc_rule, SourceRecycleBinHelp.TYPE_TXT_TOC_RULE),
     HTTP_TTS(R.string.speak_engine, SourceRecycleBinHelp.TYPE_HTTP_TTS),
     DICT_RULE(R.string.dict_rule, SourceRecycleBinHelp.TYPE_DICT_RULE),
-    HIGHLIGHT_RULE(R.string.highlight_rule_config, SourceRecycleBinHelp.TYPE_HIGHLIGHT_RULE),
     SEARCH_ENGINE(R.string.search_engine_rule, SourceRecycleBinHelp.TYPE_SEARCH_ENGINE)
 }

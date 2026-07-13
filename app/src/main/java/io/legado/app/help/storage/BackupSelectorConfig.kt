@@ -41,7 +41,6 @@ object BackupSelectorConfig {
         BackupItem("readConfig", "readConfig.json", "阅读样式配置", "配置"),
         BackupItem("readShareConfig", "readShareConfig.json", "阅读分享配置", "配置"),
         BackupItem("themeConfig", "themeConfig.json", "主题配置", "配置"),
-        BackupItem("highlightRule", "highlightRule.json", "高亮规则", "配置"),
         BackupItem("coverRule", "coverRule.json", "封面规则", "配置"),
         BackupItem("appConfig", "config.xml", "应用配置", "配置"),
         BackupItem("videoConfig", "videoConfig.xml", "视频配置", "配置"),
