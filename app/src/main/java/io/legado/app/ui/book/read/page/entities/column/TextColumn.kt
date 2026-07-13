@@ -22,11 +22,7 @@ data class TextColumn(
     override val underlineMode: Int = 0,
     override val underlineColor: Int? = null,
     override val underlineWidth: Float = 1f,
-    override val underlineOffset: Float = 2f,
-    override val underlineSvgPath: String = "",
-    override val bgImage: String = "",
-    override val bgImageFit: Int = 0,
-    override val bgImageScale: Float = 1f,
+    override val underlineOffset: Float = 2f
 ) : TextBaseColumn {
 
     override var textLine: TextLine = emptyTextLine

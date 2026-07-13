@@ -6,7 +6,6 @@ import io.legado.app.help.book.BookHelp
 import io.legado.app.help.config.ReadBookConfig
 import io.legado.app.help.config.ThemeConfig
 import io.legado.app.model.BookCover
-import io.legado.app.ui.book.read.config.HighlightRuleStore
 import io.legado.app.utils.GSON
 import splitties.init.appCtx
 import java.io.File
@@ -53,7 +52,7 @@ object BackupInfoHelper {
         CategoryDef(
             "规则相关",
             "🔧",
-            listOf("replaceRule", "txtTocRule", "dictRule", "keyboardAssist", "highlightRule", "directLinkRule")
+            listOf("replaceRule", "txtTocRule", "dictRule", "keyboardAssist", "directLinkRule")
         ),
         CategoryDef("语音相关", "🔊", listOf("httpTTS")),
         CategoryDef(
@@ -81,7 +80,6 @@ object BackupInfoHelper {
         "rssStar.json" to "订阅收藏",
         "sourceSub.json" to "源订阅",
         "replaceRule.json" to "替换规则",
-        HighlightRuleStore.backupFileName to "高亮规则",
         "readRecord.json" to "阅读记录",
         "readRecordDetail.json" to "阅读详情",
         "readRecordSession.json" to "阅读时段",
@@ -166,7 +164,6 @@ object BackupInfoHelper {
         dbItems.forEach { addItem(it) }
 
         addItem("runtimeSourceCache.json")
-        addItem(HighlightRuleStore.backupFileName)
         addBookCacheItems(::addItem)
         addConfigItems(::addItem)
         addBackgroundItems(::addItem)

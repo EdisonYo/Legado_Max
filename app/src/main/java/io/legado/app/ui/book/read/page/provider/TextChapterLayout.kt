@@ -14,7 +14,6 @@ import android.text.style.URLSpan
 import io.legado.app.constant.AppLog
 import io.legado.app.constant.AppPattern
 import io.legado.app.constant.PageAnim
-import io.legado.app.constant.PreferKey
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookChapter
 import io.legado.app.help.book.BookContent
@@ -66,13 +65,9 @@ import io.legado.app.help.TextViewTagHandler.Companion.HR_PLACE_STR
 import io.legado.app.model.analyzeRule.AnalyzeUrl.Companion.paramPattern
 import io.legado.app.ui.book.read.page.entities.column.BaseColumn
 import io.legado.app.ui.book.read.page.entities.column.TextBaseColumn
-import io.legado.app.ui.book.read.config.HighlightRule
-import io.legado.app.ui.book.read.config.HighlightRuleStore
 import io.legado.app.ui.book.read.page.provider.ChapterProvider.reviewChar
 import io.legado.app.utils.GSON
 import io.legado.app.utils.fromJsonObject
-import io.legado.app.utils.getPrefBoolean
-import splitties.init.appCtx
 
 class TextChapterLayout(
     scope: CoroutineScope,
@@ -81,10 +76,6 @@ class TextChapterLayout(
     private val book: Book,
     private val bookContent: BookContent,
 ) {
-
-    private val noteHighlightColor = 0xFF8F959E.toInt()
-    private val dialogHighlightColor = 0xFFFF8C00.toInt()
-    private val bookTitleUnderlineColor = 0xFF63C37D.toInt()
 
     @Volatile
     private var listener: LayoutProgressListener? = textChapter
@@ -123,16 +114,6 @@ class TextChapterLayout(
     private val textFullJustify = ReadBookConfig.textFullJustify
     private val adaptSpecialStyle = AppConfig.adaptSpecialStyle
     private val pageAnim = book.getPageAnim()
-    private val compiledHighlightRules by lazy {
-        HighlightRuleStore.loadEnabled(appCtx).mapNotNull { rule ->
-            kotlin.runCatching {
-                CompiledHighlightRule(
-                    rule = rule,
-                    regex = Regex(rule.pattern)
-                )
-            }.getOrNull()
-        }
-    }
 
     private var pendingTextPage = TextPage()
 
@@ -909,12 +890,10 @@ class TextChapterLayout(
         htmlContent: String,
     ) {
         val textViewTagHandler = TextViewTagHandler()
-        val spanned = applyHighlightRules(
-            SpannableStringBuilder(
-                htmlContent.parseAsHtml(
-                    HtmlCompat.FROM_HTML_MODE_COMPACT,
-                    tagHandler = textViewTagHandler
-                )
+        val spanned = SpannableStringBuilder(
+            htmlContent.parseAsHtml(
+                HtmlCompat.FROM_HTML_MODE_COMPACT,
+                tagHandler = textViewTagHandler
             )
         )
         val width = visibleWidth
@@ -972,12 +951,7 @@ class TextChapterLayout(
                 val textSize = extractTextSize(spanned, charIndex, textPaint.textSize)
                 val textColor = extractTextColor(spanned, charIndex)
                 val linkUrl = extractLinkUrl(spanned, charIndex)
-                val highlightStyle = extractHighlightStyle(spanned, charIndex)
-                val underlineMode = highlightStyle?.underlineMode ?: 0
-                val underlineColor = highlightStyle?.underlineColor
-                val bgImage = highlightStyle?.bgImage ?: ""
-                val bgImageFit = highlightStyle?.bgImageFit ?: 0
-                val bgImageScale = highlightStyle?.bgImageScale ?: 1f
+
                 val charRight = if (charIndex + 1 < lineEnd) {
                     staticLayout.getPrimaryHorizontal(charIndex + 1)
                 } else {
@@ -1067,12 +1041,7 @@ class TextChapterLayout(
                                 HR_PLACE_STR,
                                 textSize,
                                 textColor,
-                                linkUrl,
-                                underlineMode,
-                                underlineColor,
-                                bgImage = bgImage,
-                                bgImageFit = bgImageFit,
-                                bgImageScale = bgImageScale
+                                linkUrl
                             )
                         )
                         needAddText = false
@@ -1086,12 +1055,7 @@ class TextChapterLayout(
                             char,
                             textSize,
                             textColor,
-                            linkUrl,
-                            underlineMode,
-                            underlineColor,
-                            bgImage = bgImage,
-                            bgImageFit = bgImageFit,
-                            bgImageScale = bgImageScale
+                            linkUrl
                         )
                     )
                 }
@@ -1217,52 +1181,6 @@ class TextChapterLayout(
         return foregroundSpans.lastOrNull()?.foregroundColor
     }
 
-    private fun extractHighlightStyle(spanned: CharSequence, index: Int): HighlightStyleSpan? {
-        val spans = (spanned as? Spanned)?.getSpans(
-            index,
-            index + 1,
-            HighlightStyleSpan::class.java
-        ) ?: return null
-        if (spans.isEmpty()) return null
-        var underlineMode = 0
-        var underlineColor = 0xFF63C37D.toInt()
-        var underlineWidth = 1f
-        var underlineOffset = 2f
-        var underlineSvgPath = ""
-        var bgImage = ""
-        var bgImageFit = 0
-        var bgImageScale = 1f
-        var hasUnderline = false
-        var hasBgImage = false
-        spans.forEach { span ->
-            if (span.underlineMode != 0) {
-                underlineMode = span.underlineMode
-                underlineColor = span.underlineColor
-                underlineWidth = span.underlineWidth
-                underlineOffset = span.underlineOffset
-                underlineSvgPath = span.underlineSvgPath
-                hasUnderline = true
-            }
-            if (span.bgImage.isNotEmpty()) {
-                bgImage = span.bgImage
-                bgImageFit = span.bgImageFit
-                bgImageScale = span.bgImageScale
-                hasBgImage = true
-            }
-        }
-        if (!hasUnderline && !hasBgImage) return null
-        return HighlightStyleSpan(
-            underlineMode = if (hasUnderline) underlineMode else 0,
-            underlineColor = underlineColor,
-            underlineWidth = underlineWidth,
-            underlineOffset = underlineOffset,
-            underlineSvgPath = if (hasUnderline) underlineSvgPath else "",
-            bgImage = if (hasBgImage) bgImage else "",
-            bgImageFit = if (hasBgImage) bgImageFit else 0,
-            bgImageScale = if (hasBgImage) bgImageScale else 1f,
-        )
-    }
-
     private fun extractLinkUrl(spanned: Spanned, index: Int): String? {
         // 检查URLSpan（超链接）
         val urlSpans = spanned.getSpans(index, index + 1, URLSpan::class.java)
@@ -1276,119 +1194,6 @@ class TextChapterLayout(
     /**
      * 排版文字
      */
-    private fun applyBuiltInHighlightRules(spannable: SpannableStringBuilder): SpannableStringBuilder {
-        if (appCtx.getPrefBoolean(PreferKey.highlightRuleBracketNote, true)) {
-            applyTextColorRule(
-                spannable,
-                Regex("（[^）\\n]{1,80}）|\\([^\\)\\n]{1,80}\\)|【[^】\\n]{1,80}】"),
-                noteHighlightColor
-            )
-        }
-        if (appCtx.getPrefBoolean(PreferKey.highlightRuleDialog, true)) {
-            applyTextColorRule(
-                spannable,
-                Regex("“[^”\\n]{1,120}”|\"[^\"\\n]{1,120}\"|「[^」\\n]{1,120}」|『[^』\\n]{1,120}』"),
-                dialogHighlightColor
-            )
-        }
-        if (appCtx.getPrefBoolean(PreferKey.highlightRuleBookTitle, true)) {
-            applyUnderlineRule(
-                spannable,
-                Regex("《[^》\\n]{1,80}》"),
-                3,
-                bookTitleUnderlineColor
-            )
-        }
-        return spannable
-    }
-
-    private fun applyTextColorRule(
-        spannable: SpannableStringBuilder,
-        regex: Regex,
-        color: Int,
-    ) {
-        regex.findAll(spannable).forEach { match ->
-            spannable.setSpan(
-                ForegroundColorSpan(color),
-                match.range.first,
-                match.range.last + 1,
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-        }
-    }
-
-    private fun applyUnderlineRule(
-        spannable: SpannableStringBuilder,
-        regex: Regex,
-        mode: Int,
-        color: Int,
-    ) {
-        regex.findAll(spannable).forEach { match ->
-            spannable.setSpan(
-                HighlightStyleSpan(mode, color, 0.5f, 2f),
-                match.range.first,
-                match.range.last + 1,
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-        }
-    }
-
-    private fun applyHighlightRulesFromStore(spannable: SpannableStringBuilder): SpannableStringBuilder {
-        HighlightRuleStore.loadEnabled(appCtx).forEach { rule ->
-            val regex = kotlin.runCatching { Regex(rule.pattern) }.getOrNull() ?: return@forEach
-            applyRuleSpans(spannable, rule, regex)
-        }
-        return spannable
-    }
-
-    private fun applyHighlightRules(
-        spannable: SpannableStringBuilder,
-        isTitle: Boolean = false
-    ): SpannableStringBuilder {
-        compiledHighlightRules.forEach { compiled ->
-            if (!compiled.rule.appliesTo(isTitle)) return@forEach
-            applyRuleSpans(spannable, compiled.rule, compiled.regex)
-        }
-        return spannable
-    }
-
-    private fun applyRuleSpans(
-        spannable: SpannableStringBuilder,
-        rule: HighlightRule,
-        regex: Regex
-    ) {
-        regex.findAll(spannable).forEach { match ->
-            val start = match.range.first
-            val end = match.range.last + 1
-            if (start >= end) return@forEach
-            rule.textColor?.let { color ->
-                spannable.setSpan(
-                    ForegroundColorSpan(color),
-                    start,
-                    end,
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-            }
-            if (rule.underlineMode != 0 || !rule.bgImage.isNullOrBlank()) {
-                spannable.setSpan(
-                    HighlightStyleSpan(
-                        underlineMode = rule.underlineMode,
-                        underlineColor = rule.underlineColor ?: rule.textColor ?: 0xFF63C37D.toInt(),
-                        underlineWidth = rule.underlineWidth,
-                        underlineOffset = rule.underlineOffset,
-                        underlineSvgPath = rule.underlineSvgPath.orEmpty(),
-                        bgImage = rule.bgImage.orEmpty(),
-                        bgImageFit = rule.bgImageFit,
-                        bgImageScale = rule.bgImageScale
-                    ),
-                    start,
-                    end,
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-            }
-        }
-    }
-
     @Suppress("DEPRECATION")
     private suspend fun setTypeText(
         book: Book,
@@ -1404,7 +1209,7 @@ class TextChapterLayout(
         srcList: LinkedList<String>? = null,
         clickList: LinkedList<String?>?
     ) {
-        val styledText = applyHighlightRules(SpannableStringBuilder(text), isTitle)
+        val styledText: CharSequence = SpannableStringBuilder(text)
         val widthsArray = allocateFloatArray(text.length)
         textPaint.getTextWidthsCompat(text, widthsArray, reviewCharWidth)
         val layout = if (useZhLayout) {
@@ -1726,15 +1531,7 @@ class TextChapterLayout(
         textIndex: Int,
     ) {
         val textColor = extractTextColor(styledText as Spanned, textIndex)
-        val highlightStyle = extractHighlightStyle(styledText, textIndex)
-        val underlineMode = highlightStyle?.underlineMode ?: 0
-        val underlineColor = highlightStyle?.underlineColor
-        val underlineWidth = highlightStyle?.underlineWidth ?: 1f
-        val underlineOffset = highlightStyle?.underlineOffset ?: 2f
-        val underlineSvgPath = highlightStyle?.underlineSvgPath ?: ""
-        val bgImage = highlightStyle?.bgImage ?: ""
-        val bgImageFit = highlightStyle?.bgImageFit ?: 0
-        val bgImageScale = highlightStyle?.bgImageScale ?: 1f
+
         val column = when {
             !srcList.isNullOrEmpty() && (char == srcReplaceStr || char == reviewStr) -> {
                 val src = srcList.removeFirst()
@@ -1762,15 +1559,7 @@ class TextChapterLayout(
                     start = absStartX + xStart,
                     end = absStartX + xEnd,
                     charData = char,
-                    textColor = textColor,
-                    underlineMode = underlineMode,
-                    underlineColor = underlineColor,
-                    underlineWidth = underlineWidth,
-                    underlineOffset = underlineOffset,
-                    underlineSvgPath = underlineSvgPath,
-                    bgImage = bgImage,
-                    bgImageFit = bgImageFit,
-                    bgImageScale = bgImageScale
+                    textColor = textColor
                 )
             }
         }
@@ -1869,19 +1658,6 @@ class TextChapterLayout(
     private fun isZeroWidthChar(char: Char): Boolean {
         val code = char.code
         return code == 8203 || code == 8204 || code == 8205 || code == 8288
-    }
-
-    private data class CompiledHighlightRule(
-        val rule: HighlightRule,
-        val regex: Regex,
-    )
-
-    private fun HighlightRule.appliesTo(isTitle: Boolean): Boolean {
-        return when (targetScope) {
-            HighlightRule.TARGET_TITLE -> isTitle
-            HighlightRule.TARGET_BODY -> !isTitle
-            else -> true
-        }
     }
 
 }

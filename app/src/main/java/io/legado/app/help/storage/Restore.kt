@@ -51,7 +51,6 @@ import io.legado.app.model.VideoPlay.VIDEO_PREF_NAME
 import io.legado.app.model.BookCover
 import io.legado.app.model.localBook.LocalBook
 import io.legado.app.data.repository.CoverGalleryRepository
-import io.legado.app.ui.book.read.config.HighlightRuleStore
 import io.legado.app.ui.widget.image.CoverImageView
 import io.legado.app.utils.ACache
 import io.legado.app.utils.FileUtils
@@ -310,17 +309,6 @@ object Restore {
             appDb.replaceRuleDao.deleteAll()
             fileToListT<ReplaceRule>(path, "replaceRule.json")?.let {
                 appDb.replaceRuleDao.insert(*it.toTypedArray())
-            }
-        }
-
-        if (HighlightRuleStore.backupFileName in selectedSet) {
-            progress(HighlightRuleStore.backupFileName)
-            File(path, HighlightRuleStore.backupFileName).takeIf { it.exists() }?.runCatching {
-                GSON.fromJsonObject<HighlightRuleStore.BackupData>(readText()).getOrNull()?.let {
-                    HighlightRuleStore.restoreBackupData(appCtx, it, path)
-                }
-            }?.onFailure {
-                AppLog.put("恢复高亮规则出错\n${it.localizedMessage}", it)
             }
         }
 
@@ -664,14 +652,6 @@ object Restore {
         }
 
         // 恢复搜索历史
-        progress(HighlightRuleStore.backupFileName)
-        File(path, HighlightRuleStore.backupFileName).takeIf { it.exists() }?.runCatching {
-            GSON.fromJsonObject<HighlightRuleStore.BackupData>(readText()).getOrNull()?.let {
-                HighlightRuleStore.restoreBackupData(appCtx, it, path)
-            }
-        }?.onFailure {
-            AppLog.put("恢复搜索历史出错\n${it.localizedMessage}", it)
-        }
         progress("searchHistory.json")
         appDb.searchKeywordDao.deleteAll()
         fileToListT<SearchKeyword>(path, "searchHistory.json")?.let {

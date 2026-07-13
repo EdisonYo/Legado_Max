@@ -29,8 +29,7 @@ object HelpDocManager {
                 HelpDoc("打印源对象的JS对象", "打印源JS对象"),
                 HelpDoc("legado_data_objects", "书源JS格式文档"),
                 HelpDoc("legado_data_url_guide", "Data URL使用指南"),
-                HelpDoc("legado_network_api", "网络访问 API 参考"),
-                HelpDoc("highlightRules", "高亮规则说明")
+                HelpDoc("legado_network_api", "网络访问 API 参考")
             )
         ),
         HelpDocGroup(
