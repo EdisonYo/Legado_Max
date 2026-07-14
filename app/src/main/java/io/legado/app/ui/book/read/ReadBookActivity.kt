@@ -835,28 +835,35 @@ class ReadBookActivity : BaseReadBookActivity(),
         when (event.action) {
             MotionEvent.ACTION_DOWN -> textActionMenu.dismiss()
             MotionEvent.ACTION_MOVE -> {
+                // 将光标视图的触摸坐标转换为相对于 PageView 的坐标
+                val cursorLocation = IntArray(2)
+                v.getLocationInWindow(cursorLocation)
+                val pageLocation = IntArray(2)
+                readView.curPage.getLocationInWindow(pageLocation)
+                val pageX = cursorLocation[0] - pageLocation[0] + event.x
+                val pageY = cursorLocation[1] - pageLocation[1] + event.y
                 when (v.id) {
                     R.id.cursor_left -> if (!readView.curPage.getReverseStartCursor()) {
                         readView.curPage.selectStartMove(
-                            event.rawX + cursorLeft.width,
-                            event.rawY - cursorLeft.height
+                            pageX + cursorLeft.width,
+                            pageY
                         )
                     } else {
                         readView.curPage.selectEndMove(
-                            event.rawX - cursorRight.width,
-                            event.rawY - cursorRight.height
+                            pageX - cursorRight.width,
+                            pageY
                         )
                     }
 
                     R.id.cursor_right -> if (readView.curPage.getReverseEndCursor()) {
                         readView.curPage.selectStartMove(
-                            event.rawX + cursorLeft.width,
-                            event.rawY - cursorLeft.height
+                            pageX + cursorLeft.width,
+                            pageY
                         )
                     } else {
                         readView.curPage.selectEndMove(
-                            event.rawX - cursorRight.width,
-                            event.rawY - cursorRight.height
+                            pageX - cursorRight.width,
+                            pageY
                         )
                     }
                 }

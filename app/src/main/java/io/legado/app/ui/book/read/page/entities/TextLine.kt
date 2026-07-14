@@ -138,7 +138,7 @@ data class TextLine(
      */
     fun isTouch(x: Float, y: Float, relativeOffset: Float): Boolean {
         return y > lineTop + relativeOffset
-                && y < lineBottom + relativeOffset
+                && y <= lineBottom + relativeOffset
                 && x >= lineStart
                 && x <= lineEnd + 20.dpToPx()
     }
@@ -148,7 +148,7 @@ data class TextLine(
      */
     fun isTouchY(y: Float, relativeOffset: Float): Boolean {
         return y > lineTop + relativeOffset
-                && y < lineBottom + relativeOffset
+                && y <= lineBottom + relativeOffset
     }
 
     /**
