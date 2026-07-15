@@ -840,31 +840,62 @@ class ReadBookActivity : BaseReadBookActivity(),
                 v.getLocationInWindow(cursorLocation)
                 val pageLocation = IntArray(2)
                 readView.curPage.getLocationInWindow(pageLocation)
-                val pageX = cursorLocation[0] - pageLocation[0] + event.x
-                val pageY = cursorLocation[1] - pageLocation[1] + event.y
+                val rawPageX = cursorLocation[0] - pageLocation[0] + event.x
+                val rawPageY = cursorLocation[1] - pageLocation[1] + event.y
+                // 边界限制：将坐标限制在 ReadView 内容区域内
+                val pageX = rawPageX.coerceIn(
+                    readView.paddingLeft.toFloat(),
+                    (readView.width - readView.paddingRight).toFloat()
+                )
+                val pageY = rawPageY.coerceIn(
+                    (headerHeight + readView.paddingTop).toFloat(),
+                    (readView.height - readView.paddingBottom).toFloat()
+                )
                 when (v.id) {
-                    R.id.cursor_left -> if (!readView.curPage.getReverseStartCursor()) {
-                        readView.curPage.selectStartMove(
-                            pageX + cursorLeft.width,
-                            pageY
-                        )
-                    } else {
-                        readView.curPage.selectEndMove(
-                            pageX - cursorRight.width,
-                            pageY
-                        )
+                    R.id.cursor_left -> {
+                        // 先更新光标位置，确保即使文本选择未更新，光标也跟随手指
+                        val cursorX = (pageX + cursorLeft.width).toInt()
+                        val cursorY = pageY.toInt()
+                        val minCursorX = readView.paddingLeft
+                        val maxCursorX = (readView.width - readView.paddingRight - cursorLeft.width).toInt()
+                        val minCursorY = (headerHeight + readView.paddingTop).toInt()
+                        val maxCursorY = (readView.height - readView.paddingBottom - cursorLeft.height).toInt()
+                        cursorLeft.x = (cursorX - cursorLeft.width).toFloat().coerceIn(minCursorX.toFloat(), maxCursorX.toFloat())
+                        cursorLeft.y = cursorY.toFloat().coerceIn(minCursorY.toFloat(), maxCursorY.toFloat())
+                        if (!readView.curPage.getReverseStartCursor()) {
+                            readView.curPage.selectStartMove(
+                                pageX + cursorLeft.width,
+                                pageY
+                            )
+                        } else {
+                            readView.curPage.selectEndMove(
+                                pageX - cursorRight.width,
+                                pageY
+                            )
+                        }
                     }
 
-                    R.id.cursor_right -> if (readView.curPage.getReverseEndCursor()) {
-                        readView.curPage.selectStartMove(
-                            pageX + cursorLeft.width,
-                            pageY
-                        )
-                    } else {
-                        readView.curPage.selectEndMove(
-                            pageX - cursorRight.width,
-                            pageY
-                        )
+                    R.id.cursor_right -> {
+                        // 先更新光标位置，确保即使文本选择未更新，光标也跟随手指
+                        val cursorX = (pageX - cursorRight.width).toInt()
+                        val cursorY = pageY.toInt()
+                        val minCursorX = readView.paddingLeft
+                        val maxCursorX = (readView.width - readView.paddingRight - cursorRight.width).toInt()
+                        val minCursorY = (headerHeight + readView.paddingTop).toInt()
+                        val maxCursorY = (readView.height - readView.paddingBottom - cursorRight.height).toInt()
+                        cursorRight.x = cursorX.toFloat().coerceIn(minCursorX.toFloat(), maxCursorX.toFloat())
+                        cursorRight.y = cursorY.toFloat().coerceIn(minCursorY.toFloat(), maxCursorY.toFloat())
+                        if (readView.curPage.getReverseEndCursor()) {
+                            readView.curPage.selectStartMove(
+                                pageX + cursorLeft.width,
+                                pageY
+                            )
+                        } else {
+                            readView.curPage.selectEndMove(
+                                pageX - cursorRight.width,
+                                pageY
+                            )
+                        }
                     }
                 }
             }
@@ -872,6 +903,10 @@ class ReadBookActivity : BaseReadBookActivity(),
             MotionEvent.ACTION_UP -> {
                 readView.curPage.resetReverseCursor()
                 showTextActionMenu()
+            }
+
+            MotionEvent.ACTION_CANCEL -> {
+                onCancelSelect()
             }
         }
         return true
@@ -881,19 +916,27 @@ class ReadBookActivity : BaseReadBookActivity(),
      * 更新文字选择开始位置
      */
     override fun upSelectedStart(x: Float, y: Float, top: Float) = binding.run {
-        cursorLeft.x = x - cursorLeft.width
-        cursorLeft.y = y
+        val minX = readView.paddingLeft.toFloat()
+        val maxX = (readView.width - readView.paddingRight - cursorLeft.width).toFloat()
+        val minY = (headerHeight + readView.paddingTop).toFloat()
+        val maxY = (readView.height - readView.paddingBottom - cursorLeft.height).toFloat()
+        cursorLeft.x = (x - cursorLeft.width).coerceIn(minX, maxX)
+        cursorLeft.y = y.coerceIn(minY, maxY)
         cursorLeft.visible(true)
-        textMenuPosition.x = x
-        textMenuPosition.y = top
+        textMenuPosition.x = x.coerceIn(minX + cursorLeft.width, maxX + cursorLeft.width)
+        textMenuPosition.y = top.coerceIn(minY, maxY)
     }
 
     /**
      * 更新文字选择结束位置
      */
     override fun upSelectedEnd(x: Float, y: Float) = binding.run {
-        cursorRight.x = x
-        cursorRight.y = y
+        val minX = readView.paddingLeft.toFloat()
+        val maxX = (readView.width - readView.paddingRight - cursorRight.width).toFloat()
+        val minY = (headerHeight + readView.paddingTop).toFloat()
+        val maxY = (readView.height - readView.paddingBottom - cursorRight.height).toFloat()
+        cursorRight.x = x.coerceIn(minX, maxX)
+        cursorRight.y = y.coerceIn(minY, maxY)
         cursorRight.visible(true)
     }
 
@@ -914,6 +957,10 @@ class ReadBookActivity : BaseReadBookActivity(),
      * 显示文本操作菜单
      */
     override fun showTextActionMenu() {
+        if (selectedText.isBlank()) {
+            onCancelSelect()
+            return
+        }
         val navigationBarHeight =
             if (!ReadBookConfig.hideNavigationBar && navigationBarGravity == Gravity.BOTTOM)
                 binding.navigationBar.height else 0

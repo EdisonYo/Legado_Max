@@ -15,7 +15,7 @@ interface BaseColumn {
     fun draw(view: ContentTextView, canvas: Canvas)
 
     fun isTouch(x: Float): Boolean {
-        return x > start && x < end
+        return x >= start && x <= end
     }
 
 }
