@@ -68,23 +68,63 @@ class CoverGalleryRepository {
     }
 
     suspend fun addImage(context: Context, groupId: Long, uri: Uri) {
-        addImages(context, groupId, listOf(uri))
+        val path = copyImageToCovers(context, uri)
+        val order = (dao.getMaxImageOrder(groupId) ?: -1) + 1
+        dao.insertImage(
+            CoverGalleryImage(
+                groupId = groupId,
+                path = path,
+                order = order
+            )
+        )
+        refreshDefaultCover()
     }
 
     suspend fun addImages(context: Context, groupId: Long, uris: List<Uri>) {
-        if (uris.isEmpty()) return
         var order = (dao.getMaxImageOrder(groupId) ?: -1) + 1
+        val images = mutableListOf<CoverGalleryImage>()
         uris.forEach { uri ->
-            val path = copyImageToCovers(context, uri)
-            dao.insertImage(
-                CoverGalleryImage(
-                    groupId = groupId,
-                    path = path,
-                    order = order++
+            runCatching {
+                val path = copyImageToCovers(context, uri)
+                images.add(
+                    CoverGalleryImage(
+                        groupId = groupId,
+                        path = path,
+                        order = order++
+                    )
                 )
-            )
+            }.onFailure {
+                // 单条失败跳过，继续处理剩余
+            }
         }
-        refreshDefaultCover()
+        if (images.isNotEmpty()) {
+            dao.insertImages(*images.toTypedArray())
+            refreshDefaultCover()
+        }
+    }
+
+    suspend fun addImagesByUrls(context: Context, groupId: Long, urls: List<String>) {
+        var order = (dao.getMaxImageOrder(groupId) ?: -1) + 1
+        val images = mutableListOf<CoverGalleryImage>()
+        urls.forEach { url ->
+            runCatching {
+                val uri = Uri.parse(url)
+                val path = copyImageToCovers(context, uri)
+                images.add(
+                    CoverGalleryImage(
+                        groupId = groupId,
+                        path = path,
+                        order = order++
+                    )
+                )
+            }.onFailure {
+                // 单条失败跳过，继续处理剩余
+            }
+        }
+        if (images.isNotEmpty()) {
+            dao.insertImages(*images.toTypedArray())
+            refreshDefaultCover()
+        }
     }
 
     suspend fun deleteImage(imageId: Long) {
@@ -240,8 +280,7 @@ class CoverGalleryRepository {
             }
             return targetFile.absolutePath
         }
-
-        // 处理本地文件 (content:// / file://)
+        // 处理本地文件
         var file = context.externalFiles
         val sourceName = DocumentFile.fromSingleUri(context, uri)?.name.orEmpty()
         val suffix = if (sourceName.contains(".9.png", true)) {
