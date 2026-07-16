@@ -1,7 +1,6 @@
 package io.legado.app.ui.config.covergallery
 
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
@@ -114,14 +113,24 @@ fun CoverGalleryScreen(
     var pendingExportZipName by remember { mutableStateOf("") }
     var pendingImageGroupId by remember { mutableLongStateOf(0L) }
 
-    val selectImages = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenMultipleDocuments()
-    ) { uris ->
+    val selectImage = rememberLauncherForActivityResult(HandleFileContract()) { result ->
         val groupId = pendingImageGroupId
-        if (groupId != 0L && uris.isNotEmpty()) {
-            viewModel.addImages(context, groupId, uris)
+        if (groupId != 0L) {
+            // 批量图片链接（非文件选择场景）
+            result.batchImageUrls?.let { urls ->
+                if (urls.isNotEmpty()) {
+                    viewModel.addImagesByUrls(context, groupId, urls)
+                }
+                pendingImageGroupId = 0L
+                return@rememberLauncherForActivityResult
+            }
+            // 文件选择场景（单选/多选）
+            val uris = result.uris.filterNotNull()
+            if (uris.isNotEmpty()) {
+                viewModel.addImages(context, groupId, uris)
+            }
+            pendingImageGroupId = 0L
         }
-        pendingImageGroupId = 0L
     }
     val selectImportZip = rememberLauncherForActivityResult(HandleFileContract()) {
         it.uri?.let { uri ->
@@ -178,7 +187,7 @@ fun CoverGalleryScreen(
     deleteGroup?.let { groupWithImages ->
         AppConfirmDialog(
             title = "删除分组",
-            text = "确定删除“${groupWithImages.group.name}”及其中 ${groupWithImages.images.size} 张图片吗？",
+            text = "确定删除【${groupWithImages.group.name}】分组及其中 ${groupWithImages.images.size} 张图片吗？",
             confirmText = "删除",
             destructive = true,
             onConfirm = {
@@ -336,7 +345,11 @@ fun CoverGalleryScreen(
                             groupWithImages = groupWithImages,
                             onAddImage = {
                                 pendingImageGroupId = groupWithImages.group.id
-                                selectImages.launch(arrayOf("image/*"))
+                                selectImage.launch {
+                                    requestCode = 3001
+                                    mode = HandleFileContract.IMAGE
+                                    allowMultiple = true
+                                }
                             },
                             onSetDefault = { viewModel.setDefaultGroup(groupWithImages.group.id) },
                             onUnsetDefault = { viewModel.unsetDefaultGroup(groupWithImages.group.id) },
@@ -469,13 +482,6 @@ private fun CoverGalleryGroupCard(
                         text = "${images.size} 张图片",
                         style = MaterialTheme.typography.bodySmall,
                         color = pageSecondaryTextColor()
-                    )
-                }
-                IconButton(onClick = onAddImage) {
-                    Icon(
-                        Icons.Default.AddPhotoAlternate,
-                        contentDescription = "添加图片",
-                        tint = pageAccentColor()
                     )
                 }
                 Box {

@@ -34,6 +34,7 @@ class HandleFileContract :
             intent.putExtra("allowExtensions", it.allowExtensions)
             intent.putJson("otherActions", it.otherActions)
             intent.putExtra("onlyOtherActions", it.onlyOtherActions)
+            intent.putExtra("allowMultiple", it.allowMultiple)
             it.fileData?.let { fileData ->
                 intent.putExtra("fileName", fileData.name)
                 intent.putExtra("fileKey", IntentData.put(fileData.data))
@@ -45,19 +46,44 @@ class HandleFileContract :
     }
 
     override fun parseResult(resultCode: Int, intent: Intent?): Result {
-        val uri = if (resultCode != RESULT_OK || intent?.data == null ||
-            RealPathUtil.getTreePath(intent.data!!)
-                ?.startsWith(appCtx.externalFiles.parent!!) == true
-        ) {
-            null
-        } else {
-            intent.data
+        val uriSet = linkedSetOf<Uri>()
+        var batchImageUrls: List<String>? = null
+        if (resultCode == RESULT_OK && intent != null) {
+            // 多选结果优先（ClipData），避免与 data 重复
+            intent.clipData?.let { clipData ->
+                for (i in 0 until clipData.itemCount) {
+                    clipData.getItemAt(i).uri?.let { uri ->
+                        if (RealPathUtil.getTreePath(uri)
+                                ?.startsWith(appCtx.externalFiles.parent!!) != true
+                        ) {
+                            uriSet.add(uri)
+                        }
+                    }
+                }
+            }
+            // 单选结果：仅当没有 ClipData 时才取 data
+            if (uriSet.isEmpty()) {
+                intent.data?.let { uri ->
+                    if (RealPathUtil.getTreePath(uri)
+                            ?.startsWith(appCtx.externalFiles.parent!!) != true
+                    ) {
+                        uriSet.add(uri)
+                    }
+                }
+            }
+            // 批量图片链接（非文件选择场景）
+            intent.getStringArrayListExtra("batchImageUrls")?.let {
+                if (it.isNotEmpty()) batchImageUrls = it
+            }
         }
+        val uris = uriSet.toList()
         return Result(
-            uri,
-            requestCode,
-            intent?.getStringExtra("value"),
-            intent?.getStringExtra("clipboard_json")
+            uri = uris.firstOrNull(),
+            uris = uris,
+            requestCode = requestCode,
+            value = intent?.getStringExtra("value"),
+            clipboardJson = intent?.getStringExtra("clipboard_json"),
+            batchImageUrls = batchImageUrls
         )
     }
 
@@ -78,14 +104,17 @@ class HandleFileContract :
         var onlyOtherActions: Boolean = false,
         var fileData: FileData? = null,
         var requestCode: Int = 0,
-        var value: String? = null
+        var value: String? = null,
+        var allowMultiple: Boolean = false
     )
 
     data class Result(
         val uri: Uri?,
+        val uris: List<Uri>,
         val requestCode: Int,
         val value: String?,
-        val clipboardJson: String? = null
+        val clipboardJson: String? = null,
+        val batchImageUrls: List<String>? = null
     )
 
     data class FileData(
@@ -93,5 +122,4 @@ class HandleFileContract :
         val data: Any,
         val type: String
     )
-
 }
