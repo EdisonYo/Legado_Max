@@ -1,0 +1,123 @@
+name: Fast Build ReleaseS (No Shrink, No Mapping)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '**'
+      - '!**/assets/**'
+      - '!**.md'
+      - '!**/ISSUE_TEMPLATE/**'
+      - '!**/modules/web/**'
+  pull_request:
+    paths-ignore:
+      - '**/modules/web/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # 只生成版本号，不解析更新日志
+  prepare:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    outputs:
+      version: ${{ steps.set-ver.outputs.version }}
+      versionL: ${{ steps.set-ver.outputs.versionL }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1   # 只取最新 commit，版本号只用日期，无需历史
+      - id: set-ver
+        run: |
+          echo "version=$(date -d "8 hour" -u +3.%y.%m%d%H)" >> $GITHUB_OUTPUT
+          echo "versionL=$(date -d "8 hour" -u +3.%y.%m%d%H)" >> $GITHUB_OUTPUT
+
+  build:
+    needs: prepare
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      VERSIONL: ${{ needs.prepare.outputs.versionL }}
+    steps:
+      # 浅克隆，只取最新代码
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      # 签名
+      - name: Sign config
+        run: |
+          cp .github/workflows/legado.jks app/legado.jks
+          cat >> gradle.properties << EOF
+          RELEASE_STORE_FILE=./legado.jks
+          RELEASE_KEY_ALIAS=legado
+          RELEASE_STORE_PASSWORD=gedoor_legado
+          RELEASE_KEY_PASSWORD=gedoor_legado
+          EOF
+
+      # Gradle 高性能配置（并行、缓存、JVM 等）
+      - name: Optimize Gradle settings
+        run: |
+          cat >> gradle.properties << 'EOF'
+          org.gradle.parallel=true
+          org.gradle.caching=true
+          org.gradle.configuration-cache=true
+          org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=512m -XX:+UseParallelGC
+          org.gradle.configureondemand=true
+          org.gradle.workers.max=4
+          kotlin.incremental=false
+          android.enableLint=false
+          EOF
+
+      # 先设置 Gradle（恢复缓存），再修改 build.gradle，避免缓存失效
+      - uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-version: wrapper
+          cache-read-only: false
+
+      # 禁用混淆和资源压缩
+      - name: Disable minify & shrink
+        run: |
+          sed -i 's/minifyEnabled true/minifyEnabled false/g' app/build.gradle
+          sed -i 's/shrinkResources true/shrinkResources false/g' app/build.gradle
+
+      # 设置版本号
+      - name: Set version
+        run: |
+          sed -i "/def version/c def version = \"$VERSION\"" app/build.gradle
+
+      # 构建共存版 (releaseS)，跳过测试和 lint
+      - name: Build releaseS APK
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleAppSRelease \
+            --no-daemon \
+            --parallel \
+            --build-cache \
+            --max-workers=4 \
+            -x test \
+            -x lint \
+            -x check \
+            --warning-mode none
+
+      # 收集 APK，命名为正式版（共存）
+      - name: Collect APK
+        run: |
+          mkdir -p apk
+          find app/build/outputs/apk -name "*.apk" -exec mv {} apk/legado_正式版_${{ env.VERSIONL }}_releaseS.apk \;
+
+      # 仅上传 artifact，不发布任何内容
+      - name: Upload APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: legado.releaseS.apk
+          path: apk/*.apk
