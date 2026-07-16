@@ -484,6 +484,13 @@ private fun CoverGalleryGroupCard(
                         color = pageSecondaryTextColor()
                     )
                 }
+                IconButton(onClick = onAddImage) {
+                    Icon(
+                        Icons.Default.AddPhotoAlternate,
+                        contentDescription = "添加图片",
+                        tint = pageAccentColor()
+                    )
+                }
                 Box {
                     IconButton(onClick = { showMenu = true }) {
                         Icon(
@@ -556,20 +563,12 @@ private fun CoverGalleryGroupCard(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            if (images.isEmpty()) {
-                FilledTonalButton(onClick = onAddImage) {
-                    Icon(Icons.Default.AddPhotoAlternate, contentDescription = null)
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text("添加图片")
-                }
-            } else {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(images, key = { it.id }) { image ->
-                        CoverImageThumb(
-                            image = image,
-                            onDelete = { onDeleteImage(image) }
-                        )
-                    }
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(images, key = { it.id }) { image ->
+                    CoverImageThumb(
+                        image = image,
+                        onDelete = { onDeleteImage(image) }
+                    )
                 }
             }
         }
