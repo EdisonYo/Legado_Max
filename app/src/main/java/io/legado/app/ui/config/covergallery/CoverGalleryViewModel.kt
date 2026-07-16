@@ -67,6 +67,13 @@ class CoverGalleryViewModel : ViewModel() {
         }
     }
 
+    fun addImagesByUrls(context: Context, groupId: Long, urls: List<String>) {
+        if (urls.isEmpty()) return
+        viewModelScope.launch {
+            repository.addImagesByUrls(context.applicationContext, groupId, urls)
+        }
+    }
+
     fun exportGroupZip(
         context: Context,
         groupWithImages: CoverGalleryGroupWithImages,
@@ -95,7 +102,7 @@ class CoverGalleryViewModel : ViewModel() {
             }.onSuccess {
                 _messageDialog.value = CoverGalleryMessageDialog(
                     title = "导入成功",
-                    message = "已导入“${it.groupName}”，共 ${it.imageCount} 张图片"
+                    message = "已导入【${it.groupName}】分组，共 ${it.imageCount} 张图片"
                 )
             }.onFailure {
                 val message = it.localizedMessage ?: "导入zip失败"

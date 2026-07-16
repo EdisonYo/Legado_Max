@@ -1,5 +1,6 @@
 package io.legado.app.ui.file
 
+import android.content.ClipData
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -63,6 +64,28 @@ class HandleFileActivity :
         } ?: finish()
     }
 
+    private val selectDocs = registerForActivityResult(
+        ActivityResultContracts.OpenMultipleDocuments()
+    ) { uriList ->
+        if (uriList.isNotEmpty()) {
+            val firstUri = uriList.first()
+            if (firstUri.isContentScheme()) {
+                val modeFlags =
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                try {
+                    contentResolver.takePersistableUriPermission(firstUri, modeFlags)
+                } catch (_: SecurityException) { }
+            }
+            val clipData = ClipData.newUri(contentResolver, "", firstUri)
+            uriList.drop(1).forEach { uri ->
+                clipData.addItem(ClipData.Item(uri))
+            }
+            onResult(Intent().setData(firstUri).also { it.clipData = clipData })
+        } else {
+            finish()
+        }
+    }
+
     private val selectImage = registerForActivityResult(SelectImageContract()) {
         it.uri?.let { uri ->
             onResult(Intent().setData(uri))
@@ -76,6 +99,7 @@ class HandleFileActivity :
             finish()
         }
         val allowExtensions = intent.getStringArrayExtra("allowExtensions")
+        val allowMultiple = intent.getBooleanExtra("allowMultiple", false)
         val customActions = intent.getJsonArray<SelectItem<Int>>("otherActions")
         val selectList: ArrayList<SelectItem<Int>> = if (intent.getBooleanExtra("onlyOtherActions", false)) {
             arrayListOf<SelectItem<Int>>().apply {
@@ -125,16 +149,34 @@ class HandleFileActivity :
                         }
                     }
 
-                    HandleFileContract.FILE -> kotlin.runCatching {
-                        selectDoc.launch(typesOfExtensions(allowExtensions))
-                    }.onFailure {
-                        AppLog.put(getString(R.string.open_sys_dir_picker_error), it, true)
-                        checkPermissions {
-                            FilePickerDialog.show(
-                                supportFragmentManager,
-                                mode = HandleFileContract.FILE,
-                                allowExtensions = allowExtensions
-                            )
+                    HandleFileContract.FILE -> {
+                        val extensions = typesOfExtensions(allowExtensions)
+                        if (allowMultiple) {
+                            kotlin.runCatching {
+                                selectDocs.launch(extensions)
+                            }.onFailure {
+                                AppLog.put(getString(R.string.open_sys_dir_picker_error), it, true)
+                                checkPermissions {
+                                    FilePickerDialog.show(
+                                        supportFragmentManager,
+                                        mode = HandleFileContract.FILE,
+                                        allowExtensions = allowExtensions
+                                    )
+                                }
+                            }
+                        } else {
+                            kotlin.runCatching {
+                                selectDoc.launch(extensions)
+                            }.onFailure {
+                                AppLog.put(getString(R.string.open_sys_dir_picker_error), it, true)
+                                checkPermissions {
+                                    FilePickerDialog.show(
+                                        supportFragmentManager,
+                                        mode = HandleFileContract.FILE,
+                                        allowExtensions = allowExtensions
+                                    )
+                                }
+                            }
                         }
                     }
 
@@ -238,30 +280,32 @@ class HandleFileActivity :
 
     private fun showInputImgSrcDialog() {
         val alertBinding = DialogEditTextBinding.inflate(layoutInflater).apply {
-            editView.hint = getString(R.string.enter_img_src_path)
+            editView.hint = "一行一个"
         }
 
-        alert(getString(R.string.manual_input)) {
+        alert("支持批量添加链接") {
             customView { alertBinding.root }
             okButton {
-                val inputPath = alertBinding.editView.text.toString()
-                if (inputPath.isBlank()) {
+                val inputText = alertBinding.editView.text.toString()
+                if (inputText.isBlank()) {
                     toastOnUi(getString(R.string.empty_img_src_input))
                     return@okButton
                 }
-                if (inputPath.startsWith("http", true)) {
-                    onResult(Intent().setData(inputPath.toUri()))
+                val lines = inputText.lines().map { it.trim() }.filter { it.isNotBlank() }
+                val urlLines = lines.filter { it.startsWith("http://", true) || it.startsWith("https://", true) }
+                if (urlLines.isEmpty()) {
+                    toastOnUi(getString(R.string.invalid_file_path))
                     return@okButton
                 }
-                val file = File(inputPath)
-                if (file.exists() &&
-                    file.isFile &&
-                    isExternalStorage(file) &&
-                    file.canRead()
-                ) {
-                    onResult(Intent().setData(Uri.fromFile(file)))
+                if (urlLines.size == 1) {
+                    // 单条链接：保持原有行为，返回 Uri
+                    onResult(Intent().setData(urlLines.first().toUri()))
                 } else {
-                    toastOnUi(getString(R.string.invalid_file_path))
+                    // 多条链接：通过 batchImageUrls 返回
+                    val intent = Intent()
+                    intent.putStringArrayListExtra("batchImageUrls", ArrayList(urlLines))
+                    setResult(RESULT_OK, intent)
+                    finish()
                 }
             }
             onDismiss {

@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import io.legado.app.R
 import io.legado.app.constant.PreferKey
@@ -30,8 +31,12 @@ import io.legado.app.utils.removePref
 import io.legado.app.utils.setEdgeEffectColor
 import io.legado.app.utils.showDialogFragment
 import io.legado.app.utils.toastOnUi
+import io.legado.app.help.http.okHttpClient
+import io.legado.app.help.http.newCallResponse
 import splitties.init.appCtx
 import java.io.FileOutputStream
+import java.io.IOException
+import kotlinx.coroutines.launch
 
 class CoverConfigFragment : PreferenceFragment(),
     SharedPreferences.OnSharedPreferenceChangeListener {
@@ -192,6 +197,37 @@ class CoverConfigFragment : PreferenceFragment(),
     }
 
     private fun setCoverFromUri(preferenceKey: String, uri: Uri) {
+        // 处理网络图片链接 (http/https)
+        if (uri.scheme == "http" || uri.scheme == "https") {
+            lifecycleScope.launch {
+                runCatching {
+                    val url = uri.toString()
+                    val response = okHttpClient.newCallResponse(retry = 1) { url(url) }
+                    val body = response.body ?: throw IOException("响应体为空")
+                    val bytes = body.bytes()
+                    response.close()
+
+                    val pathSegments = uri.path?.split("/")?.filter { it.isNotBlank() } ?: emptyList()
+                    val rawName = pathSegments.lastOrNull().orEmpty()
+                    val suffix = if (rawName.contains(".9.png", true)) {
+                        ".9.png"
+                    } else {
+                        "." + rawName.substringAfterLast(".", "jpg")
+                    }
+                    val fileName = MD5Utils.md5Encode(bytes.inputStream()) + suffix
+                    val targetFile = FileUtils.createFileIfNotExist(
+                        requireContext().externalFiles, "covers", fileName
+                    )
+                    FileOutputStream(targetFile).use { it.write(bytes) }
+                    putPrefString(preferenceKey, targetFile.absolutePath)
+                    BookCover.upDefaultCover()
+                }.onFailure {
+                    appCtx.toastOnUi(it.localizedMessage)
+                }
+            }
+            return
+        }
+        // 本地文件
         readUri(uri) { fileDoc, inputStream ->
             kotlin.runCatching {
                 var file = requireContext().externalFiles
@@ -214,5 +250,4 @@ class CoverConfigFragment : PreferenceFragment(),
             }
         }
     }
-
 }
