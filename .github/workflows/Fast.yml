@@ -1,4 +1,4 @@
-name: Fast Build ReleaseS (No Shrink, No Mapping)
+name: Fast Build ReleaseS
 
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
       version: ${{ steps.set-ver.outputs.version }}
       versionL: ${{ steps.set-ver.outputs.versionL }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 1   # 只取最新 commit，版本号只用日期，无需历史
       - id: set-ver
@@ -38,12 +38,13 @@ jobs:
   build:
     needs: prepare
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
     env:
       VERSION: ${{ needs.prepare.outputs.version }}
       VERSIONL: ${{ needs.prepare.outputs.versionL }}
     steps:
       # 浅克隆，只取最新代码
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
@@ -79,7 +80,7 @@ jobs:
           EOF
 
       # 先设置 Gradle（恢复缓存），再修改 build.gradle，避免缓存失效
-      - uses: gradle/actions/setup-gradle@v5
+      - uses: gradle/actions/setup-gradle@v6
         with:
           gradle-version: wrapper
           cache-read-only: false
@@ -113,7 +114,7 @@ jobs:
       - name: Collect APK
         run: |
           mkdir -p apk
-          find app/build/outputs/apk -name "*.apk" -exec mv {} apk/legado_正式版_${{ env.VERSIONL }}_releaseS.apk \;
+          find app/build/outputs/apk -name "*.apk" -print0 | xargs -0 -I{} mv {} apk/legado_正式版_${{ env.VERSIONL }}_releaseS.apk
 
       # 仅上传 artifact，不发布任何内容
       - name: Upload APK
