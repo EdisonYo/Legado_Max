@@ -59,7 +59,7 @@ class SpeakEngineContentSearchDialog : BaseContentSearchDialog() {
 
     override fun getContentSearchType() = ContentSearchType.SPEAK_ENGINE
 
-    override fun loadSourceItems(allSources: Boolean, callback: (List<SourceFieldItem>) -> Unit) {
+    override suspend fun loadSourceItems(allSources: Boolean): List<SourceFieldItem> {
         viewModel.loadEngines { engines ->
             allEngines = engines
             cachedJsonStrings = engines.associate { it.id.toString() to GSON.toJson(it) }

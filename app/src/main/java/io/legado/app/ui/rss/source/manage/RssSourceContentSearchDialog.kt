@@ -78,32 +78,30 @@ class RssSourceContentSearchDialog : BaseContentSearchDialog() {
 
     override fun getContentSearchType() = ContentSearchType.RSS_SOURCE
 
-    override fun loadSourceItems(allSources: Boolean, callback: (List<SourceFieldItem>) -> Unit) {
-        viewModel.loadSources(allSources) { sources ->
-            allRssSources = sources
-            cachedJsonStrings = sources.associate { it.sourceUrl to GSON.toJson(it) }
-            val items = mutableListOf<SourceFieldItem>()
-            for (source in sources) {
-                for ((tabKey, fields) in TAB_FIELDS) {
-                    for ((fieldKey, fieldName) in fields) {
-                        val value = getFieldValue(source, fieldKey) ?: continue
-                        if (value.isNotBlank()) {
-                            items.add(SourceFieldItem(
-                                sourceName = source.sourceName,
-                                sourceUrl = source.sourceUrl,
-                                tabKey = tabKey,
-                                tabName = TAB_NAMES[tabKey] ?: tabKey,
-                                fieldKey = fieldKey,
-                                fieldName = fieldName,
-                                value = value,
-                                sourceGroup = source.sourceGroup
-                            ))
-                        }
+    override suspend fun loadSourceItems(allSources: Boolean): List<SourceFieldItem> {
+        allRssSources = viewModel.loadSources(allSources)
+        cachedJsonStrings = allRssSources.associate { it.sourceUrl to GSON.toJson(it) }
+        val items = mutableListOf<SourceFieldItem>()
+        for (source in allRssSources) {
+            for ((tabKey, fields) in TAB_FIELDS) {
+                for ((fieldKey, fieldName) in fields) {
+                    val value = getFieldValue(source, fieldKey) ?: continue
+                    if (value.isNotBlank()) {
+                        items.add(SourceFieldItem(
+                            sourceName = source.sourceName,
+                            sourceUrl = source.sourceUrl,
+                            tabKey = tabKey,
+                            tabName = TAB_NAMES[tabKey] ?: tabKey,
+                            fieldKey = fieldKey,
+                            fieldName = fieldName,
+                            value = value,
+                            sourceGroup = source.sourceGroup
+                        ))
                     }
                 }
             }
-            callback(items)
         }
+        return items
     }
 
     override suspend fun performSearch(query: String, allItems: List<SourceFieldItem>): List<SourceFieldItem> {

@@ -48,7 +48,7 @@ class TxtTocRuleContentSearchDialog : BaseContentSearchDialog() {
 
     override fun getContentSearchType() = ContentSearchType.TXT_TOC_RULE
 
-    override fun loadSourceItems(allSources: Boolean, callback: (List<SourceFieldItem>) -> Unit) {
+    override suspend fun loadSourceItems(allSources: Boolean): List<SourceFieldItem> {
         viewModel.loadRules(allSources) { rules ->
             allRules = rules
             cachedJsonStrings = rules.associate { it.id.toString() to GSON.toJson(it) }
