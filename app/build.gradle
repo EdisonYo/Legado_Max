@@ -7,7 +7,6 @@ plugins {
 //    id "com.google.gms.google-services"
 
     alias libs.plugins.android.application
-    alias libs.plugins.kotlin.android
     alias libs.plugins.kotlin.parcelize
     alias libs.plugins.kotlin.compose
     alias libs.plugins.room
@@ -46,7 +45,7 @@ room {
     }
 
 android {
-    compileSdk 36
+    compileSdk = 36
     namespace = 'io.legado.app'
     kotlin {
         jvmToolchain {
@@ -148,20 +147,23 @@ android {
             // proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro', 'cronet-proguard-rules.pro'
         }
     }
-    android.applicationVariants.configureEach { variant ->
-        variant.outputs.configureEach { output ->
-            def flavorName = variant.flavorName
-            def flavorLabel = [
-                    appS     : "正式版",
-                    appMax   : "测试版",
-                    appLegacy: "兼容版"
-            ][flavorName] ?: flavorName
-            def flavorSuffix = [
-                    appS     : "releaseS",
-                    appMax   : "release",
-                    appLegacy: "legacy"
-            ][flavorName] ?: flavorName
-            outputFileName = "${name}_${flavorLabel}_${defaultConfig.versionName}_${flavorSuffix}.apk"
+    androidComponents {
+        onVariants(selector().all()) { variant ->
+            variant.outputs.forEach { output ->
+                def flavorName = variant.flavorName
+                def flavorLabel = [
+                        appS     : "正式版",
+                        appMax   : "测试版",
+                        appLegacy: "兼容版"
+                ][flavorName] ?: flavorName
+                def flavorSuffix = [
+                        appS     : "releaseS",
+                        appMax   : "release",
+                        appLegacy: "legacy"
+                ][flavorName] ?: flavorName
+                // 正确写法：调用 Property 的 set()
+                output.outputFileName.set("${name}_${flavorLabel}_${defaultConfig.versionName}_${flavorSuffix}.apk")
+            }
         }
     }
 

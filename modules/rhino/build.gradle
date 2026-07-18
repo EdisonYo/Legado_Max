@@ -2,7 +2,7 @@ plugins {
     //d 'com.android.library'
     //id 'org.jetbrains.kotlin.android'
     alias libs.plugins.android.library
-    alias libs.plugins.kotlin.android
+//    alias libs.plugins.kotlin.android
 }
 
 android {
@@ -15,7 +15,6 @@ android {
     }
     defaultConfig {
         minSdk 21
-        targetSdk 36
 
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -26,6 +25,10 @@ android {
     }
     lint {
         checkDependencies = true
+        targetSdk 36
+    }
+    testOptions {
+        targetSdk 36
     }
     tasks.withType(JavaCompile).tap {
         configureEach {
