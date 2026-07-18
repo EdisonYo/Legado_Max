@@ -1,76 +1,22 @@
 package io.legado.app.ui.rss.source.manage
 
 import androidx.fragment.app.viewModels
-import io.legado.app.data.entities.RssSource
 import io.legado.app.ui.rss.source.edit.RssSourceEditActivity
 import io.legado.app.ui.source.BaseContentSearchDialog
-import io.legado.app.ui.source.ContentSearchEngine
 import io.legado.app.ui.source.ContentSearchType
-import io.legado.app.ui.source.JsonSearchItem
-import io.legado.app.ui.source.SourceFieldItem
-import io.legado.app.utils.GSON
+import io.legado.app.ui.source.SearchRequest
+import io.legado.app.ui.source.SearchResult
+import io.legado.app.ui.source.SourceMetadata
 import io.legado.app.utils.share
 import io.legado.app.utils.startActivity
 
 /**
  * 订阅源内容查询界面，用于按规则字段或完整 JSON 搜索订阅源配置。
+ * 使用数据库侧搜索，避免全量加载到内存。
  */
 class RssSourceContentSearchDialog : BaseContentSearchDialog() {
 
     private val viewModel by viewModels<RssSourceContentSearchViewModel>()
-
-    private var allRssSources: List<RssSource> = emptyList()
-    private var cachedJsonStrings: Map<String, String> = emptyMap()
-
-    companion object {
-        private val TAB_NAMES = mapOf(
-            "base" to "基础",
-            "start" to "启动",
-            "list" to "列表",
-            "webview" to "正文"
-        )
-
-        private val TAB_FIELDS = mapOf(
-            "base" to listOf(
-                "sourceUrl" to "源地址",
-                "sourceName" to "源名称",
-                "sourceGroup" to "源分组",
-                "sourceComment" to "源注释",
-                "searchUrl" to "搜索地址",
-                "sortUrl" to "分类地址",
-                "loginUrl" to "登录地址",
-                "loginUi" to "登录界面",
-                "loginCheckJs" to "登录检查JS",
-                "header" to "请求头",
-                "variableComment" to "变量说明",
-                "concurrentRate" to "并发率",
-                "jsLib" to "jsLib"
-            ),
-            "start" to listOf(
-                "startHtml" to "启动页HTML",
-                "startStyle" to "启动页样式",
-                "startJs" to "启动页JS",
-                "preloadJs" to "预注入JS"
-            ),
-            "list" to listOf(
-                "ruleArticles" to "列表规则",
-                "ruleNextPage" to "列表下一页规则",
-                "ruleTitle" to "标题规则",
-                "rulePubDate" to "时间规则",
-                "ruleDescription" to "描述规则",
-                "ruleImage" to "图片URL规则",
-                "ruleLink" to "链接规则"
-            ),
-            "webview" to listOf(
-                "ruleContent" to "正文规则",
-                "style" to "正文样式",
-                "injectJs" to "注入JS",
-                "shouldOverrideUrlLoading" to "URL拦截",
-                "contentWhitelist" to "白名单",
-                "contentBlacklist" to "黑名单"
-            )
-        )
-    }
 
     override fun getDialogTitle() = "订阅源内容查询"
 
@@ -78,49 +24,12 @@ class RssSourceContentSearchDialog : BaseContentSearchDialog() {
 
     override fun getContentSearchType() = ContentSearchType.RSS_SOURCE
 
-    override suspend fun loadSourceItems(allSources: Boolean): List<SourceFieldItem> {
-        allRssSources = viewModel.loadSources(allSources)
-        cachedJsonStrings = allRssSources.associate { it.sourceUrl to GSON.toJson(it) }
-        val items = mutableListOf<SourceFieldItem>()
-        for (source in allRssSources) {
-            for ((tabKey, fields) in TAB_FIELDS) {
-                for ((fieldKey, fieldName) in fields) {
-                    val value = getFieldValue(source, fieldKey) ?: continue
-                    if (value.isNotBlank()) {
-                        items.add(SourceFieldItem(
-                            sourceName = source.sourceName,
-                            sourceUrl = source.sourceUrl,
-                            tabKey = tabKey,
-                            tabName = TAB_NAMES[tabKey] ?: tabKey,
-                            fieldKey = fieldKey,
-                            fieldName = fieldName,
-                            value = value,
-                            sourceGroup = source.sourceGroup
-                        ))
-                    }
-                }
-            }
-        }
-        return items
+    override suspend fun loadSourceMetadata(allSources: Boolean): SourceMetadata {
+        return viewModel.loadSourceMetadata(!allSources)
     }
 
-    override suspend fun performSearch(query: String, allItems: List<SourceFieldItem>): List<SourceFieldItem> {
-        return if (searchByRuleField) {
-            ContentSearchEngine.searchFields(query, allItems)
-        } else {
-            ContentSearchEngine.searchJson(
-                query = query,
-                sourceItems = allItems,
-                jsonItems = allRssSources.mapNotNull { source ->
-                    val json = cachedJsonStrings[source.sourceUrl] ?: return@mapNotNull null
-                    JsonSearchItem(
-                        sourceName = source.sourceName,
-                        sourceUrl = source.sourceUrl,
-                        json = json
-                    )
-                }
-            )
-        }
+    override suspend fun searchContent(request: SearchRequest): SearchResult {
+        return viewModel.searchContent(request)
     }
 
     override fun navigateToEdit(sourceUrl: String, tabKey: String?, fieldKey: String?) {
@@ -135,47 +44,11 @@ class RssSourceContentSearchDialog : BaseContentSearchDialog() {
         }
     }
 
-    override fun getTabNames(): Map<String, String> = TAB_NAMES
+    override fun getTabNames(): Map<String, String> = RssSourceContentSearchViewModel.TAB_NAMES
 
     override fun exportSources(sourceUrls: List<String>) {
         viewModel.exportSources(sourceUrls) { file ->
             activity?.share(file)
-        }
-    }
-
-    private fun getFieldValue(source: RssSource, fieldKey: String): String? {
-        return when (fieldKey) {
-            "sourceUrl" -> source.sourceUrl
-            "sourceName" -> source.sourceName
-            "sourceGroup" -> source.sourceGroup
-            "sourceComment" -> source.sourceComment
-            "searchUrl" -> source.searchUrl
-            "sortUrl" -> source.sortUrl
-            "loginUrl" -> source.loginUrl
-            "loginUi" -> source.loginUi
-            "loginCheckJs" -> source.loginCheckJs
-            "header" -> source.header
-            "variableComment" -> source.variableComment
-            "concurrentRate" -> source.concurrentRate
-            "jsLib" -> source.jsLib
-            "startHtml" -> source.startHtml
-            "startStyle" -> source.startStyle
-            "startJs" -> source.startJs
-            "preloadJs" -> source.preloadJs
-            "ruleArticles" -> source.ruleArticles
-            "ruleNextPage" -> source.ruleNextPage
-            "ruleTitle" -> source.ruleTitle
-            "rulePubDate" -> source.rulePubDate
-            "ruleDescription" -> source.ruleDescription
-            "ruleImage" -> source.ruleImage
-            "ruleLink" -> source.ruleLink
-            "ruleContent" -> source.ruleContent
-            "style" -> source.style
-            "injectJs" -> source.injectJs
-            "shouldOverrideUrlLoading" -> source.shouldOverrideUrlLoading
-            "contentWhitelist" -> source.contentWhitelist
-            "contentBlacklist" -> source.contentBlacklist
-            else -> null
         }
     }
 }

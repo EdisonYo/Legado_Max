@@ -6,13 +6,19 @@ import io.legado.app.ui.source.BaseContentSearchDialog
 import io.legado.app.ui.source.ContentSearchEngine
 import io.legado.app.ui.source.ContentSearchType
 import io.legado.app.ui.source.JsonSearchItem
+import io.legado.app.ui.source.SearchRequest
+import io.legado.app.ui.source.SearchResult
+import io.legado.app.ui.source.SearchScopeMode
+import io.legado.app.ui.source.SourceBrief
 import io.legado.app.ui.source.SourceFieldItem
+import io.legado.app.ui.source.SourceMetadata
 import io.legado.app.utils.GSON
 import io.legado.app.utils.share
 import io.legado.app.utils.showDialogFragment
 
 /**
  * TXT 目录规则内容查询界面，用于按规则字段或完整 JSON 搜索目录识别规则。
+ * 数据量通常较小，使用内存搜索。
  */
 class TxtTocRuleContentSearchDialog : BaseContentSearchDialog() {
 
@@ -48,14 +54,40 @@ class TxtTocRuleContentSearchDialog : BaseContentSearchDialog() {
 
     override fun getContentSearchType() = ContentSearchType.TXT_TOC_RULE
 
-    override suspend fun loadSourceItems(allSources: Boolean): List<SourceFieldItem> {
+    override suspend fun loadSourceMetadata(allSources: Boolean): SourceMetadata {
         val rules = viewModel.loadRules(allSources)
         allRules = rules
         cachedJsonStrings = rules.associate { it.id.toString() to GSON.toJson(it) }
+        val sources = rules.map { SourceBrief(it.name, it.id.toString()) }
+        return SourceMetadata(sources, emptyList())
+    }
+
+    override suspend fun searchContent(request: SearchRequest): SearchResult {
+        val rules = allRules
+        if (rules.isEmpty()) return SearchResult(emptyList())
+
+        // 应用范围过滤
+        val scopedRules = when (request.scopeMode) {
+            SearchScopeMode.SINGLE_SOURCE -> {
+                val id = request.selectedSourceUrl ?: return SearchResult(emptyList())
+                rules.filter { it.id.toString() == id }
+            }
+            else -> rules
+        }
+
+        if (scopedRules.isEmpty()) return SearchResult(emptyList())
+
+        // 按分类构建 SourceFieldItem
+        val tabs = if (request.selectedTab == "__ALL__") {
+            TAB_FIELDS
+        } else {
+            mapOf(request.selectedTab to (TAB_FIELDS[request.selectedTab] ?: emptyList()))
+        }
+
         val items = mutableListOf<SourceFieldItem>()
-        for (rule in rules) {
+        for (rule in scopedRules) {
             val ruleId = rule.id.toString()
-            for ((tabKey, fields) in TAB_FIELDS) {
+            for ((tabKey, fields) in tabs) {
                 for ((fieldKey, fieldName) in fields) {
                     val value = getFieldValue(rule, fieldKey) ?: continue
                     if (value.isNotBlank()) {
@@ -74,30 +106,24 @@ class TxtTocRuleContentSearchDialog : BaseContentSearchDialog() {
                 }
             }
         }
-        return items
-    }
 
-    override suspend fun performSearch(
-        query: String,
-        allItems: List<SourceFieldItem>
-    ): List<SourceFieldItem> {
-        return if (searchByRuleField) {
-            ContentSearchEngine.searchFields(query, allItems)
+        // 搜索
+        val results = if (request.searchByRuleField) {
+            ContentSearchEngine.searchFields(request.query, items)
         } else {
+            val jsonItems = scopedRules.mapNotNull { rule ->
+                val ruleId = rule.id.toString()
+                val json = cachedJsonStrings[ruleId] ?: return@mapNotNull null
+                JsonSearchItem(rule.name, ruleId, json)
+            }
             ContentSearchEngine.searchJson(
-                query = query,
-                sourceItems = allItems,
-                jsonItems = allRules.mapNotNull { rule ->
-                    val ruleId = rule.id.toString()
-                    val json = cachedJsonStrings[ruleId] ?: return@mapNotNull null
-                    JsonSearchItem(
-                        sourceName = rule.name,
-                        sourceUrl = ruleId,
-                        json = json
-                    )
-                }
+                query = request.query,
+                sourceItems = items,
+                jsonItems = jsonItems
             )
         }
+
+        return SearchResult(results)
     }
 
     override fun navigateToEdit(sourceUrl: String, tabKey: String?, fieldKey: String?) {

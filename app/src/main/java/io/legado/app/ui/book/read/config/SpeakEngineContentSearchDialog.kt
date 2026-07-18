@@ -6,13 +6,19 @@ import io.legado.app.ui.source.BaseContentSearchDialog
 import io.legado.app.ui.source.ContentSearchEngine
 import io.legado.app.ui.source.ContentSearchType
 import io.legado.app.ui.source.JsonSearchItem
+import io.legado.app.ui.source.SearchRequest
+import io.legado.app.ui.source.SearchResult
+import io.legado.app.ui.source.SearchScopeMode
+import io.legado.app.ui.source.SourceBrief
 import io.legado.app.ui.source.SourceFieldItem
+import io.legado.app.ui.source.SourceMetadata
 import io.legado.app.utils.GSON
 import io.legado.app.utils.share
 import io.legado.app.utils.showDialogFragment
 
 /**
  * 朗读引擎内容查询界面，用于按规则字段或完整 JSON 搜索 HTTP TTS 配置。
+ * 数据量通常较小，使用内存搜索。
  */
 class SpeakEngineContentSearchDialog : BaseContentSearchDialog() {
 
@@ -59,15 +65,43 @@ class SpeakEngineContentSearchDialog : BaseContentSearchDialog() {
 
     override fun getContentSearchType() = ContentSearchType.SPEAK_ENGINE
 
-    override suspend fun loadSourceItems(allSources: Boolean): List<SourceFieldItem> {
+    override suspend fun loadSourceMetadata(allSources: Boolean): SourceMetadata {
         val engines = viewModel.loadEngines()
         allEngines = engines
         cachedJsonStrings = engines.associate { it.id.toString() to GSON.toJson(it) }
+        val sources = engines.map {
+            SourceBrief(it.name.ifBlank { "未命名(${it.id})" }, it.id.toString())
+        }
+        return SourceMetadata(sources, emptyList())
+    }
+
+    override suspend fun searchContent(request: SearchRequest): SearchResult {
+        val engines = allEngines
+        if (engines.isEmpty()) return SearchResult(emptyList())
+
+        // 应用范围过滤
+        val scopedEngines = when (request.scopeMode) {
+            SearchScopeMode.SINGLE_SOURCE -> {
+                val id = request.selectedSourceUrl ?: return SearchResult(emptyList())
+                engines.filter { it.id.toString() == id }
+            }
+            else -> engines
+        }
+
+        if (scopedEngines.isEmpty()) return SearchResult(emptyList())
+
+        // 按分类构建 SourceFieldItem
+        val tabs = if (request.selectedTab == "__ALL__") {
+            TAB_FIELDS
+        } else {
+            mapOf(request.selectedTab to (TAB_FIELDS[request.selectedTab] ?: emptyList()))
+        }
+
         val items = mutableListOf<SourceFieldItem>()
-        for (engine in engines) {
+        for (engine in scopedEngines) {
             val engineId = engine.id.toString()
             val engineName = engine.name.ifBlank { "未命名($engineId)" }
-            for ((tabKey, fields) in TAB_FIELDS) {
+            for ((tabKey, fields) in tabs) {
                 for ((fieldKey, fieldName) in fields) {
                     val value = getFieldValue(engine, fieldKey) ?: continue
                     if (value.isNotBlank()) {
@@ -86,30 +120,24 @@ class SpeakEngineContentSearchDialog : BaseContentSearchDialog() {
                 }
             }
         }
-        return items
-    }
 
-    override suspend fun performSearch(
-        query: String,
-        allItems: List<SourceFieldItem>
-    ): List<SourceFieldItem> {
-        return if (searchByRuleField) {
-            ContentSearchEngine.searchFields(query, allItems)
+        // 搜索
+        val results = if (request.searchByRuleField) {
+            ContentSearchEngine.searchFields(request.query, items)
         } else {
+            val jsonItems = scopedEngines.mapNotNull { engine ->
+                val engineId = engine.id.toString()
+                val json = cachedJsonStrings[engineId] ?: return@mapNotNull null
+                JsonSearchItem(engine.name.ifBlank { "未命名($engineId)" }, engineId, json)
+            }
             ContentSearchEngine.searchJson(
-                query = query,
-                sourceItems = allItems,
-                jsonItems = allEngines.mapNotNull { engine ->
-                    val engineId = engine.id.toString()
-                    val json = cachedJsonStrings[engineId] ?: return@mapNotNull null
-                    JsonSearchItem(
-                        sourceName = engine.name.ifBlank { "未命名($engineId)" },
-                        sourceUrl = engineId,
-                        json = json
-                    )
-                }
+                query = request.query,
+                sourceItems = items,
+                jsonItems = jsonItems
             )
         }
+
+        return SearchResult(results)
     }
 
     override fun navigateToEdit(sourceUrl: String, tabKey: String?, fieldKey: String?) {

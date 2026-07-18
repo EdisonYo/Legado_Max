@@ -77,9 +77,9 @@ abstract class BaseContentSearchDialog : BaseDialogFragment(R.layout.dialog_rule
     private var selectedSourceGroup: String? = null
     private var scopeRow: View? = null
 
-    /** 所有可搜索的字段条目，由子类通过 loadSourceItems 填充 */
-    protected var allSourceItems: List<SourceFieldItem> = emptyList()
-    protected var sourcesLoaded = false
+    /** 源元信息（源列表 + 分组列表），由 loadSourceMetadata 填充，不包含字段数据 */
+    protected var sourceMetadata: SourceMetadata? = null
+    protected var metadataLoaded = false
     protected var lastResults: List<SourceFieldItem> = emptyList()
 
     /** 当前选中的分类 key，"__ALL__" 表示全部分类 */
@@ -96,12 +96,18 @@ abstract class BaseContentSearchDialog : BaseDialogFragment(R.layout.dialog_rule
     abstract fun getSearchHint(): String
 
     /**
-     * 加载所有源的可搜索字段。
-     * 子类应根据 allSources 决定加载范围，直接返回结果。
+     * 加载源元信息（源名称+URL列表、分组列表），不加载字段数据。
+     * 用于范围选择器和分组选择器，应轻量快速。
+     * @param allSources true=加载所有源, false=仅加载启用源
      */
-    abstract suspend fun loadSourceItems(allSources: Boolean): List<SourceFieldItem>
+    abstract suspend fun loadSourceMetadata(allSources: Boolean): SourceMetadata
 
-    abstract suspend fun performSearch(query: String, allItems: List<SourceFieldItem>): List<SourceFieldItem>
+    /**
+     * 执行内容搜索。子类应直接查数据库或按需加载数据，不再依赖全量预加载。
+     * @param request 搜索请求参数（含查询词、模式、范围、分类等）
+     * @return 搜索结果
+     */
+    abstract suspend fun searchContent(request: SearchRequest): SearchResult
 
     /** 点击"跳转"后导航到对应的源编辑界面 */
     abstract fun navigateToEdit(sourceUrl: String, tabKey: String? = null, fieldKey: String? = null)
@@ -709,12 +715,12 @@ abstract class BaseContentSearchDialog : BaseDialogFragment(R.layout.dialog_rule
     // ========== 数据加载 ==========
 
     private fun loadSources() {
-        sourcesLoaded = false
+        metadataLoaded = false
         showLoadingState()
         lifecycleScope.launch {
             try {
-                allSourceItems = loadSourceItems(searchAllSources)
-                sourcesLoaded = true
+                sourceMetadata = loadSourceMetadata(searchAllSources)
+                metadataLoaded = true
                 hideLoadingState()
                 val query = binding.searchEditText.text.toString().trim()
                 if (query.isNotEmpty()) {
@@ -724,7 +730,6 @@ abstract class BaseContentSearchDialog : BaseDialogFragment(R.layout.dialog_rule
                 }
             } catch (e: Exception) {
                 hideLoadingState()
-                // Handle error
             }
         }
     }
@@ -732,33 +737,35 @@ abstract class BaseContentSearchDialog : BaseDialogFragment(R.layout.dialog_rule
     // ========== 搜索与结果展示 ==========
 
     private fun doSearch(query: String) {
-        if (!sourcesLoaded || allSourceItems.isEmpty()) return
+        if (!metadataLoaded) return
 
         binding.initialStateLayout.visibility = View.GONE
         binding.emptyStateLayout.visibility = View.GONE
         binding.recyclerView.visibility = View.GONE
         binding.resultCountText.visibility = View.GONE
 
-        val scopeFilteredItems = filterItemsBySearchScope(allSourceItems)
-        val filteredItems = if (selectedTab == "__ALL__") {
-            scopeFilteredItems
-        } else {
-            scopeFilteredItems.filter { it.tabKey == selectedTab }
-        }
-
         searchJob = lifecycleScope.launch(Dispatchers.IO) {
-            val results = performSearch(query, filteredItems)
+            val request = SearchRequest(
+                query = query,
+                searchByRuleField = searchByRuleField,
+                selectedTab = selectedTab,
+                scopeMode = searchScopeMode,
+                selectedSourceUrl = selectedSourceUrl,
+                selectedSourceGroup = selectedSourceGroup,
+                allSources = searchAllSources
+            )
+            val result = searchContent(request)
             withContext(Dispatchers.Main) {
-                showResults(results)
+                showResults(result.items)
             }
         }
     }
 
     private fun showSingleSourceSelector() {
-        val options = allSourceItems
-            .distinctBy { it.sourceUrl }
-            .sortedBy { it.sourceName }
-            .map { SearchScopeOption(it.sourceName, it.sourceUrl) }
+        val metadata = sourceMetadata ?: return
+        val options = metadata.sources
+            .sortedBy { it.name }
+            .map { SearchScopeOption(it.name, it.url) }
         showSearchScopeSelector("搜索单个源", "没有可搜索源", options) { option ->
             searchScopeMode = SearchScopeMode.SINGLE_SOURCE
             selectedSourceUrl = option.value
@@ -771,9 +778,8 @@ abstract class BaseContentSearchDialog : BaseDialogFragment(R.layout.dialog_rule
     }
 
     private fun showGroupSelector() {
-        val options = allSourceItems
-            .mapNotNull { it.sourceGroup?.takeIf(String::isNotBlank) }
-            .distinct()
+        val metadata = sourceMetadata ?: return
+        val options = metadata.groups
             .sorted()
             .map { SearchScopeOption(it, it) }
         showSearchScopeSelector("搜索分组", "没有可搜索分组", options) { option ->
@@ -796,7 +802,7 @@ abstract class BaseContentSearchDialog : BaseDialogFragment(R.layout.dialog_rule
                 "所有源",
                 "仅启用",
                 selectedSourceUrl?.let { url ->
-                    allSourceItems.distinctBy { it.sourceUrl }.firstOrNull { it.sourceUrl == url }?.sourceName?.let { "搜索单个源($it)" }
+                    sourceMetadata?.sources?.firstOrNull { it.url == url }?.name?.let { "搜索单个源($it)" }
                 } ?: "搜索单个源",
                 selectedSourceGroup?.let { "搜索分组($it)" } ?: "搜索分组"
             )
@@ -899,20 +905,6 @@ abstract class BaseContentSearchDialog : BaseDialogFragment(R.layout.dialog_rule
     private fun redoSearchIfNeeded() {
         val query = binding.searchEditText.text.toString().trim()
         if (query.isNotEmpty()) doSearch(query)
-    }
-
-    private fun filterItemsBySearchScope(items: List<SourceFieldItem>): List<SourceFieldItem> {
-        return when (searchScopeMode) {
-            SearchScopeMode.SINGLE_SOURCE -> {
-                val sourceUrl = selectedSourceUrl ?: return items
-                items.filter { it.sourceUrl == sourceUrl }
-            }
-            SearchScopeMode.GROUP -> {
-                val group = selectedSourceGroup ?: return items
-                items.filter { it.sourceGroup == group }
-            }
-            else -> items
-        }
     }
 
     protected fun showResults(results: List<SourceFieldItem>) {
@@ -1332,7 +1324,8 @@ enum class ContentSearchType(
     fun createDialog(): DialogFragment = dialogFactory()
 }
 
-private enum class SearchScopeMode {
+/** 搜索范围模式 */
+enum class SearchScopeMode {
     ALL,
     ENABLED,
     SINGLE_SOURCE,
@@ -1361,3 +1354,42 @@ data class SourceFieldItem(
     val fullValue: String = value,
     val sourceGroup: String? = null
 ) : Parcelable
+
+/**
+ * 源简要信息，用于范围选择器等 UI。
+ * 不包含字段数据，仅含名称和唯一标识。
+ */
+data class SourceBrief(
+    val name: String,
+    val url: String
+)
+
+/**
+ * 源元信息，由 [BaseContentSearchDialog.loadSourceMetadata] 返回。
+ * 包含源列表（用于单源选择器）和分组列表（用于分组选择器）。
+ */
+data class SourceMetadata(
+    val sources: List<SourceBrief>,
+    val groups: List<String>
+)
+
+/**
+ * 搜索请求参数，由基类构建后传给 [BaseContentSearchDialog.searchContent]。
+ * 子类根据这些参数直接查数据库或按需加载数据，不再依赖全量预加载。
+ */
+data class SearchRequest(
+    val query: String,
+    val searchByRuleField: Boolean,
+    val selectedTab: String,
+    val scopeMode: SearchScopeMode,
+    val selectedSourceUrl: String?,
+    val selectedSourceGroup: String?,
+    val allSources: Boolean
+)
+
+/**
+ * 搜索结果。
+ */
+data class SearchResult(
+    val items: List<SourceFieldItem>
+)

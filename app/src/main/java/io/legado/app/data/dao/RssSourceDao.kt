@@ -128,6 +128,87 @@ interface RssSourceDao {
     @Query("delete from rssSources where sourceGroup like 'legado'")
     fun deleteDefault()
 
+    /**
+     * 全字段内容搜索（所有源）。
+     * 使用 SQL LIKE 搜索所有文本列，避免全量加载到内存。
+     */
+    @Query(
+        """SELECT * FROM rssSources where
+        sourceName like '%' || :query || '%'
+        or sourceUrl like '%' || :query || '%'
+        or sourceGroup like '%' || :query || '%'
+        or sourceComment like '%' || :query || '%'
+        or searchUrl like '%' || :query || '%'
+        or sortUrl like '%' || :query || '%'
+        or loginUrl like '%' || :query || '%'
+        or loginUi like '%' || :query || '%'
+        or loginCheckJs like '%' || :query || '%'
+        or coverDecodeJs like '%' || :query || '%'
+        or header like '%' || :query || '%'
+        or variableComment like '%' || :query || '%'
+        or concurrentRate like '%' || :query || '%'
+        or jsLib like '%' || :query || '%'
+        or startHtml like '%' || :query || '%'
+        or startStyle like '%' || :query || '%'
+        or startJs like '%' || :query || '%'
+        or preloadJs like '%' || :query || '%'
+        or ruleArticles like '%' || :query || '%'
+        or ruleNextPage like '%' || :query || '%'
+        or ruleTitle like '%' || :query || '%'
+        or rulePubDate like '%' || :query || '%'
+        or ruleDescription like '%' || :query || '%'
+        or ruleImage like '%' || :query || '%'
+        or ruleLink like '%' || :query || '%'
+        or ruleContent like '%' || :query || '%'
+        or style like '%' || :query || '%'
+        or injectJs like '%' || :query || '%'
+        or shouldOverrideUrlLoading like '%' || :query || '%'
+        or contentWhitelist like '%' || :query || '%'
+        or contentBlacklist like '%' || :query || '%'
+        order by customOrder"""
+    )
+    fun searchAllFieldsAll(query: String): List<RssSource>
+
+    /**
+     * 全字段内容搜索（仅启用源）。
+     */
+    @Query(
+        """SELECT * FROM rssSources where enabled = 1 and (
+        sourceName like '%' || :query || '%'
+        or sourceUrl like '%' || :query || '%'
+        or sourceGroup like '%' || :query || '%'
+        or sourceComment like '%' || :query || '%'
+        or searchUrl like '%' || :query || '%'
+        or sortUrl like '%' || :query || '%'
+        or loginUrl like '%' || :query || '%'
+        or loginUi like '%' || :query || '%'
+        or loginCheckJs like '%' || :query || '%'
+        or coverDecodeJs like '%' || :query || '%'
+        or header like '%' || :query || '%'
+        or variableComment like '%' || :query || '%'
+        or concurrentRate like '%' || :query || '%'
+        or jsLib like '%' || :query || '%'
+        or startHtml like '%' || :query || '%'
+        or startStyle like '%' || :query || '%'
+        or startJs like '%' || :query || '%'
+        or preloadJs like '%' || :query || '%'
+        or ruleArticles like '%' || :query || '%'
+        or ruleNextPage like '%' || :query || '%'
+        or ruleTitle like '%' || :query || '%'
+        or rulePubDate like '%' || :query || '%'
+        or ruleDescription like '%' || :query || '%'
+        or ruleImage like '%' || :query || '%'
+        or ruleLink like '%' || :query || '%'
+        or ruleContent like '%' || :query || '%'
+        or style like '%' || :query || '%'
+        or injectJs like '%' || :query || '%'
+        or shouldOverrideUrlLoading like '%' || :query || '%'
+        or contentWhitelist like '%' || :query || '%'
+        or contentBlacklist like '%' || :query || '%'
+        ) order by customOrder"""
+    )
+    fun searchAllFieldsEnabled(query: String): List<RssSource>
+
     @get:Query("select * from rssSources where sourceGroup is null or sourceGroup = ''")
     val noGroup: List<RssSource>
 

@@ -5,9 +5,15 @@ import android.os.Parcelable
 import com.google.gson.JsonObject
 import io.legado.app.base.BaseViewModel
 import io.legado.app.data.appDb
+import io.legado.app.data.entities.BookSource
 import io.legado.app.ui.source.ContentSearchEngine
 import io.legado.app.ui.source.JsonSearchItem
+import io.legado.app.ui.source.SearchRequest
+import io.legado.app.ui.source.SearchResult
+import io.legado.app.ui.source.SearchScopeMode
+import io.legado.app.ui.source.SourceBrief
 import io.legado.app.ui.source.SourceFieldItem
+import io.legado.app.ui.source.SourceMetadata
 import io.legado.app.utils.FileUtils
 import io.legado.app.utils.GSON
 import io.legado.app.utils.stackTraceStr
@@ -252,6 +258,123 @@ class SourceContentSearchViewModel(application: Application) : BaseViewModel(app
 
             results
         }
+    }
+
+    /**
+     * 加载源元信息（源名称+URL列表、分组列表），不加载字段数据。
+     * 用于范围选择器和分组选择器，轻量快速。
+     * @param enabledOnly true=仅加载启用源, false=加载所有源
+     */
+    suspend fun loadSourceMetadata(enabledOnly: Boolean): SourceMetadata {
+        return withContext(Dispatchers.IO) {
+            val parts = if (enabledOnly) {
+                appDb.bookSourceDao.allEnabledPart
+            } else {
+                appDb.bookSourceDao.allPart
+            }
+            val sources = parts.map { SourceBrief(it.bookSourceName, it.bookSourceUrl) }
+            val groups = if (enabledOnly) {
+                appDb.bookSourceDao.allEnabledGroups()
+            } else {
+                appDb.bookSourceDao.allGroups()
+            }
+            SourceMetadata(sources, groups)
+        }
+    }
+
+    /**
+     * 执行内容搜索（数据库侧搜索）。
+     * 先用 SQL LIKE 过滤出匹配的源，再对匹配源构建字段条目做精细搜索。
+     * 避免全量加载上万源到内存。
+     */
+    suspend fun searchContent(request: SearchRequest): SearchResult {
+        return withContext(Dispatchers.IO) {
+            // 1. SQL LIKE 快速过滤出匹配的源
+            val matchedSources = if (request.allSources) {
+                appDb.bookSourceDao.searchAllFieldsAll(request.query)
+            } else {
+                appDb.bookSourceDao.searchAllFieldsEnabled(request.query)
+            }
+
+            // 2. 应用范围过滤（单源/分组）
+            val scopedSources = when (request.scopeMode) {
+                SearchScopeMode.SINGLE_SOURCE -> {
+                    val url = request.selectedSourceUrl
+                        ?: return@withContext SearchResult(emptyList())
+                    matchedSources.filter { it.bookSourceUrl == url }
+                }
+                SearchScopeMode.GROUP -> {
+                    val group = request.selectedSourceGroup
+                        ?: return@withContext SearchResult(emptyList())
+                    matchedSources.filter { it.hasGroup(group) }
+                }
+                else -> matchedSources
+            }
+
+            if (scopedSources.isEmpty()) return@withContext SearchResult(emptyList())
+
+            // 3. 仅对匹配的源构建 SourceFieldItem
+            val sourceItems = buildSourceFieldItemsFromSources(scopedSources, request.selectedTab)
+
+            // 4. 在匹配的字段条目中做精细搜索（含上下文截断和高亮）
+            val results = if (request.searchByRuleField) {
+                ContentSearchEngine.searchFields(request.query, sourceItems)
+            } else {
+                val jsonItems = scopedSources.map { source ->
+                    JsonSearchItem(
+                        source.bookSourceName,
+                        source.bookSourceUrl,
+                        GSON.toJsonTree(source).asJsonObject.toString()
+                    )
+                }
+                ContentSearchEngine.searchJson(
+                    query = request.query,
+                    sourceItems = sourceItems,
+                    jsonItems = jsonItems
+                )
+            }
+
+            SearchResult(results)
+        }
+    }
+
+    /**
+     * 从 BookSource 列表构建可搜索的字段条目。
+     * 仅构建指定分类的字段，selectedTab 为 "__ALL__" 时构建全部分类。
+     */
+    private fun buildSourceFieldItemsFromSources(
+        sources: List<BookSource>,
+        selectedTab: String
+    ): List<SourceFieldItem> {
+        val items = mutableListOf<SourceFieldItem>()
+        val tabs = if (selectedTab == "__ALL__") {
+            TAB_FIELDS
+        } else {
+            mapOf(selectedTab to (TAB_FIELDS[selectedTab] ?: emptyList()))
+        }
+        for (source in sources) {
+            val jsonObj = GSON.toJsonTree(source).asJsonObject
+            val sourceGroup = source.bookSourceGroup
+            for ((tabKey, fields) in tabs) {
+                for ((fieldKey, fieldName) in fields) {
+                    val value = getFieldValue(jsonObj, tabKey, fieldKey) ?: continue
+                    items.add(
+                        SourceFieldItem(
+                            sourceName = source.bookSourceName,
+                            sourceUrl = source.bookSourceUrl,
+                            tabKey = tabKey,
+                            tabName = TAB_NAMES[tabKey] ?: tabKey,
+                            fieldKey = fieldKey,
+                            fieldName = fieldName,
+                            value = value,
+                            fullValue = value,
+                            sourceGroup = sourceGroup
+                        )
+                    )
+                }
+            }
+        }
+        return items
     }
 
     /**

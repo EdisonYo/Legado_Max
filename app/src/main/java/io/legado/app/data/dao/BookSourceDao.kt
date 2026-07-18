@@ -398,6 +398,66 @@ interface BookSourceDao {
         }.flowOn(IO)
     }
 
+    /**
+     * 全字段内容搜索（所有源）。
+     * 使用 SQL LIKE 搜索所有文本列，包括规则子对象（以 JSON 字符串存储）。
+     * 用于内容查询对话窗，避免全量加载到内存。
+     */
+    @Query(
+        """select * from book_sources where
+        bookSourceName like '%' || :query || '%'
+        or bookSourceGroup like '%' || :query || '%'
+        or bookSourceUrl like '%' || :query || '%'
+        or bookSourceComment like '%' || :query || '%'
+        or bookUrlPattern like '%' || :query || '%'
+        or loginUrl like '%' || :query || '%'
+        or loginUi like '%' || :query || '%'
+        or loginCheckJs like '%' || :query || '%'
+        or coverDecodeJs like '%' || :query || '%'
+        or header like '%' || :query || '%'
+        or variableComment like '%' || :query || '%'
+        or concurrentRate like '%' || :query || '%'
+        or jsLib like '%' || :query || '%'
+        or searchUrl like '%' || :query || '%'
+        or exploreUrl like '%' || :query || '%'
+        or ruleSearch like '%' || :query || '%'
+        or ruleExplore like '%' || :query || '%'
+        or ruleBookInfo like '%' || :query || '%'
+        or ruleToc like '%' || :query || '%'
+        or ruleContent like '%' || :query || '%'
+        order by customOrder asc"""
+    )
+    fun searchAllFieldsAll(query: String): List<BookSource>
+
+    /**
+     * 全字段内容搜索（仅启用源）。
+     */
+    @Query(
+        """select * from book_sources where enabled = 1 and (
+        bookSourceName like '%' || :query || '%'
+        or bookSourceGroup like '%' || :query || '%'
+        or bookSourceUrl like '%' || :query || '%'
+        or bookSourceComment like '%' || :query || '%'
+        or bookUrlPattern like '%' || :query || '%'
+        or loginUrl like '%' || :query || '%'
+        or loginUi like '%' || :query || '%'
+        or loginCheckJs like '%' || :query || '%'
+        or coverDecodeJs like '%' || :query || '%'
+        or header like '%' || :query || '%'
+        or variableComment like '%' || :query || '%'
+        or concurrentRate like '%' || :query || '%'
+        or jsLib like '%' || :query || '%'
+        or searchUrl like '%' || :query || '%'
+        or exploreUrl like '%' || :query || '%'
+        or ruleSearch like '%' || :query || '%'
+        or ruleExplore like '%' || :query || '%'
+        or ruleBookInfo like '%' || :query || '%'
+        or ruleToc like '%' || :query || '%'
+        or ruleContent like '%' || :query || '%'
+        ) order by customOrder asc"""
+    )
+    fun searchAllFieldsEnabled(query: String): List<BookSource>
+
     @Query("select * from book_sources where enabled = 1 and homepageModules is not null and homepageModules != '' order by customOrder asc")
     fun flowHomepageSources(): Flow<List<BookSource>>
 

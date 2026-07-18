@@ -41,6 +41,10 @@ try {
 } catch (Exception ignored) {
 }
 
+room {
+        schemaDirectory "$projectDir/schemas" 
+    }
+
 android {
     compileSdk 36
     namespace = 'io.legado.app'
@@ -48,6 +52,14 @@ android {
         jvmToolchain {
             languageVersion.set(JavaLanguageVersion.of(17))
         }
+    }
+
+    ksp {
+        // 开启KSP通用增量缓存，大幅减少重复扫描
+        arg("room.incremental", "true")
+        arg("room.expandProjection", "true")
+        arg("room.generateKotlin", "false")
+        arg("skipPrivatePreviews", "true")
     }
 
     signingConfigs {
@@ -154,9 +166,7 @@ android {
     }
 
 
-    room {
-        schemaDirectory "$projectDir/schemas" 
-    }
+    
     // 设定Room的KSP参数
     ksp {
         arg("room.incremental", "true")
@@ -307,7 +317,7 @@ dependencies {
     implementation(libs.glide.okhttp)
     implementation(libs.glide.compose)
     implementation(libs.reorderable)
-    ksp(libs.glide.ksp)
+    // ksp(libs.glide.ksp)
     
     //Svg
     implementation(libs.androidsvg)

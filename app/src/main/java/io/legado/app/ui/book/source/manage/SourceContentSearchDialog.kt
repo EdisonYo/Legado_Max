@@ -5,7 +5,9 @@ import androidx.lifecycle.lifecycleScope
 import io.legado.app.ui.book.source.edit.BookSourceEditActivity
 import io.legado.app.ui.source.BaseContentSearchDialog
 import io.legado.app.ui.source.ContentSearchType
-import io.legado.app.ui.source.SourceFieldItem
+import io.legado.app.ui.source.SearchRequest
+import io.legado.app.ui.source.SearchResult
+import io.legado.app.ui.source.SourceMetadata
 import io.legado.app.utils.share
 import io.legado.app.utils.startActivity
 import kotlinx.coroutines.launch
@@ -24,13 +26,12 @@ class SourceContentSearchDialog : BaseContentSearchDialog() {
 
     override fun getContentSearchType() = ContentSearchType.BOOK_SOURCE
 
-    override suspend fun loadSourceItems(allSources: Boolean): List<SourceFieldItem> {
-        return viewModel.loadSourceItems(!allSources)
+    override suspend fun loadSourceMetadata(allSources: Boolean): SourceMetadata {
+        return viewModel.loadSourceMetadata(!allSources)
     }
 
-    override suspend fun performSearch(query: String, allItems: List<SourceFieldItem>): List<SourceFieldItem> {
-        // 直接使用ViewModel的search方法，它现在会返回结果
-        return viewModel.search(query, searchByRuleField, selectedTab)
+    override suspend fun searchContent(request: SearchRequest): SearchResult {
+        return viewModel.searchContent(request)
     }
 
     override fun navigateToEdit(sourceUrl: String, tabKey: String?, fieldKey: String?) {
@@ -53,7 +54,6 @@ class SourceContentSearchDialog : BaseContentSearchDialog() {
                 val file = viewModel.exportSources(sourceUrls)
                 activity?.share(file)
             } catch (e: Exception) {
-                // 处理导出错误
                 e.printStackTrace()
             }
         }
